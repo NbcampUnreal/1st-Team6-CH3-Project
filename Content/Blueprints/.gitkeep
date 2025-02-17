@@ -1,0 +1,4 @@
+touch Source/GetToJob/Character/.gitkeep
+git add Source/SomeFolder/.gitkeep
+git commit -m "Keep empty folder"
+git push
