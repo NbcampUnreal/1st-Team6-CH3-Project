@@ -7,7 +7,9 @@ AGJPlayerController::AGJPlayerController()
     JumpAction(nullptr),
     LookAction(nullptr),
     SprintAction(nullptr),
-    SitAction(nullptr)
+    SitAction(nullptr),
+    FireAction(nullptr),
+    ReloadAction(nullptr)
 {
 }
 
@@ -29,4 +31,23 @@ void AGJPlayerController::BeginPlay()
             }
         }
     }
+}
+
+void AGJPlayerController::ShowMainMenu(bool bIsRestart)
+{
+}
+
+void AGJPlayerController::ShowGameHUD()
+{
+}
+
+void AGJPlayerController::StartGame()
+{
+    /*if (USpartaGameInstance* SpartaGameInstance = Cast<USpartaGameInstance>(UGameplayStatics::GetGameInstance(this)))
+    {
+        SpartaGameInstance->CurrentLevelIndex = 0;
+        SpartaGameInstance->TotalScore = 0;
+    }
+
+    UGameplayStatics::OpenLevel(GetWorld(), FName("BasicLevel"));*/
 }

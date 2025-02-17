@@ -33,6 +33,20 @@ public:
 	// IA_Sit를 지정할 변수
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* SitAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* FireAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* ReloadAction;
+
+	// HUD 표시
+	UFUNCTION(BlueprintCallable, Category = "HUD")
+	void ShowGameHUD();
+	// 메인 메뉴 표시
+	UFUNCTION(BlueprintCallable, Category = "Menu")
+	void ShowMainMenu(bool bIsRestart);
+	// 게임 시작
+	UFUNCTION(BlueprintCallable, Category = "Menu")
+	void StartGame();
 
 	virtual void BeginPlay() override;
 
