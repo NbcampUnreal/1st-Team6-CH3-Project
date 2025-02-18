@@ -23,6 +23,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	USkeletalMeshComponent* GunMesh;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Reload")
+	float ReloadTime; //재장전 시간
+
+	UAnimMontage* ReloadMontage; // 재장전용 애니메이션
+
+	bool bIsReloading; // 재장전 여부 확인
+	FTimerHandle ReloadTimerHandle; // 재장전 타이머 핸들
+
 	UFUNCTION()
 	void OnBeginOverlap(
 		UPrimitiveComponent* OverlappedComponent,
@@ -35,11 +43,11 @@ public:
 
 	
 	virtual void Fire() override;
-
+	virtual void Reload() override;
 	void Pickup(ACharacter* PlayerCharacter);
-
-
 	void EnableFire();
+	void FinishReload();
+	
 
 protected:
 	virtual void BeginPlay() override;
@@ -53,6 +61,8 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")
 	USoundBase* FireSound;
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	USoundBase* ReloadSound;
 
 private:
 	FTimerHandle CoolDownTimerHandle;

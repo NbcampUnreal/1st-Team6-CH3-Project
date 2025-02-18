@@ -28,12 +28,14 @@ AGJRevolver::AGJRevolver()
 	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AGJRevolver::OnBeginOverlap);
 
 	FireSound = nullptr;
+	FireRate = 30.0f;
 	CoolDownDelay = 1 / (FireRate / 60);
 	TraceRange = 2000.0f;
 	bCanFire = true;
 	bIsReloading = false;
-	MaxAmmo = 30;
+	MaxAmmo = 5;
 	CurrentAmmo = MaxAmmo;
+	ReloadTime = 3.0f;
 
 }
 
@@ -82,10 +84,11 @@ void AGJRevolver::Pickup(ACharacter* PlayerCharacter)
 
 void AGJRevolver::Fire()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Not Fire!!"));
+	
 	// 재장전 중이거나, 탄이 없을 경우 발사 불가
 	if (!bCanFire || bIsReloading || CurrentAmmo <= 0)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Cannot Fire!!"));
 		return;
 	}
 	UE_LOG(LogTemp, Warning, TEXT("Fire!!"));
@@ -106,13 +109,27 @@ void AGJRevolver::Fire()
 	AController* OwnerController = GetOwner() ? GetOwner()->GetInstigatorController() : nullptr;
 	if (OwnerController)
 	{
-		FVector Location;
-		FRotator Rotation;
-		OwnerController->GetPlayerViewPoint(Location, Rotation);
+		FVector CameraLocation;
+		FRotator CameraRotation;
+		OwnerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
 
-		FVector TraceStart = Location;
-		FVector TraceEnd = Location + (Rotation.Vector() * TraceRange);
-		
+		// 캐릭터가 가진 소켓 위치 가져오기 // TODO 나중에 총구 소켓(Muzzle)을 만들어서 변경
+		AGJCharacter* Character = Cast<AGJCharacter>(GetOwner());
+		FVector MuzzleLocation = FVector::ZeroVector;
+
+		if (Character && Character->GetMesh())
+		{
+			MuzzleLocation = Character->GetMesh()->GetSocketLocation(TEXT("head"));
+		}
+		else
+		{
+			// 못 가져올 경우에는 카메라 Location을 사용
+			MuzzleLocation = CameraLocation;
+		}
+
+		FVector TraceStart = MuzzleLocation;
+		FVector TraceEnd = TraceStart + (CameraRotation.Vector() * TraceRange);
+
 		FHitResult HitResult;
 		FCollisionQueryParams Params;
 		Params.AddIgnoredActor(this);
@@ -134,19 +151,20 @@ void AGJRevolver::Fire()
 				UGameplayStatics::ApplyPointDamage(
 					HitActor,
 					Damage,
-					Rotation.Vector(),
+					CameraRotation.Vector(),
 					HitResult,
 					OwnerController,
 					this,
 					nullptr
 				);
 			}
-			// 디버그용 선 그리기(나중에 제거)
-			DrawDebugLine(GetWorld(), TraceStart, HitResult.ImpactPoint, FColor::Red, false, 1.f);
+			// 맞췄을 때 디버그 라인
+			DrawDebugLine(GetWorld(), TraceStart, HitResult.ImpactPoint, FColor::Red, false, 3.0f);
 		}
 		else
 		{
-			DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Blue, false, 1.f);
+			// 못 맞췄을 때 디버르 라인
+			DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Blue, false, 3.0f);
 		}
 	}
 
@@ -164,9 +182,49 @@ void AGJRevolver::Fire()
 	// 사격 후 반동이 있으면 좋을 것 같다.
 }
 
+void AGJRevolver::Reload()
+{
+	// 재장전을 할 필요가 없을 때
+	if (bIsReloading || CurrentAmmo == MaxAmmo)
+	{
+		return;
+	}
+	
+	bIsReloading = true;
+
+	if (ReloadSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			GetWorld(),
+			ReloadSound,
+			GetActorLocation()
+		);
+	}
+
+	// 애님 몽타주 실행 (TODO: add Anim Montage)
+	AGJCharacter* GJCharacter = Cast<AGJCharacter>(GetOwner());
+	if (GJCharacter && ReloadMontage && GJCharacter)
+	{
+		GJCharacter->GetMesh()->GetAnimInstance()->Montage_Play(ReloadMontage);
+	}
+	GetWorldTimerManager().SetTimer(
+		ReloadTimerHandle,
+		this,
+		&AGJRevolver::FinishReload,
+		ReloadTime,
+		false
+	);
+}
+
 void AGJRevolver::EnableFire()
 {
 	bCanFire = true;
+}
+
+void AGJRevolver::FinishReload()
+{
+	CurrentAmmo = MaxAmmo;
+	bIsReloading = false;
 }
 
 void AGJRevolver::BeginPlay()
