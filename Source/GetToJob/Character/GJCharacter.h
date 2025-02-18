@@ -7,6 +7,7 @@
 class USpringArmComponent; // 스프링 암 관련 클래스 헤더
 class UCameraComponent; // 카메라 관련 클래스 전방 선언
 struct FInputActionValue; // Enhanced Input에서 액션 값을 받을 때 사용하는 구조체
+class AGJBaseGun;
 
 UCLASS()
 class GETTOJOB_API AGJCharacter : public ACharacter
@@ -23,12 +24,17 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	UCameraComponent* CameraComp;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Gun")
+	AGJBaseGun* CurrentGun;
+
 	// 현재 체력을 가져오는 함수
 	UFUNCTION(BlueprintPure, Category = "Health")
 	int32 GetHealth() const;
 	// 체력을 회복시키는 함수
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void AddHealth(float Amount);
+
+
 
 protected:
 	/*UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Gun")
@@ -54,6 +60,8 @@ protected:
 	float CrouchSpeed; // 앉은 상태 속도
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Look", meta = (ClampMin = "0.1", ClampMax = "5.0"))
 	float LookSensitivity; // 마우스 감도 조절을 위한 변수
+
+
 
 	// 입력 바인딩을 처리할 함수
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

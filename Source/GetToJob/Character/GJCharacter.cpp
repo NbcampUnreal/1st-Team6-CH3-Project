@@ -6,6 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Weapon/GJBaseGun.h"
 //#include "Components/WidgetComponent.h"
 //#include "Components/TextBlock.h"
 //#include "Components/ProgressBar.h"
@@ -53,14 +54,32 @@ AGJCharacter::AGJCharacter()
 
     // 캐릭터가 Crouch 기능을 사용할 수 있도록 설정
     GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
+    
+    // 현재 소지 총 초기화
+    CurrentGun = nullptr;
 }
 
 void AGJCharacter::FireWeapon()
 {
+    if (!CurrentGun)
+    {
+        UE_LOG(LogTemp, Error, TEXT("FireWeapon Failed: CurrentGun is NULL!"));
+        return;
+    }
+
+    CurrentGun->Fire();
 }
 
 void AGJCharacter::ReloadWeapon()
 {
+    // 🔍 무기 변수 또는 필수 포인터가 `nullptr`인지 확인
+    if (!CurrentGun)
+    {
+        UE_LOG(LogTemp, Error, TEXT("ReloadWeapon Failed: CurrentWeapon is nullptr!"));
+        return;
+    }
+
+    CurrentGun->Reload();
 }
 
 void AGJCharacter::BeginPlay()
