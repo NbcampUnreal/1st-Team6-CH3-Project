@@ -31,6 +31,9 @@ AGJRevolver::AGJRevolver()
 	CoolDownDelay = 1 / (FireRate / 60);
 	TraceRange = 2000.0f;
 	bCanFire = true;
+	bIsReloading = false;
+	MaxAmmo = 30;
+	CurrentAmmo = MaxAmmo;
 
 }
 
@@ -66,6 +69,7 @@ void AGJRevolver::Pickup(ACharacter* PlayerCharacter)
 	// 플레이어가 총을 소유
 	SetOwner(PlayerCharacter);
 
+
 	// 캐릭터가 가진 현재 총 = 장착한 총
 	/*if (GJCharacter)
 	{
@@ -78,12 +82,14 @@ void AGJRevolver::Pickup(ACharacter* PlayerCharacter)
 
 void AGJRevolver::Fire()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Not Fire!!"));
 	// 재장전 중이거나, 탄이 없을 경우 발사 불가
 	if (!bCanFire || bIsReloading || CurrentAmmo <= 0)
 	{
 		return;
 	}
-	
+	UE_LOG(LogTemp, Warning, TEXT("Fire!!"));
+
 	// 탄을 소비
 	CurrentAmmo--;
 

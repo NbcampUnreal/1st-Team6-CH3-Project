@@ -33,9 +33,11 @@ public:
 		const FHitResult& SweepResult
 	);
 
+	
+	virtual void Fire() override;
+
 	void Pickup(ACharacter* PlayerCharacter);
 
-	virtual void Fire() override;
 
 	void EnableFire();
 
