@@ -31,6 +31,9 @@ public:
 	void AddHealth(float Amount);
 
 protected:
+	/*UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Gun")
+	AGJRevolver* CurrentGun;*/
+
 	// 무기 발사 함수
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void FireWeapon();
