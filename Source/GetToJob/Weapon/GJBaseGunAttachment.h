@@ -16,6 +16,9 @@ public:
 	// Sets default values for this actor's properties
 	AGJBaseGunAttachment();
 
+	virtual void AttachToGun(class ABaseGun* Gun) override;
+	virtual void DetachToGun(class ABaseGun* Gun) override;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

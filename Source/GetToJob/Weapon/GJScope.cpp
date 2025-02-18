@@ -3,3 +3,10 @@
 
 #include "Weapon/GJScope.h"
 
+void AGJScope::AttachToGun(ABaseGun* Gun)
+{
+}
+
+void AGJScope::DetachToGun(ABaseGun* Gun)
+{
+}

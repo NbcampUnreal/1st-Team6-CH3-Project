@@ -4,6 +4,7 @@
 #include "Components/SphereComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/Controller.h"
+#include "Character/GJCharacter.h"
 #include "Kismet/GameplayStatics.h"
 
 AGJRevolver::AGJRevolver()
@@ -26,6 +27,11 @@ AGJRevolver::AGJRevolver()
 	// 오버랩 이벤트를 바인딩 (일단 접촉 시 이벤트가 발생하는 것을 초기 설정으로)
 	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AGJRevolver::OnBeginOverlap);
 
+	FireSound = nullptr;
+	CoolDownDelay = 1 / (FireRate / 60);
+	TraceRange = 2000.0f;
+	bCanFire = true;
+
 }
 
 void AGJRevolver::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -42,30 +48,32 @@ void AGJRevolver::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 
 void AGJRevolver::Pickup(ACharacter* PlayerCharacter)
 {
-	//if (!PlayerCharacter) return;
+	if (!PlayerCharacter) return;
 
-	//// 플레이어 캐릭터가 총을 가지고 있는지 확인
-	//AGJCharacter* GJCharacter = Cast<AGJCharacter>(PlayerCharacter);
+	// 플레이어 캐릭터가 총을 가지고 있는지 확인
+	AGJCharacter* GJCharacter = Cast<AGJCharacter>(PlayerCharacter);
 	//if (GJCharacter && GJCharacter->CurrentGun)
 	//{
 	//	return; // 총을 가지고 있으면 줍지 않는다.
 	//}
 
-	//// 총을 플레이어에 장착하는 함수라는데 일단 보류
-	///*AttachToComponent(PlayerCharacter->GetMesh(),
-	//	FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-	//	TEXT("hand_r")
-	//);*/
+	// 총을 플레이어의 오른쪽 손 본에 장착
+	AttachToComponent(PlayerCharacter->GetMesh(),
+		FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+		TEXT("hand_r")
+	);
 
-	//SetOwner(PlayerCharacter);
+	// 플레이어가 총을 소유
+	SetOwner(PlayerCharacter);
 
-	//if (GJCharacter)
-	//{
-	//	GJCharacter->CurrentGun = this;
-	//}
+	// 캐릭터가 가진 현재 총 = 장착한 총
+	/*if (GJCharacter)
+	{
+		GJCharacter->CurrentGun = this;
+	}*/
 
-	//// 주운 이후에는 콜리전 제거
-	//CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	// 주운 이후에는 콜리전 제거
+	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AGJRevolver::Fire()
@@ -79,7 +87,7 @@ void AGJRevolver::Fire()
 	// 탄을 소비
 	CurrentAmmo--;
 
-	//캐릭터의 컨트롤러에서 시점 정보를 가져오는 함수 (SetOwner를 이용해서 캐릭터에 총을 장착 시켜야 한다.)
+	//캐릭터의 컨트롤러에서 시점 정보를 가져오는 함수 
 	AController* OwnerController = GetOwner() ? GetOwner()->GetInstigatorController() : nullptr;
 	if (OwnerController)
 	{
@@ -138,6 +146,7 @@ void AGJRevolver::Fire()
 	);
 
 	// 탄창이 돌아가는 Animation이 있으면 좋을 것 같다.
+	// 사격 후 반동이 있으면 좋을 것 같다.
 }
 
 void AGJRevolver::EnableFire()

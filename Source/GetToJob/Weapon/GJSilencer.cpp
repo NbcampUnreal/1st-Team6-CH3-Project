@@ -3,3 +3,10 @@
 
 #include "Weapon/GJSilencer.h"
 
+void AGJSilencer::AttachToGun(ABaseGun* Gun)
+{
+}
+
+void AGJSilencer::DetachToGun(ABaseGun* Gun)
+{
+}

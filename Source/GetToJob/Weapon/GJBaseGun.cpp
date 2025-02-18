@@ -9,6 +9,19 @@ AGJBaseGun::AGJBaseGun()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
+	Damage = 100.0f;
+	Accuracy = 100.0f;
+	AmmoVelocity = 100.0f;
+	FireRate = 600.0f;
+
+	MaxAmmo = 30;
+	CurrentAmmo = MaxAmmo;
+
+
+	bIsSilenced = false;
+	bHasScope = false;
+	ReloadTime = 3.0f;
+	bIsReloading = false;
 }
 
 void AGJBaseGun::Fire()

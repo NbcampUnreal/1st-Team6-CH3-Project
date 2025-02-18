@@ -14,4 +14,7 @@ class GETTOJOB_API AGJScope : public AGJBaseGunAttachment
 {
 	GENERATED_BODY()
 	
+public:
+	virtual void AttachToGun(class ABaseGun* Gun) override;
+	virtual void DetachToGun(class ABaseGun* Gun) override;
 };

@@ -39,6 +39,8 @@ protected:
 	float Damage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
 	float Accuracy;
+	
+	//CoolDownDelay = 1 / (FireRate / 60); // 초당 발사 간격 결정 가능
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
 	float FireRate;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")

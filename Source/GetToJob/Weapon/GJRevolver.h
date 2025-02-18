@@ -43,10 +43,14 @@ protected:
 	virtual void BeginPlay() override;
 
 
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
-	float TraceRange = 2000.0f;
+	float TraceRange;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
-	float CoolDownDelay = 1.0f;
+	float CoolDownDelay;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	USoundBase* FireSound;
 
 private:
 	FTimerHandle CoolDownTimerHandle;

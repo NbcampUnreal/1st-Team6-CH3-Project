@@ -11,6 +11,14 @@ AGJBaseGunAttachment::AGJBaseGunAttachment()
 
 }
 
+void AGJBaseGunAttachment::AttachToGun(ABaseGun* Gun)
+{
+}
+
+void AGJBaseGunAttachment::DetachToGun(ABaseGun* Gun)
+{
+}
+
 // Called when the game starts or when spawned
 void AGJBaseGunAttachment::BeginPlay()
 {
