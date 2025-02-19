@@ -19,11 +19,10 @@ public:
 	
 	AGJRocketProjectile();
 
-	USphereComponent* CollisionComp;
-	
-
 	UProjectileMovementComponent* ProjectileMovement;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+	USphereComponent* CollisionComp;
 	// 메시 추가
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	UStaticMeshComponent* RocketMesh;

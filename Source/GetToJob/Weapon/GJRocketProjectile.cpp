@@ -13,17 +13,22 @@ AGJRocketProjectile::AGJRocketProjectile()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
+	// 발사자의 충돌을 무시하도록 설정
+	if (GetInstigator())
+	{
+		CollisionComp->IgnoreActorWhenMoving(GetInstigator(), true);
+	}
+
 	// 충돌 감지를 위한 콜리전을 추가
 	CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComp"));
 	CollisionComp->InitSphereRadius(10.0f);
-	CollisionComp->SetCollisionProfileName(TEXT("BlockAllDynamic"));
 	RootComponent = CollisionComp;
 
-	// 로켓에 메시 추가
+	// 로켓에 메시 추가, 콜리전 설정
 	RocketMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RocketMesh"));
 	RocketMesh->SetupAttachment(RootComponent);
-	RocketMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);// 로켓 메시 자체는 충돌하지 않도록
-
+	
+	
 	// 물리 탄환의 이동 컴포넌트 추가
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
 	ProjectileMovement->InitialSpeed = 2000.0f;
@@ -43,6 +48,11 @@ AGJRocketProjectile::AGJRocketProjectile()
 
 void AGJRocketProjectile::OnImpact(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	if (OtherActor)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Rocket Impact with : %s"), *OtherActor->GetName());
+	}
+
 	if (OtherActor && OtherActor != GetInstigator())
 	{
 		AutoExplode();
@@ -77,6 +87,8 @@ void AGJRocketProjectile::AutoExplode()
 void AGJRocketProjectile::BeginPlay()
 {
 	Super::BeginPlay();
+
+	
 
 	// 일정 시간 후 자동으로 폭발
 	GetWorldTimerManager().SetTimer(

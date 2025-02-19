@@ -89,7 +89,7 @@ void AGJBaseGun::Pickup(ACharacter* PlayerCharacter)
 	// 총을 플레이어의 오른쪽 손 본에 장착
 	AttachToComponent(PlayerCharacter->GetMesh(),
 		FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-		TEXT("hand_r")
+		TEXT("Gun")
 	);
 
 	// 플레이어가 총을 소유
