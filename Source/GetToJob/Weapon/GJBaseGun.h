@@ -7,6 +7,9 @@
 #include "Weapon/GJGunInterface.h"
 #include "GJBaseGun.generated.h"
 
+class USphereComponent;
+class USkeletalMeshComponent;
+
 UCLASS()
 class GETTOJOB_API AGJBaseGun : public AActor, public IGJGunInterface
 {
@@ -15,6 +18,21 @@ class GETTOJOB_API AGJBaseGun : public AActor, public IGJGunInterface
 public:	
 	AGJBaseGun();
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USphereComponent* CollisionComp;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+	USkeletalMeshComponent* GunMesh;
+
+
+	UFUNCTION()
+	void OnBeginOverlap(
+		UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult
+	);
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon Combat")
 	virtual void Fire() override;
@@ -22,6 +40,8 @@ public:
 	virtual void Reload() override;
 	UFUNCTION(BlueprintCallable, Category = "Weapon Combat")
 	virtual bool IsReloading() override;
+	UFUNCTION()
+	void Pickup(ACharacter* PlayerCharacter);
 	
 	UFUNCTION(BlueprintCallable, Category = "Weapon Attachment")
 	void EquipAttachment(AActor* Attachment);
@@ -49,14 +69,14 @@ protected:
 	int32 MaxAmmo;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
 	int32 CurrentAmmo;
-
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")
+	TSubclassOf<class AActor> ProjectileClass;
 
 
 
 	float ReloadTime;
 	bool bIsReloading;
-	TSubclassOf<class AActor> ProjectileClass;
+	
 
 
 

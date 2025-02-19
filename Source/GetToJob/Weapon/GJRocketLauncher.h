@@ -6,9 +6,6 @@
 #include "Weapon/GJBaseGun.h"
 #include "GJRocketLauncher.generated.h"
 
-class USphereComponent;
-class USkeletalMeshComponent;
-
 UCLASS()
 class GETTOJOB_API AGJRocketLauncher : public AGJBaseGun
 {
@@ -16,29 +13,17 @@ class GETTOJOB_API AGJRocketLauncher : public AGJBaseGun
 	
 public:
 	AGJRocketLauncher();
+	
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	USphereComponent* CollisionComp;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
-	USkeletalMeshComponent* GunMesh;
 
 	
 
-	UFUNCTION()
-	void OnBeginOverlap(
-		UPrimitiveComponent* OverlappedComponent,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex,
-		bool bFromSweep,
-		const FHitResult& SweepResult
-	);
-
 	virtual void Fire() override;
 	virtual void Reload() override;
-	void Pickup(ACharacter* PlayerCharacter);
 	void EnableFire();
 	void FinishReload();
+
+
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
