@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -26,6 +26,7 @@ public:
 	virtual void Reload() = 0;
 	virtual bool IsReloading() = 0;
 	virtual float GetDamage() = 0;
+	virtual void Pickup(ACharacter* PlayerCharacter) = 0;
 	virtual int32 GetCurrentAmmo() const = 0;
 	virtual int32 GetMaxAmmo() const = 0;
 };

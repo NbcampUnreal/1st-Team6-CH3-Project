@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Weapon/GJBaseGun.h"
@@ -13,7 +13,7 @@ AGJBaseGun::AGJBaseGun()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	// Äİ¸®Àü ÄÄÆ÷³ÍÆ® »ı¼º ¹× ¼³Á¤
+	// ì½œë¦¬ì „ ì»´í¬ë„ŒíŠ¸ ìƒì„± ë° ì„¤ì •
 	CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComp"));
 	CollisionComp->SetSphereRadius(50.f);
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
@@ -22,11 +22,11 @@ AGJBaseGun::AGJBaseGun()
 	CollisionComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 	RootComponent = CollisionComp;
 
-	// ÃÑ±â ¸Ş½¬ Ãß°¡
+	// ì´ê¸° ë©”ì‰¬ ì¶”ê°€
 	GunMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("GunMesh"));
 	GunMesh->SetupAttachment(RootComponent);
 
-	// ¿À¹ö·¦ ÀÌº¥Æ®¸¦ ¹ÙÀÎµù (ÀÏ´Ü Á¢ÃË ½Ã ÀÌº¥Æ®°¡ ¹ß»ıÇÏ´Â °ÍÀ» ÃÊ±â ¼³Á¤À¸·Î)
+	// ì˜¤ë²„ë© ì´ë²¤íŠ¸ë¥¼ ë°”ì¸ë”© (ì¼ë‹¨ ì ‘ì´‰ ì‹œ ì´ë²¤íŠ¸ê°€ ë°œìƒí•˜ëŠ” ê²ƒì„ ì´ˆê¸° ì„¤ì •ìœ¼ë¡œ)
 	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AGJBaseGun::OnBeginOverlap);
 
 
@@ -79,30 +79,30 @@ void AGJBaseGun::Pickup(ACharacter* PlayerCharacter)
 {
 	if (!PlayerCharacter) return;
 
-	// ÇÃ·¹ÀÌ¾î Ä³¸¯ÅÍ°¡ ÃÑÀ» °¡Áö°í ÀÖ´ÂÁö È®ÀÎ
+	// í”Œë ˆì´ì–´ ìºë¦­í„°ê°€ ì´ì„ ê°€ì§€ê³  ìˆëŠ”ì§€ í™•ì¸
 	AGJCharacter* GJCharacter = Cast<AGJCharacter>(PlayerCharacter);
 	if (GJCharacter && GJCharacter->CurrentGun)
 	{
-		return; // ÃÑÀ» °¡Áö°í ÀÖÀ¸¸é ÁİÁö ¾Ê´Â´Ù.
+		return; // ì´ì„ ê°€ì§€ê³  ìˆìœ¼ë©´ ì¤ì§€ ì•ŠëŠ”ë‹¤.
 	}
 
-	// ÃÑÀ» ÇÃ·¹ÀÌ¾îÀÇ ¿À¸¥ÂÊ ¼Õ º»¿¡ ÀåÂø
+	// ì´ì„ í”Œë ˆì´ì–´ì˜ ì˜¤ë¥¸ìª½ ì† ë³¸ì— ì¥ì°©
 	AttachToComponent(PlayerCharacter->GetMesh(),
 		FAttachmentTransformRules::SnapToTargetNotIncludingScale,
 		TEXT("Gun")
 	);
 
-	// ÇÃ·¹ÀÌ¾î°¡ ÃÑÀ» ¼ÒÀ¯
+	// í”Œë ˆì´ì–´ê°€ ì´ì„ ì†Œìœ 
 	SetOwner(PlayerCharacter);
 
 
-	// Ä³¸¯ÅÍ°¡ °¡Áø ÇöÀç ÃÑ = ÀåÂøÇÑ ÃÑ
+	// ìºë¦­í„°ê°€ ê°€ì§„ í˜„ì¬ ì´ = ì¥ì°©í•œ ì´
 	if (GJCharacter)
 	{
 		GJCharacter->CurrentGun = this;
 	}
 
-	// ÁÖ¿î ÀÌÈÄ¿¡´Â Äİ¸®Àü Á¦°Å
+	// ì£¼ìš´ ì´í›„ì—ëŠ” ì½œë¦¬ì „ ì œê±°
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 

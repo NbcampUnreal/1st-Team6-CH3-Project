@@ -1,7 +1,8 @@
-#include "Weapon/GJRevolver.h"
+ï»¿#include "Weapon/GJRevolver.h"
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h"
 #include "GameFramework/Controller.h"
+#include "Components/SphereComponent.h"
 #include "Character/GJCharacter.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -26,7 +27,7 @@ AGJRevolver::AGJRevolver()
 void AGJRevolver::Fire()
 {
 	
-	// ÀçÀåÀü ÁßÀÌ°Å³ª, ÅºÀÌ ¾øÀ» °æ¿ì ¹ß»ç ºÒ°¡
+	// ì¬ì¥ì „ ì¤‘ì´ê±°ë‚˜, íƒ„ì´ ì—†ì„ ê²½ìš° ë°œì‚¬ ë¶ˆê°€
 	if (!bCanFire || bIsReloading || CurrentAmmo <= 0)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Cannot Fire!!"));
@@ -34,10 +35,10 @@ void AGJRevolver::Fire()
 	}
 	UE_LOG(LogTemp, Warning, TEXT("Fire!!"));
 
-	// ÅºÀ» ¼Òºñ
+	// íƒ„ì„ ì†Œë¹„
 	CurrentAmmo--;
 
-	// ÃÑ ¼Ò¸® Àç»ı
+	// ì´ ì†Œë¦¬ ì¬ìƒ
 	if (FireSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(
@@ -46,7 +47,7 @@ void AGJRevolver::Fire()
 			GetActorLocation()
 		);
 	}
-	//Ä³¸¯ÅÍÀÇ ÄÁÆ®·Ñ·¯¿¡¼­ ½ÃÁ¡ Á¤º¸¸¦ °¡Á®¿À´Â ÇÔ¼ö 
+	//ìºë¦­í„°ì˜ ì»¨íŠ¸ë¡¤ëŸ¬ì—ì„œ ì‹œì  ì •ë³´ë¥¼ ê°€ì ¸ì˜¤ëŠ” í•¨ìˆ˜ 
 	AController* OwnerController = GetOwner() ? GetOwner()->GetInstigatorController() : nullptr;
 	if (OwnerController)
 	{
@@ -54,7 +55,7 @@ void AGJRevolver::Fire()
 		FRotator CameraRotation;
 		OwnerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
 
-		// Ä³¸¯ÅÍ°¡ °¡Áø ¼ÒÄÏ À§Ä¡ °¡Á®¿À±â // TODO ³ªÁß¿¡ ÃÑ±¸ ¼ÒÄÏ(Muzzle)À» ¸¸µé¾î¼­ º¯°æ
+		// ìºë¦­í„°ê°€ ê°€ì§„ ì†Œì¼“ ìœ„ì¹˜ ê°€ì ¸ì˜¤ê¸° // TODO ë‚˜ì¤‘ì— ì´êµ¬ ì†Œì¼“(Muzzle)ì„ ë§Œë“¤ì–´ì„œ ë³€ê²½
 		AGJCharacter* GJCharacter = Cast<AGJCharacter>(GetOwner());
 		FVector MuzzleLocation = FVector::ZeroVector;
 
@@ -64,7 +65,7 @@ void AGJRevolver::Fire()
 		}
 		else
 		{
-			// ¸ø °¡Á®¿Ã °æ¿ì¿¡´Â Ä«¸Ş¶ó LocationÀ» »ç¿ë
+			// ëª» ê°€ì ¸ì˜¬ ê²½ìš°ì—ëŠ” ì¹´ë©”ë¼ Locationì„ ì‚¬ìš©
 			MuzzleLocation = CameraLocation;
 		}
 
@@ -99,17 +100,17 @@ void AGJRevolver::Fire()
 					nullptr
 				);
 			}
-			// ¸ÂÃèÀ» ¶§ µğ¹ö±× ¶óÀÎ
+			// ë§ì·„ì„ ë•Œ ë””ë²„ê·¸ ë¼ì¸
 			DrawDebugLine(GetWorld(), TraceStart, HitResult.ImpactPoint, FColor::Red, false, 3.0f);
 		}
 		else
 		{
-			// ¸ø ¸ÂÃèÀ» ¶§ µğ¹ö±× ¶óÀÎ
+			// ëª» ë§ì·„ì„ ë•Œ ë””ë²„ê·¸ ë¼ì¸
 			DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Blue, false, 3.0f);
 		}
 	}
 
-	// »ç°İ ¼Óµµ¿¡ µû¸¥ Delay ÇÊ¿ä
+	// ì‚¬ê²© ì†ë„ì— ë”°ë¥¸ Delay í•„ìš”
 	bCanFire = false;
 	GetWorldTimerManager().SetTimer(
 		CoolDownTimerHandle,
@@ -119,13 +120,13 @@ void AGJRevolver::Fire()
 		false
 	);
 
-	// ÅºÃ¢ÀÌ µ¹¾Æ°¡´Â AnimationÀÌ ÀÖÀ¸¸é ÁÁÀ» °Í °°´Ù.
-	// »ç°İ ÈÄ ¹İµ¿ÀÌ ÀÖÀ¸¸é ÁÁÀ» °Í °°´Ù.
+	// íƒ„ì°½ì´ ëŒì•„ê°€ëŠ” Animationì´ ìˆìœ¼ë©´ ì¢‹ì„ ê²ƒ ê°™ë‹¤.
+	// ì‚¬ê²© í›„ ë°˜ë™ì´ ìˆìœ¼ë©´ ì¢‹ì„ ê²ƒ ê°™ë‹¤.
 }
 
 void AGJRevolver::Reload()
 {
-	// ÀçÀåÀüÀ» ÇÒ ÇÊ¿ä°¡ ¾øÀ» ¶§
+	// ì¬ì¥ì „ì„ í•  í•„ìš”ê°€ ì—†ì„ ë•Œ
 	if (bIsReloading || CurrentAmmo == MaxAmmo)
 	{
 		return;
@@ -142,7 +143,7 @@ void AGJRevolver::Reload()
 		);
 	}
 
-	// ¾Ö´Ô ¸ùÅ¸ÁÖ ½ÇÇà (TODO: add Anim Montage)
+	// ì• ë‹˜ ëª½íƒ€ì£¼ ì‹¤í–‰ (TODO: add Anim Montage)
 	AGJCharacter* GJCharacter = Cast<AGJCharacter>(GetOwner());
 	if (GJCharacter && ReloadMontage && GJCharacter)
 	{
@@ -171,4 +172,35 @@ void AGJRevolver::FinishReload()
 void AGJRevolver::BeginPlay()
 {
 	Super::BeginPlay();
+}
+
+void AGJRevolver::Pickup(ACharacter* PlayerCharacter)
+{
+	if (!PlayerCharacter) return;
+
+	// í”Œë ˆì´ì–´ ìºë¦­í„°ê°€ ì´ì„ ê°€ì§€ê³  ìˆëŠ”ì§€ í™•ì¸
+	AGJCharacter* GJCharacter = Cast<AGJCharacter>(PlayerCharacter);
+	if (GJCharacter && GJCharacter->CurrentGun)
+	{
+		return; // ì´ì„ ê°€ì§€ê³  ìˆìœ¼ë©´ ì¤ì§€ ì•ŠëŠ”ë‹¤.
+	}
+
+	// ì´ì„ í”Œë ˆì´ì–´ì˜ ì˜¤ë¥¸ìª½ ì† ë³¸ì— ì¥ì°©
+	AttachToComponent(PlayerCharacter->GetMesh(),
+		FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+		TEXT("Revolver")
+	);
+
+	// í”Œë ˆì´ì–´ê°€ ì´ì„ ì†Œìœ 
+	SetOwner(PlayerCharacter);
+
+
+	// ìºë¦­í„°ê°€ ê°€ì§„ í˜„ì¬ ì´ = ì¥ì°©í•œ ì´
+	if (GJCharacter)
+	{
+		GJCharacter->CurrentGun = this;
+	}
+
+	// ì£¼ìš´ ì´í›„ì—ëŠ” ì½œë¦¬ì „ ì œê±°
+	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }

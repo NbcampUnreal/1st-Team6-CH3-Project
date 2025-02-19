@@ -1,7 +1,8 @@
-#include "Weapon/GJRocketLauncher.h"
+ï»¿#include "Weapon/GJRocketLauncher.h"
 #include "Engine/World.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "GameFramework/Controller.h"
+#include "Components/SphereComponent.h"
 #include "Character/GJCharacter.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -44,7 +45,7 @@ void AGJRocketLauncher::Fire()
 				OwnerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
 			}
 
-			// Ä³¸¯ÅÍ°¡ °¡Áø ¼ÒÄÏ À§Ä¡ °¡Á®¿À±â // TODO ³ªÁß¿¡ ÃÑ±¸ ¼ÒÄÏ(Muzzle)À» ¸¸µé¾î¼­ º¯°æ
+			// ìºë¦­í„°ê°€ ê°€ì§„ ì†Œì¼“ ìœ„ì¹˜ ê°€ì ¸ì˜¤ê¸° // TODO ë‚˜ì¤‘ì— ì´êµ¬ ì†Œì¼“(Muzzle)ì„ ë§Œë“¤ì–´ì„œ ë³€ê²½
 			AGJCharacter* GJCharacter = Cast<AGJCharacter>(GetOwner());
 			FVector MuzzleLocation = FVector::ZeroVector;
 
@@ -54,7 +55,7 @@ void AGJRocketLauncher::Fire()
 			}
 			else
 			{
-				// ¸ø °¡Á®¿Ã °æ¿ì¿¡´Â Ä«¸Ş¶ó LocationÀ» »ç¿ë
+				// ëª» ê°€ì ¸ì˜¬ ê²½ìš°ì—ëŠ” ì¹´ë©”ë¼ Locationì„ ì‚¬ìš©
 				MuzzleLocation = CameraLocation;
 			}
 
@@ -67,7 +68,7 @@ void AGJRocketLauncher::Fire()
 			if (SpawnedRocket)
 			{
 				SpawnedRocket->SetInstigator(OwnerPawn);
-				// ·ÎÄÏÀÇ ¼Óµµ ÃÊ±âÈ­
+				// ë¡œì¼“ì˜ ì†ë„ ì´ˆê¸°í™”
 				UProjectileMovementComponent* ProjectileMovement = SpawnedRocket->FindComponentByClass<UProjectileMovementComponent>();
 				if (ProjectileMovement)
 				{
@@ -76,7 +77,7 @@ void AGJRocketLauncher::Fire()
 			}
 		}
 	}
-	// »ç°İ ¼Óµµ¿¡ µû¸¥ Delay ÇÊ¿ä
+	// ì‚¬ê²© ì†ë„ì— ë”°ë¥¸ Delay í•„ìš”
 	bCanFire = false;
 	GetWorldTimerManager().SetTimer(
 		CoolDownTimerHandle,
@@ -102,5 +103,36 @@ void AGJRocketLauncher::FinishReload()
 {
 	CurrentAmmo = MaxAmmo;
 	bIsReloading = false;
+}
+
+void AGJRocketLauncher::Pickup(ACharacter* PlayerCharacter)
+{
+	if (!PlayerCharacter) return;
+
+	// í”Œë ˆì´ì–´ ìºë¦­í„°ê°€ ì´ì„ ê°€ì§€ê³  ìˆëŠ”ì§€ í™•ì¸
+	AGJCharacter* GJCharacter = Cast<AGJCharacter>(PlayerCharacter);
+	if (GJCharacter && GJCharacter->CurrentGun)
+	{
+		return; // ì´ì„ ê°€ì§€ê³  ìˆìœ¼ë©´ ì¤ì§€ ì•ŠëŠ”ë‹¤.
+	}
+
+	// ì´ì„ í”Œë ˆì´ì–´ì˜ ì˜¤ë¥¸ìª½ ì† ë³¸ì— ì¥ì°©
+	AttachToComponent(PlayerCharacter->GetMesh(),
+		FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+		TEXT("Rocket")
+	);
+
+	// í”Œë ˆì´ì–´ê°€ ì´ì„ ì†Œìœ 
+	SetOwner(PlayerCharacter);
+
+
+	// ìºë¦­í„°ê°€ ê°€ì§„ í˜„ì¬ ì´ = ì¥ì°©í•œ ì´
+	if (GJCharacter)
+	{
+		GJCharacter->CurrentGun = this;
+	}
+
+	// ì£¼ìš´ ì´í›„ì—ëŠ” ì½œë¦¬ì „ ì œê±°
+	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
