@@ -114,12 +114,12 @@ void AGJRevolver::Fire()
 		OwnerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
 
 		// 캐릭터가 가진 소켓 위치 가져오기 // TODO 나중에 총구 소켓(Muzzle)을 만들어서 변경
-		AGJCharacter* Character = Cast<AGJCharacter>(GetOwner());
+		AGJCharacter* GJCharacter = Cast<AGJCharacter>(GetOwner());
 		FVector MuzzleLocation = FVector::ZeroVector;
 
-		if (Character && Character->GetMesh())
+		if (GJCharacter && GJCharacter->GetMesh())
 		{
-			MuzzleLocation = Character->GetMesh()->GetSocketLocation(TEXT("head"));
+			MuzzleLocation = GJCharacter->GetMesh()->GetSocketLocation(TEXT("head"));
 		}
 		else
 		{
@@ -163,7 +163,7 @@ void AGJRevolver::Fire()
 		}
 		else
 		{
-			// 못 맞췄을 때 디버르 라인
+			// 못 맞췄을 때 디버그 라인
 			DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Blue, false, 3.0f);
 		}
 	}

@@ -23,13 +23,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	USkeletalMeshComponent* GunMesh;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Reload")
-	float ReloadTime; //재장전 시간
-
-	UAnimMontage* ReloadMontage; // 재장전용 애니메이션
-
-	bool bIsReloading; // 재장전 여부 확인
-	FTimerHandle ReloadTimerHandle; // 재장전 타이머 핸들
+	
 
 	UFUNCTION()
 	void OnBeginOverlap(
@@ -64,7 +58,17 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")
 	USoundBase* ReloadSound;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Reload")
+	float ReloadTime; //재장전 시간
+
+	
+
 private:
 	FTimerHandle CoolDownTimerHandle;
 	bool bCanFire;
+
+	UAnimMontage* ReloadMontage; // 재장전용 애니메이션
+
+	bool bIsReloading; // 재장전 여부 확인
+	FTimerHandle ReloadTimerHandle; // 재장전 타이머 핸들
 };
