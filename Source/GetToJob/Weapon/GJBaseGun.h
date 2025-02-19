@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -40,8 +40,8 @@ public:
 	virtual void Reload() override;
 	UFUNCTION(BlueprintCallable, Category = "Weapon Combat")
 	virtual bool IsReloading() override;
-	UFUNCTION()
-	void Pickup(ACharacter* PlayerCharacter);
+	
+	virtual void Pickup(ACharacter* PlayerCharacter) override;
 	
 	UFUNCTION(BlueprintCallable, Category = "Weapon Attachment")
 	void EquipAttachment(AActor* Attachment);
@@ -54,13 +54,13 @@ public:
 
 
 protected:
-	// ¹«±âÀÇ ½ºÅÈ°ú °ü·ÃµÈ º¯¼ö
+	// ë¬´ê¸°ì˜ ìŠ¤íƒ¯ê³¼ ê´€ë ¨ëœ ë³€ìˆ˜
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
 	float Damage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
 	float Accuracy;
 	
-	//CoolDownDelay = 1 / (FireRate / 60); // ÃÊ´ç ¹ß»ç °£°İ °áÁ¤ °¡´É
+	//CoolDownDelay = 1 / (FireRate / 60); // ì´ˆë‹¹ ë°œì‚¬ ê°„ê²© ê²°ì • ê°€ëŠ¥
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
 	float FireRate;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
@@ -82,7 +82,7 @@ protected:
 
 
 	FTimerHandle ReloadTimerHandle;
-	// ºÎÂø¹° °ü·Ã º¯¼ö
+	// ë¶€ì°©ë¬¼ ê´€ë ¨ ë³€ìˆ˜
 	bool bIsSilenced;
 	bool bHasScope;
 	

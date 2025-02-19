@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -23,24 +23,24 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	USphereComponent* CollisionComp;
-	// ¸Ş½Ã Ãß°¡
+	// ë©”ì‹œ ì¶”ê°€
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	UStaticMeshComponent* RocketMesh;
-	//Ãæµ¹ ½Ã Æø¹ßÇÏ´Â È¿°ú
+	//ì¶©ëŒ ì‹œ í­ë°œí•˜ëŠ” íš¨ê³¼
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Explosion | Effect")
 	UParticleSystem* ExplosionEffect;
-	// Æø¹ß µ¥¹ÌÁö¿Í ¹İ°æ
+	// í­ë°œ ë°ë¯¸ì§€ì™€ ë°˜ê²½
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Explosion | Damage")
 	float DamageRadius;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Explosion | Damage")
 	float DamageAmount;
-	// ·ÎÄÏ Áö¼Ó ½Ã°£
+	// ë¡œì¼“ ì§€ì† ì‹œê°„
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Explosion | Lifetime")
 	float RocketLifetime;
-	// ·ÎÄÏ Áö¼Ó Å¸ÀÌ¸Ó
+	// ë¡œì¼“ ì§€ì† íƒ€ì´ë¨¸
 	FTimerHandle DestroyTimerHandle;
 
-	// Ãæµ¹ ÇÔ¼ö: Ãæµ¹ ½Ã Æø¹ß
+	// ì¶©ëŒ í•¨ìˆ˜: ì¶©ëŒ ì‹œ í­ë°œ
 	UFUNCTION()
 	void OnImpact(
 		UPrimitiveComponent* HitComp,
@@ -52,7 +52,7 @@ public:
 
 
 
-	// ÀÏÁ¤ ½Ã°£ ÈÄ Æø¹ß
+	// ì¼ì • ì‹œê°„ í›„ í­ë°œ
 	void AutoExplode();
 
 protected:

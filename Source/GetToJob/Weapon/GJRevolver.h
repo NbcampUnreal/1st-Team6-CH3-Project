@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -40,16 +40,17 @@ protected:
 	USoundBase* ReloadSound;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Reload")
-	float ReloadTime; //ÀçÀåÀü ½Ã°£
+	float ReloadTime; //ì¬ì¥ì „ ì‹œê°„
 
+	virtual void Pickup(ACharacter* PlayerCharacter) override;
 	
 
 private:
 	FTimerHandle CoolDownTimerHandle;
 	bool bCanFire;
 
-	UAnimMontage* ReloadMontage; // ÀçÀåÀü¿ë ¾Ö´Ï¸ŞÀÌ¼Ç
+	UAnimMontage* ReloadMontage; // ì¬ì¥ì „ìš© ì• ë‹ˆë©”ì´ì…˜
 
-	bool bIsReloading; // ÀçÀåÀü ¿©ºÎ È®ÀÎ
-	FTimerHandle ReloadTimerHandle; // ÀçÀåÀü Å¸ÀÌ¸Ó ÇÚµé
+	bool bIsReloading; // ì¬ì¥ì „ ì—¬ë¶€ í™•ì¸
+	FTimerHandle ReloadTimerHandle; // ì¬ì¥ì „ íƒ€ì´ë¨¸ í•¸ë“¤
 };

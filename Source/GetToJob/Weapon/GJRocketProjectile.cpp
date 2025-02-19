@@ -1,11 +1,11 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Weapon/GJRocketProjectile.h"
 #include "GJRocketProjectile.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
-#include "GameFramework/ProjectileMovementComponent.h" // ProjectileMovement¸¦ À§ÇØ ÇÊ¿ä
+#include "GameFramework/ProjectileMovementComponent.h" // ProjectileMovementë¥¼ ìœ„í•´ í•„ìš”
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -13,34 +13,34 @@ AGJRocketProjectile::AGJRocketProjectile()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	// ¹ß»çÀÚÀÇ Ãæµ¹À» ¹«½ÃÇÏµµ·Ï ¼³Á¤
+	// ë°œì‚¬ìì˜ ì¶©ëŒì„ ë¬´ì‹œí•˜ë„ë¡ ì„¤ì •
 	if (GetInstigator())
 	{
 		CollisionComp->IgnoreActorWhenMoving(GetInstigator(), true);
 	}
 
-	// Ãæµ¹ °¨Áö¸¦ À§ÇÑ Äİ¸®ÀüÀ» Ãß°¡
+	// ì¶©ëŒ ê°ì§€ë¥¼ ìœ„í•œ ì½œë¦¬ì „ì„ ì¶”ê°€
 	CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComp"));
 	CollisionComp->InitSphereRadius(10.0f);
 	RootComponent = CollisionComp;
 
-	// ·ÎÄÏ¿¡ ¸Ş½Ã Ãß°¡, Äİ¸®Àü ¼³Á¤
+	// ë¡œì¼“ì— ë©”ì‹œ ì¶”ê°€, ì½œë¦¬ì „ ì„¤ì •
 	RocketMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RocketMesh"));
 	RocketMesh->SetupAttachment(RootComponent);
 	
 	
-	// ¹°¸® ÅºÈ¯ÀÇ ÀÌµ¿ ÄÄÆ÷³ÍÆ® Ãß°¡
+	// ë¬¼ë¦¬ íƒ„í™˜ì˜ ì´ë™ ì»´í¬ë„ŒíŠ¸ ì¶”ê°€
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
 	ProjectileMovement->InitialSpeed = 2000.0f;
 	ProjectileMovement->MaxSpeed = 2000.f;
 	ProjectileMovement->bAllowAnyoneToDestroyMe = false;
-	ProjectileMovement->bRotationFollowsVelocity = true; // ÅºÈ¯ÀÌ ÀÌµ¿ÇÏ´Â ¹æÇâ¿¡ µû¶ó ÀÚµ¿À¸·Î È¸Àü
-	// -> ÀÌµ¿ÇÏ¸é¼­ ¹æÇâÀ» À¯ÁöÇÏ´Â ¹°Ã¼¿¡ ÀûÇÕ
+	ProjectileMovement->bRotationFollowsVelocity = true; // íƒ„í™˜ì´ ì´ë™í•˜ëŠ” ë°©í–¥ì— ë”°ë¼ ìë™ìœ¼ë¡œ íšŒì „
+	// -> ì´ë™í•˜ë©´ì„œ ë°©í–¥ì„ ìœ ì§€í•˜ëŠ” ë¬¼ì²´ì— ì í•©
 	
-	// Ãæµ¹ ÀÌº¥Æ®¸¦ ¹ÙÀÎµù
+	// ì¶©ëŒ ì´ë²¤íŠ¸ë¥¼ ë°”ì¸ë”©
 	CollisionComp->OnComponentHit.AddDynamic(this, &AGJRocketProjectile::OnImpact);
 
-	// µ¥¹ÌÁö ¼³Á¤, ÀÚµ¿ Æø¹ß ¼³Á¤
+	// ë°ë¯¸ì§€ ì„¤ì •, ìë™ í­ë°œ ì„¤ì •
 	DamageRadius = 300.0f;
 	DamageAmount = 50.0f;
 	RocketLifetime = 3.0f;
@@ -61,13 +61,13 @@ void AGJRocketProjectile::OnImpact(UPrimitiveComponent* HitComp, AActor* OtherAc
 
 void AGJRocketProjectile::AutoExplode()
 {
-	// Æø¹ß È¿°ú Àç»ı
+	// í­ë°œ íš¨ê³¼ ì¬ìƒ
 	if (ExplosionEffect)
 	{
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation());
 	}
 
-	// Æø¹ß µ¥¹ÌÁö¸¦ Àû¿ë
+	// í­ë°œ ë°ë¯¸ì§€ë¥¼ ì ìš©
 	UGameplayStatics::ApplyRadialDamage(
 		this,
 		DamageAmount,
@@ -80,7 +80,7 @@ void AGJRocketProjectile::AutoExplode()
 		true
 	);
 
-	// ·ÎÄÏÀ» »èÁ¦
+	// ë¡œì¼“ì„ ì‚­ì œ
 	Destroy();
 }
 
@@ -90,7 +90,7 @@ void AGJRocketProjectile::BeginPlay()
 
 	
 
-	// ÀÏÁ¤ ½Ã°£ ÈÄ ÀÚµ¿À¸·Î Æø¹ß
+	// ì¼ì • ì‹œê°„ í›„ ìë™ìœ¼ë¡œ í­ë°œ
 	GetWorldTimerManager().SetTimer(
 		DestroyTimerHandle,
 		this,
