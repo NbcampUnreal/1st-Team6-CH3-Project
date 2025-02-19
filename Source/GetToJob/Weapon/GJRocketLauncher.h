@@ -33,6 +33,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
 	float CoolDownDelay;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Own Weapon")
+	bool bPickRocketLauncher;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")
 	USoundBase* FireSound;
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")

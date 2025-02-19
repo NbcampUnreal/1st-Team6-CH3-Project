@@ -14,4 +14,9 @@ class GETTOJOB_API AGJRifle : public AGJBaseGun
 {
 	GENERATED_BODY()
 	
+public:
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Own Weapon")
+	bool bPickRifle;
 };

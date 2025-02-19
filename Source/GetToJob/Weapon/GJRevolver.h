@@ -27,7 +27,8 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Own Weapon")
+	bool bPickRevolver;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
 	float TraceRange;

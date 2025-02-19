@@ -19,6 +19,7 @@ AGJRocketLauncher::AGJRocketLauncher()
 	MaxAmmo = 5;
 	CurrentAmmo = MaxAmmo;
 	ReloadTime = 4.0f;
+	bPickRocketLauncher= false;
 }
 
 
@@ -124,7 +125,7 @@ void AGJRocketLauncher::Pickup(ACharacter* PlayerCharacter)
 
 	// 플레이어가 총을 소유
 	SetOwner(PlayerCharacter);
-
+	bPickRocketLauncher = false;
 
 	// 캐릭터가 가진 현재 총 = 장착한 총
 	if (GJCharacter)
