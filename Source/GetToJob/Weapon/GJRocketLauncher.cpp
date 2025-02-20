@@ -5,6 +5,7 @@
 #include "Components/SphereComponent.h"
 #include "Character/GJCharacter.h"
 #include "Kismet/GameplayStatics.h"
+#include "Weapon/GJRocketProjectile.h"
 
 
 
@@ -13,12 +14,14 @@ AGJRocketLauncher::AGJRocketLauncher()
 	FireSound = nullptr;
 	FireRate = 20.0f;
 	CoolDownDelay = 1 / (FireRate / 60);
-	InitialSpeed = 200.0f;
+	InitialSpeed = 20000.0f;
 	bCanFire = true;
 	bIsReloading = false;
 	MaxAmmo = 5;
 	CurrentAmmo = MaxAmmo;
 	ReloadTime = 4.0f;
+	bPickRocketLauncher= false;
+	ExplosionRadius = 300.f;
 }
 
 
@@ -30,6 +33,15 @@ void AGJRocketLauncher::Fire()
 	}
 
 	CurrentAmmo--;
+	UE_LOG(LogTemp, Warning, TEXT("CurrentAmmo: %d"), CurrentAmmo);
+	if (FireSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			GetWorld(),
+			FireSound,
+			GetActorLocation()
+		);
+	}
 
 	if (ProjectileClass)
 	{
@@ -59,7 +71,14 @@ void AGJRocketLauncher::Fire()
 				MuzzleLocation = CameraLocation;
 			}
 
-			AActor* SpawnedRocket = GetWorld()->SpawnActor<AActor>(
+			// 방향 벡터 계산
+			FVector LaunchDirection = (CameraLocation - MuzzleLocation).GetSafeNormal(); // 방향 벡터
+
+			// 속도
+			InitialSpeed = 20000.0f;
+
+			// 로켓 생성
+			AGJRocketProjectile* SpawnedRocket = GetWorld()->SpawnActor<AGJRocketProjectile>(
 				ProjectileClass,
 				MuzzleLocation,
 				CameraRotation
@@ -67,12 +86,20 @@ void AGJRocketLauncher::Fire()
 
 			if (SpawnedRocket)
 			{
+				// 로켓을 발사한 폰 설정
 				SpawnedRocket->SetInstigator(OwnerPawn);
 				// 로켓의 속도 초기화
 				UProjectileMovementComponent* ProjectileMovement = SpawnedRocket->FindComponentByClass<UProjectileMovementComponent>();
 				if (ProjectileMovement)
 				{
-					ProjectileMovement->Velocity = CameraRotation.Vector() * InitialSpeed;
+					ProjectileMovement->Velocity = CameraRotation.Vector() * InitialSpeed; // 방향 & 속도 설정
+					ProjectileMovement->bRotationFollowsVelocity = true; // 이동 방향 따라 회전
+					ProjectileMovement->Activate(); // 이동 활성화
+
+					UE_LOG(LogTemp, Warning, TEXT("Final Velocity: X=%f, Y=%f, Z=%f"),
+						ProjectileMovement->Velocity.X,
+						ProjectileMovement->Velocity.Y,
+						ProjectileMovement->Velocity.Z);
 				}
 			}
 		}
@@ -90,7 +117,36 @@ void AGJRocketLauncher::Fire()
 
 void AGJRocketLauncher::Reload()
 {
+	// 재장전을 할 필요가 없을 때
+	if (bIsReloading || CurrentAmmo == MaxAmmo)
+	{
+		return;
+	}
 
+	bIsReloading = true;
+
+	if (ReloadSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			GetWorld(),
+			ReloadSound,
+			GetActorLocation()
+		);
+	}
+
+	// 애님 몽타주 실행 (TODO: add Anim Montage)
+	AGJCharacter* GJCharacter = Cast<AGJCharacter>(GetOwner());
+	if (GJCharacter && ReloadMontage && GJCharacter)
+	{
+		GJCharacter->GetMesh()->GetAnimInstance()->Montage_Play(ReloadMontage);
+	}
+	GetWorldTimerManager().SetTimer(
+		ReloadTimerHandle,
+		this,
+		&AGJRocketLauncher::FinishReload,
+		ReloadTime,
+		false
+	);
 }
 
 
@@ -124,7 +180,7 @@ void AGJRocketLauncher::Pickup(ACharacter* PlayerCharacter)
 
 	// 플레이어가 총을 소유
 	SetOwner(PlayerCharacter);
-
+	bPickRocketLauncher = false;
 
 	// 캐릭터가 가진 현재 총 = 장착한 총
 	if (GJCharacter)
@@ -134,5 +190,13 @@ void AGJRocketLauncher::Pickup(ACharacter* PlayerCharacter)
 
 	// 주운 이후에는 콜리전 제거
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void AGJRocketLauncher::BeginPlay()
+{
+	Super::BeginPlay();
+
+	MaxAmmo = 5;
+	CurrentAmmo = MaxAmmo;
 }
 
