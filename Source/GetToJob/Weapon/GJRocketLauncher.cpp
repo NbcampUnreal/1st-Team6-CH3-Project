@@ -33,6 +33,15 @@ void AGJRocketLauncher::Fire()
 
 	CurrentAmmo--;
 
+	if (FireSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			GetWorld(),
+			FireSound,
+			GetActorLocation()
+		);
+	}
+
 	if (ProjectileClass)
 	{
 		APawn* OwnerPawn = Cast<APawn>(GetOwner());
