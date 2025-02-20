@@ -76,7 +76,7 @@ void AAICharacterBase::OnAttackOverlapBegin(UPrimitiveComponent* const Overlappe
 	}
 	if (auto const Player = Cast<AGJCharacter>(OtherActor))
 	{
-		/*
+		
 		UGameplayStatics::ApplyDamage(
 			Player,
 			5.0f,
@@ -84,7 +84,6 @@ void AAICharacterBase::OnAttackOverlapBegin(UPrimitiveComponent* const Overlappe
 			this,
 			UDamageType::StaticClass()
 		);
-		*/
 		UE_LOG(LogTemp, Error, TEXT("Hitted"));
 		StartAttackCooldown();
 	}
