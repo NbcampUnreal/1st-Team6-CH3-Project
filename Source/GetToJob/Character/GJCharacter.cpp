@@ -7,6 +7,9 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Weapon/GJBaseGun.h"
+#include "Weapon/GJRevolver.h"
+#include "Weapon/GJRifle.h"
+#include "Weapon/GJRocketLauncher.h"
 #include "Components/CapsuleComponent.h"
 //#include "Components/WidgetComponent.h"
 //#include "Components/TextBlock.h"
@@ -92,8 +95,24 @@ void AGJCharacter::DropWeapon()
         // 무기를 손에서 떼고 물리 적용
         CurrentGun->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
         CurrentGun->SetActorEnableCollision(true);
-
         // 무기 포인터 초기화 (더 이상 장착 중이 아님)
+        // 1. 무슨 무기를 가지고 있는지 인식 Cast to 사용
+        // 2. 그것에 대한 변수값에 bpickrifle~ 기타등등
+        // 3. 그 변수들에 대한 변수 값을 set(false)
+        // 4. 그래야 그 총들이 소유되지 않았다는 것을 인식한다.
+         // 현재 무기의 타입을 판별하여 상태 변수 업데이트
+        /*if (Cast<AGJRevolver>(CurrentGun))
+        {
+            bPickRevolver = false;
+        }
+        else if (Cast<AGJRifle>(CurrentGun))
+        {
+            bPickRifle = false;
+        }
+        else if (Cast<AGJRocketLauncher>(CurrentGun))
+        {
+            bPickRocketLauncher = false;
+        }*/
         CurrentGun = nullptr;
     }
 }
@@ -120,21 +139,7 @@ float AGJCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 void AGJCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
-    // AAICharacterBase의 SetHealth()를 사용하여 체력 설정
 }
-
-//void AGJCharacter::Tick(float DeltaTime)
-//{
-//    Super::Tick(DeltaTime);
-//
-//    // 체력이 0 이하이고 아직 죽지 않았다면 사망 처리
-//    if (GetHealth() <= 0.0f && !bIsDead)
-//    {
-//        OnDeath();
-//        bIsDead = true;  // 중복 실행 방지
-//    }
-//}
 
 void AGJCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -247,6 +252,7 @@ void AGJCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
             if (PlayerController->ESCAction)
             {
+                // 메인메뉴 (ESC)
                 EnhancedInput->BindAction(
                     PlayerController->ESCAction, 
                     ETriggerEvent::Triggered, 
@@ -256,6 +262,7 @@ void AGJCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
             if (PlayerController->DropWeaponAction)
             {
+                // 무기 드롭(G)
                 EnhancedInput->BindAction(
                     PlayerController->DropWeaponAction, 
                     ETriggerEvent::Triggered, 
@@ -348,41 +355,6 @@ void AGJCharacter::StopSit(const FInputActionValue& value)
         GetCharacterMovement()->MaxWalkSpeed = NormalSpeed; // 원래 속도로 복귀
     }
 }
-
-// 체력 얻는 함수
-//int AGJCharacter::GetHealth() const
-//{
-//    return Health; // Health는 클래스의 멤버 변수
-//}
-//
-//// 체력 회복 함수
-//void AGJCharacter::AddHealth(float Amount)
-//{
-//    // 체력을 회복시킴. 최대 체력을 초과하지 않도록 제한함
-//    Health = FMath::Clamp(Health + Amount, 0.0f, MaxHealth);
-//    UE_LOG(LogTemp, Log, TEXT("Health increased to: %f"), Health);
-//}
-
-// 데미지 처리 함수
-//float AGJCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-//{
-//    // 기본 데미지 처리 로직 호출 (필수는 아님)
-//    float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-//
-//    // 체력을 데미지만큼 감소시키고, 0 이하로 떨어지지 않도록 Clamp
-//    Health = FMath::Clamp(Health - DamageAmount, 0.0f, MaxHealth);
-//    UE_LOG(LogTemp, Warning, TEXT("Health decreased to: %f"), Health);
-//
-//    // 체력이 0 이하가 되면 사망 처리
-//    if (Health <= 0.0f)
-//    {
-//        OnDeath();
-//    }
-//
-//    // 실제 적용된 데미지를 반환
-//    return ActualDamage;
-//}
-
 
 void AGJCharacter::OnDeath()
 {
