@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "BehaviorTree/BehaviorTree.h"
+#include "PatrolPath.h"
+#include "Animation/AnimMontage.h"
 #include "GJNPC.generated.h"
 
 UCLASS()
@@ -15,6 +17,11 @@ public:
 
 	UBehaviorTree* GetBehaviorTree() const; //Tree Return 함수
 
+	APatrolPath* GetPatrolParth() const;
+
+	UAnimMontage* GetMontage() const;
+
+
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -24,4 +31,10 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrviateAccess = "true")) // UPROPERTY 로 지정 가능한 BehaviorTree 인스턴스 생성
 	UBehaviorTree* Tree;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrviateAccess = "true"))
+	APatrolPath* PatrolPath;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation, meta = (AllowPrviateAccess = "true"))
+	UAnimMontage* Montage;
 };

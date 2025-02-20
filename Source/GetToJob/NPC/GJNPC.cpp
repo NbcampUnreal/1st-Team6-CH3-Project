@@ -11,6 +11,16 @@ UBehaviorTree* AGJNPC::GetBehaviorTree() const
 	return Tree; // Tree 반환 함수
 }
 
+APatrolPath* AGJNPC::GetPatrolParth() const
+{
+	return PatrolPath;
+}
+
+UAnimMontage* AGJNPC::GetMontage() const
+{
+	return Montage;
+}
+
 void AGJNPC::BeginPlay()
 {
 	Super::BeginPlay();
