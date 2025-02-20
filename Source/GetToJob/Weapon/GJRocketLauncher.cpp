@@ -21,6 +21,7 @@ AGJRocketLauncher::AGJRocketLauncher()
 	CurrentAmmo = MaxAmmo;
 	ReloadTime = 4.0f;
 	bPickRocketLauncher= false;
+	ExplosionRadius = 300.f;
 }
 
 
@@ -32,7 +33,7 @@ void AGJRocketLauncher::Fire()
 	}
 
 	CurrentAmmo--;
-
+	UE_LOG(LogTemp, Warning, TEXT("CurrentAmmo: %d"), CurrentAmmo);
 	if (FireSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(
@@ -189,5 +190,13 @@ void AGJRocketLauncher::Pickup(ACharacter* PlayerCharacter)
 
 	// 주운 이후에는 콜리전 제거
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void AGJRocketLauncher::BeginPlay()
+{
+	Super::BeginPlay();
+
+	MaxAmmo = 5;
+	CurrentAmmo = MaxAmmo;
 }
 

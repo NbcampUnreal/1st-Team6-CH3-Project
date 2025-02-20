@@ -27,7 +27,7 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
-	float ExplosionRadius = 300.f;
+	float ExplosionRadius;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
 	float InitialSpeed; // 로켓의 초기 속도
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
@@ -45,6 +45,8 @@ protected:
 	float ReloadTime; //재장전 시간
 
 	virtual void Pickup(ACharacter* PlayerCharacter) override;
+
+	virtual void BeginPlay() override;
 
 private:
 	FTimerHandle CoolDownTimerHandle;
