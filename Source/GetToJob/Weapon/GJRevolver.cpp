@@ -188,33 +188,9 @@ void AGJRevolver::BeginPlay()
 
 void AGJRevolver::Pickup(ACharacter* PlayerCharacter)
 {
-	if (!PlayerCharacter) return;
-
-	// 플레이어 캐릭터가 총을 가지고 있는지 확인
-	AGJCharacter* GJCharacter = Cast<AGJCharacter>(PlayerCharacter);
-	if (GJCharacter && GJCharacter->CurrentGun)
-	{
-		return; // 총을 가지고 있으면 줍지 않는다.
-	}
-
-	// 총을 플레이어의 오른쪽 손 본에 장착
-	AttachToComponent(PlayerCharacter->GetMesh(),
-		FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-		TEXT("Revolver")
-	);
-
-	// 플레이어가 총을 소유
-	SetOwner(PlayerCharacter);
+	Super::Pickup(PlayerCharacter);
 	bPickRevolver = true;
 
-	// 캐릭터가 가진 현재 총 = 장착한 총
-	if (GJCharacter)
-	{
-		GJCharacter->CurrentGun = this;
-	}
-
-	// 주운 이후에는 콜리전 제거
-	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AGJRevolver::ThrowAway()

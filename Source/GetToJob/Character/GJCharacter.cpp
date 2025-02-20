@@ -93,8 +93,9 @@ void AGJCharacter::DropWeapon()
         UE_LOG(LogTemp, Warning, TEXT("Weapon Dropped!"));
 
         // 무기를 손에서 떼고 물리 적용
-        CurrentGun->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-        CurrentGun->SetActorEnableCollision(true);
+//        CurrentGun->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+//        CurrentGun->SetActorEnableCollision(true);
+        CurrentGun->ThrowAway();
         // 무기 포인터 초기화 (더 이상 장착 중이 아님)
         // 1. 무슨 무기를 가지고 있는지 인식 Cast to 사용
         // 2. 그것에 대한 변수값에 bpickrifle~ 기타등등
@@ -113,7 +114,6 @@ void AGJCharacter::DropWeapon()
         {
             bPickRocketLauncher = false;
         }*/
-        CurrentGun = nullptr;
     }
 }
 
