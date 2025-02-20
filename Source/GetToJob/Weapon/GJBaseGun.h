@@ -23,6 +23,8 @@ public:
 	USphereComponent* CollisionComp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	USkeletalMeshComponent* GunMesh;
+	UPROPERTY(EditDefaultsOnly, Category = "Attachment")
+	FName AttachmentSocketName = TEXT("AttachmentSocket");
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Own Weapon")
 	bool bPickupGun;
@@ -91,6 +93,7 @@ protected:
 	// 부착물 관련 변수
 	bool bIsSilenced;
 	bool bHasScope;
+
 	
 
 

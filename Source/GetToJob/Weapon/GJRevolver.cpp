@@ -50,7 +50,8 @@ void AGJRevolver::Fire()
 	}
 	//캐릭터의 컨트롤러에서 시점 정보를 가져오는 함수 
 	AController* OwnerController = GetOwner() ? GetOwner()->GetInstigatorController() : nullptr;
-	if (OwnerController)
+	// 카메라 방향 기준으로 라인 트레이스
+	 if (OwnerController)
 	{
 		FVector CameraLocation;
 		FRotator CameraRotation;
@@ -119,6 +120,7 @@ void AGJRevolver::Fire()
 			DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Blue, false, 3.0f);
 		}
 	}
+
 
 	// 사격 속도에 따른 Delay 필요
 	bCanFire = false;

@@ -118,10 +118,20 @@ void AGJBaseGun::EquipAttachment(AGJBaseGunAttachment* Attachment)
 	CurrentAttachment = Attachment;
 	CurrentAttachment->AttachToGun(this);
 
+	// 부착물을 부착
+	CurrentAttachment->AttachToComponent(
+		GunMesh,
+		FAttachmentTransformRules::SnapToTargetIncludingScale,
+		AttachmentSocketName
+	);
+
 	if (AGJScope* GJScope = Cast<AGJScope>(Attachment))
 	{
+		bHasScope = true;
 		GJScope->EnableScopeView();
 	}
+
+
 }
 
 void AGJBaseGun::RemoveAttachment()
@@ -130,12 +140,16 @@ void AGJBaseGun::RemoveAttachment()
 
 	if (AGJScope* Scope = Cast<AGJScope>(CurrentAttachment))
 	{
-		Scope->DisableScopeView();
+		bHasScope = false;
 	}
+
+	// 부착물에서 메시를 떼기
+	CurrentAttachment->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 
 	CurrentAttachment->DetachFromGun();
 	CurrentAttachment = nullptr;
-
+	
+	
 }
 
 float AGJBaseGun::GetDamage()
