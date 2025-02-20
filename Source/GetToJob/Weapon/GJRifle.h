@@ -42,6 +42,7 @@ protected:
 	float ReloadTime; //재장전 시간
 
 	virtual void Pickup(ACharacter* PlayerCharacter) override;
+	virtual void ThrowAway() override;
 
 
 private:

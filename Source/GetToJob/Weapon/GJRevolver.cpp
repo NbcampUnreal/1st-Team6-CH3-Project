@@ -216,3 +216,9 @@ void AGJRevolver::Pickup(ACharacter* PlayerCharacter)
 	// 주운 이후에는 콜리전 제거
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
+
+void AGJRevolver::ThrowAway()
+{
+	Super::ThrowAway();
+	bPickRevolver = false;
+}

@@ -192,6 +192,12 @@ void AGJRocketLauncher::Pickup(ACharacter* PlayerCharacter)
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
+void AGJRocketLauncher::ThrowAway()
+{
+	Super::ThrowAway();
+	bPickRocketLauncher = false;
+}
+
 void AGJRocketLauncher::BeginPlay()
 {
 	Super::BeginPlay();

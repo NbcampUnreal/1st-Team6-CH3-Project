@@ -171,6 +171,7 @@ void AGJRifle::BeginPlay()
 
 void AGJRifle::Pickup(ACharacter* PlayerCharacter)
 {
+	Super::Pickup(PlayerCharacter);
 	if (!PlayerCharacter) return;
 
 	// 플레이어 캐릭터가 총을 가지고 있는지 확인
@@ -198,4 +199,10 @@ void AGJRifle::Pickup(ACharacter* PlayerCharacter)
 
 	// 주운 이후에는 콜리전 제거
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void AGJRifle::ThrowAway()
+{
+	Super::ThrowAway();
+	bPickRifle = false;
 }

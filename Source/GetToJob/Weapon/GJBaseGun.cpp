@@ -107,6 +107,11 @@ void AGJBaseGun::Pickup(ACharacter* PlayerCharacter)
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
+void AGJBaseGun::ThrowAway()
+{
+
+}
+
 void AGJBaseGun::EquipAttachment(AGJBaseGunAttachment* Attachment)
 {
 	if (!Attachment)

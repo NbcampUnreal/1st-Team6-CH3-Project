@@ -47,6 +47,7 @@ public:
 	virtual bool IsReloading() override;
 	
 	virtual void Pickup(ACharacter* PlayerCharacter) override;
+	virtual void ThrowAway() override;
 	
 	UFUNCTION(BlueprintCallable, Category = "Weapon Attachment")
 	void EquipAttachment(AGJBaseGunAttachment* Attachment);
