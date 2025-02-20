@@ -24,6 +24,8 @@ public:
 	int32 ThreeWaveScore; //세번째 웨이브 점수
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "GameData")
 	int32 BossWaveScore; //보스 웨이브 점수
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "GameData")
+	int32 CurrentWaveIndex;
 
 	//점수 추가 함수
 	UFUNCTION(BlueprintCallable, Category = "GameData")
@@ -39,7 +41,7 @@ public:
 	void SaveThreeWaveScore(int amount);
 
 	UFUNCTION(BlueprintCallable, Category = "GameData")
-	void BossScore(int amount);
+	void SaveBossScore(int amount);
 
 	//전체 적 킬 수
 	UFUNCTION(BlueprintCallable, Category = "GameData")

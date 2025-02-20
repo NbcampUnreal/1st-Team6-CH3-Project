@@ -8,6 +8,7 @@ UGJGameInstance::UGJGameInstance()
 	TwoWaveScore = 0;
 	ThreeWaveScore = 0;
 	BossWaveScore = 0;
+	CurrentWaveIndex = 0;
 }
 
 void UGJGameInstance::AddToScore(int amount)
@@ -30,7 +31,7 @@ void UGJGameInstance::SaveThreeWaveScore(int amount)
 	ThreeWaveScore += amount;
 }
 
-void UGJGameInstance::BossScore(int amount)
+void UGJGameInstance::SaveBossScore(int amount)
 {
 	BossWaveScore += amount;
 }
