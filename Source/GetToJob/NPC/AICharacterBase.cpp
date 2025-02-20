@@ -12,10 +12,9 @@ AAICharacterBase::AAICharacterBase():
 {
 	PrimaryActorTick.bCanEverTick = true;
 	bCanAttack = true;
-
 	if (RightFistCollisionBox)
 	{
-		RightFistCollisionBox->SetupAttachment(GetMesh(), "RightFistSocketName");
+		RightFistCollisionBox->SetupAttachment(GetMesh(), "hand_r_socket");
 	}
 }
 
@@ -57,6 +56,8 @@ float AAICharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 
 void AAICharacterBase::OnAttackOverlapBegin(UPrimitiveComponent* const OverlappedComponent, AActor* const OtherActor, UPrimitiveComponent* const OtherComponent, int const OtherBodyIndex, bool const FromSeep, FHitResult const& SweepResult)
 {
+
+	if (!bCanAttack) return;
 	if (OtherActor == this)
 	{
 		return;
@@ -72,6 +73,20 @@ void AAICharacterBase::OnAttackOverlapBegin(UPrimitiveComponent* const Overlappe
 		);
 		UE_LOG(LogTemp, Error, TEXT("Hit"));
 		StartAttackCooldown(); 
+	}
+	if (auto const Player = Cast<AGJCharacter>(OtherActor))
+	{
+		/*
+		UGameplayStatics::ApplyDamage(
+			Player,
+			5.0f,
+			nullptr,
+			this,
+			UDamageType::StaticClass()
+		);
+		*/
+		UE_LOG(LogTemp, Error, TEXT("Hitted"));
+		StartAttackCooldown();
 	}
 }
 
@@ -115,18 +130,6 @@ float AAICharacterBase::GetMaxHealth() const
 void AAICharacterBase::SetHealth(float const NewHealth)
 {
 	Health = NewHealth;
-	if (auto const NPC = Cast<AGJNPC>(this))
-	{
-		if (Health <= 0)
-		{
-			UE_LOG(LogTemp, Error, TEXT("Killed"));
-
-			NPC->GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
-			NPC->GetMesh()->SetSimulatePhysics(true);
-			NPC->GetCapsuleComponent()->SetCollisionProfileName(TEXT("NoCollision"));
-
-		}
-	}
 }
 
 void AAICharacterBase::AttackStart() const

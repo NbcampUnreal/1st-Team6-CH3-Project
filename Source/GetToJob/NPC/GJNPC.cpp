@@ -3,7 +3,6 @@
 AGJNPC::AGJNPC()
 {
 	PrimaryActorTick.bCanEverTick = true;
-
 }
 
 UBehaviorTree* AGJNPC::GetBehaviorTree() const
@@ -38,4 +37,14 @@ void AGJNPC::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 }
+
+int AGJNPC::MeleeAttack_Implementation()
+{
+	if (Montage)
+	{
+		PlayAnimMontage(Montage);
+	}
+	return 0;
+}
+
 
