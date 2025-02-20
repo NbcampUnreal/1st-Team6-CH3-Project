@@ -9,6 +9,7 @@
 
 class USphereComponent;
 class USkeletalMeshComponent;
+class AGJBaseGunAttachment;
 
 UCLASS()
 class GETTOJOB_API AGJBaseGun : public AActor, public IGJGunInterface
@@ -46,9 +47,9 @@ public:
 	virtual void Pickup(ACharacter* PlayerCharacter) override;
 	
 	UFUNCTION(BlueprintCallable, Category = "Weapon Attachment")
-	void EquipAttachment(AActor* Attachment);
+	void EquipAttachment(AGJBaseGunAttachment* Attachment);
 	UFUNCTION(BlueprintCallable, Category = "Weapon Attachment")
-	void RemoveAttachment(AActor* Attachment);
+	void RemoveAttachment();
 
 	virtual float GetDamage() override;
 	virtual int32 GetCurrentAmmo() const override;
@@ -74,6 +75,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")
 	TSubclassOf<class AActor> ProjectileClass;
 
+	// 총에 부착할 부착물
+	UPROPERTY()
+	AGJBaseGunAttachment* CurrentAttachment;
 
 
 	float ReloadTime;
@@ -93,6 +97,6 @@ protected:
 
 
 private:
-
+	
 
 };
