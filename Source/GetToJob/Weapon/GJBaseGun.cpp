@@ -43,6 +43,7 @@ AGJBaseGun::AGJBaseGun()
 	bHasScope = false;
 	ReloadTime = 3.0f;
 	bIsReloading = false;
+	bPickupGun = false;
 }
 
 void AGJBaseGun::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -94,6 +95,7 @@ void AGJBaseGun::Pickup(ACharacter* PlayerCharacter)
 
 	// 플레이어가 총을 소유
 	SetOwner(PlayerCharacter);
+	bPickupGun = true;
 
 
 	// 캐릭터가 가진 현재 총 = 장착한 총
