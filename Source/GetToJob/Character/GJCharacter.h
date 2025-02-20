@@ -38,6 +38,13 @@ public:
 
 
 protected:
+	virtual float TakeDamage(
+		float DamageAmount,
+		struct FDamageEvent const& DamageEvent,
+		AController* EventInstigator,
+		AActor* DamgeCauser
+	) override;
+
 	/*UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Gun")
 	AGJRevolver* CurrentGun;*/
 
@@ -53,7 +60,7 @@ protected:
 	UFUNCTION()
 	void DropWeapon();  // 무기 버리기 함수
 
-	virtual void Tick(float DeltaTime) override;
+	/*virtual void Tick(float DeltaTime) override;*/
 	virtual void BeginPlay() override;
 
 	// 이동 속도 관련 프로퍼티들

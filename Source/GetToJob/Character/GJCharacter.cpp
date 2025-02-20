@@ -57,6 +57,7 @@ AGJCharacter::AGJCharacter()
     
     // 현재 소지 총 초기화
     CurrentGun = nullptr;
+    SetHealth(100.f);
 }
 
 void AGJCharacter::FireWeapon()
@@ -97,25 +98,43 @@ void AGJCharacter::DropWeapon()
     }
 }
 
+float AGJCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamgeCauser)
+{
+    float ActualDamage = Super::TakeDamage(DamageAmount,
+        DamageEvent,
+        EventInstigator,
+        DamgeCauser);
+    SetHealth(FMath::Clamp(GetHealth() - DamageAmount, 0.0f, GetMaxHealth()));
+    if (auto const Player = Cast<AGJCharacter>(this))
+    {
+        if (GetHealth() <= 0)
+        {
+            UE_LOG(LogTemp, Error, TEXT("Dead"));
+            OnDeath();
+            bIsDead = true;  // 중복 실행 방지
+        }
+    }
+    return ActualDamage;
+}
+
 void AGJCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
     // AAICharacterBase의 SetHealth()를 사용하여 체력 설정
-    SetHealth(100.f);
 }
 
-void AGJCharacter::Tick(float DeltaTime)
-{
-    Super::Tick(DeltaTime);
-
-    // 체력이 0 이하이고 아직 죽지 않았다면 사망 처리
-    if (GetHealth() <= 0.0f && !bIsDead)
-    {
-        OnDeath();
-        bIsDead = true;  // 중복 실행 방지
-    }
-}
+//void AGJCharacter::Tick(float DeltaTime)
+//{
+//    Super::Tick(DeltaTime);
+//
+//    // 체력이 0 이하이고 아직 죽지 않았다면 사망 처리
+//    if (GetHealth() <= 0.0f && !bIsDead)
+//    {
+//        OnDeath();
+//        bIsDead = true;  // 중복 실행 방지
+//    }
+//}
 
 void AGJCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
