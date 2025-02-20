@@ -100,6 +100,15 @@ void AGJRevolver::Fire()
 					this,
 					nullptr
 				);
+				if (HitActor->ActorHasTag(FName("NPC")))
+				{
+					UGameplayStatics::SpawnEmitterAtLocation(
+						GetWorld(),
+						HitEffect,
+						HitResult.ImpactPoint,
+						HitResult.ImpactNormal.Rotation()
+					);
+				}
 			}
 			// 맞췄을 때 디버그 라인
 			DrawDebugLine(GetWorld(), TraceStart, HitResult.ImpactPoint, FColor::Red, false, 3.0f);

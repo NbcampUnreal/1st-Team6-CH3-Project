@@ -1,10 +1,9 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "Weapon/GJBaseGun.h"
+﻿#include "Weapon/GJBaseGun.h"
 #include "Components/SphereComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Character/GJCharacter.h"
+#include "Weapon/GJBaseGunAttachment.h"
+#include "Weapon/GJScope.h"
 
 
 // Sets default values
@@ -108,12 +107,35 @@ void AGJBaseGun::Pickup(ACharacter* PlayerCharacter)
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
-void AGJBaseGun::EquipAttachment(AActor* Attachment)
+void AGJBaseGun::EquipAttachment(AGJBaseGunAttachment* Attachment)
 {
+	if (!Attachment)
+	{
+		return;
+	}
+	RemoveAttachment(); // 기존 부착물이 있다면 제거
+
+	CurrentAttachment = Attachment;
+	CurrentAttachment->AttachToGun(this);
+
+	if (AGJScope* GJScope = Cast<AGJScope>(Attachment))
+	{
+		GJScope->EnableScopeView();
+	}
 }
 
-void AGJBaseGun::RemoveAttachment(AActor* Attachment)
+void AGJBaseGun::RemoveAttachment()
 {
+	if (!CurrentAttachment) return;
+
+	if (AGJScope* Scope = Cast<AGJScope>(CurrentAttachment))
+	{
+		Scope->DisableScopeView();
+	}
+
+	CurrentAttachment->DetachFromGun();
+	CurrentAttachment = nullptr;
+
 }
 
 float AGJBaseGun::GetDamage()
