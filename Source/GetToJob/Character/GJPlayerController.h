@@ -37,13 +37,17 @@ public:
 	UInputAction* FireAction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* ReloadAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* DropWeaponAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* ESCAction;
 
 	// HUD 표시
 	UFUNCTION(BlueprintCallable, Category = "HUD")
 	void ShowGameHUD();
 	// 메인 메뉴 표시
 	UFUNCTION(BlueprintCallable, Category = "Menu")
-	void ShowMainMenu(bool bIsRestart);
+	void OpenMainMenu();
 	// 게임 시작
 	UFUNCTION(BlueprintCallable, Category = "Menu")
 	void StartGame();
