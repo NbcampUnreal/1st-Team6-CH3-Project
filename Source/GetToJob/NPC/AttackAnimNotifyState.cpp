@@ -22,3 +22,4 @@ void UAttackAnimNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSe
 		}
 	}
 }
+
