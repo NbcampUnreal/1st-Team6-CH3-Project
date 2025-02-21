@@ -11,6 +11,16 @@ class USphereComponent;
 class USkeletalMeshComponent;
 class AGJBaseGunAttachment;
 
+UENUM(BlueprintType)
+enum class EGunType : uint8
+{
+	Revolver      UMETA(DisplayName = "Revolver"),
+	Rifle       UMETA(DisplayName = "Rifle"),
+	RocketLauncher     UMETA(DisplayName = "RocketLauncher"),
+	MiniGun      UMETA(DisplayName = "MiniGun")
+};
+
+
 UCLASS()
 class GETTOJOB_API AGJBaseGun : public AActor, public IGJGunInterface
 {
@@ -27,6 +37,22 @@ public:
 	FName AttachmentSocketName = TEXT("AttachmentSocket");
 	UPROPERTY(EditDefaultsOnly, Category = "Socket | Gun")
 	FName GunSocketName = TEXT("AttachmentSocket");
+
+	// Reload 관련 변수
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Reload")
+	UAnimMontage* ReloadMontage; // 재장전용 애니메이션
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Reload")
+	bool bIsReloading; // 재장전 여부 확인
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Reload")
+	FTimerHandle ReloadTimerHandle; // 재장전 타이머 핸들
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Reload")
+	int32 MagazineCount;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Reload")
+	float ReloadTime;
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	USoundBase* ReloadSound;
+
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Own Weapon")
 	bool bPickupGun;
@@ -52,6 +78,7 @@ public:
 	virtual void ThrowAway() override;
 	
 	void EnablePickup();
+	void FinishReload();
 	
 	UFUNCTION(BlueprintCallable, Category = "Weapon Attachment")
 	void EquipAttachment(AGJBaseGunAttachment* Attachment);
@@ -63,6 +90,8 @@ public:
 	virtual int32 GetMaxAmmo() const override;
 
 	virtual void BeginPlay() override;
+
+	EGunType GetGunType() const;
 
 
 protected:
@@ -88,15 +117,14 @@ protected:
 	UPROPERTY()
 	AGJBaseGunAttachment* CurrentAttachment;
 
-
-	float ReloadTime;
-	bool bIsReloading;
+	// 총기 타입
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
+	EGunType GunType;
 	
 
 
 
 
-	FTimerHandle ReloadTimerHandle;
 	// 부착물 관련 변수
 	bool bIsSilenced;
 	bool bHasScope;
@@ -108,5 +136,5 @@ protected:
 
 private:
 	bool bCanPickup;
-
+	
 };

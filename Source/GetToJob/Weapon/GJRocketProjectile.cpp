@@ -7,6 +7,10 @@
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h" // ProjectileMovement를 위해 필요
 #include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystem.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "GameFramework/Character.h"
+
 
 // Sets default values
 AGJRocketProjectile::AGJRocketProjectile()
@@ -51,6 +55,19 @@ void AGJRocketProjectile::OnImpact(UPrimitiveComponent* HitComp, AActor* OtherAc
 	if (OtherActor)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Rocket Impact with : %s"), *OtherActor->GetName());
+
+		// NPC 태그가 있는지 확인
+		if (OtherActor->ActorHasTag("NPC"))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s is an NPC! Applying knockback."), *OtherActor->GetName());
+
+			// 넉백 적용 함수 호출
+			ApplyKnockback(OtherActor, Hit.ImpactNormal);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("This Actor is not CharacterClass!"))
+		}
 	}
 
 	if (OtherActor && OtherActor != GetInstigator())
@@ -61,11 +78,47 @@ void AGJRocketProjectile::OnImpact(UPrimitiveComponent* HitComp, AActor* OtherAc
 
 void AGJRocketProjectile::AutoExplode()
 {
-	// 폭발 효과 재생
 	if (ExplosionEffect)
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation());
+		UParticleSystemComponent* SpawnedEffect = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation());
+
+		if (SpawnedEffect)
+		{
+			// 3초 후에 이펙트를 제거하는 타이머 설정
+			FTimerHandle ExplosionEffectTimer;
+			GetWorldTimerManager().SetTimer(
+				ExplosionEffectTimer,
+				[SpawnedEffect]()
+				{
+					if (SpawnedEffect)
+					{
+						SpawnedEffect->DeactivateSystem(); // 이펙트 중지
+						SpawnedEffect->DestroyComponent(); // 컴포넌트 삭제
+					}
+				},
+				3.0f,
+				false
+			);
+		}
 	}
+	// 폭발 반경 내의 액터들을 배열에 저장
+	TArray<AActor*> OverlappedActors;
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn)); // 캐릭터만 감지
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_PhysicsBody)); // 물리 오브젝트도 포함
+
+	TArray<AActor*> IgnoreActors;
+	IgnoreActors.Add(this); // 자기 자신 제외
+
+	UKismetSystemLibrary::SphereOverlapActors(
+		GetWorld(),
+		GetActorLocation(),
+		DamageRadius,
+		ObjectTypes,
+		nullptr,
+		IgnoreActors,
+		OverlappedActors
+	);
 
 	// 폭발 데미지를 적용
 	UGameplayStatics::ApplyRadialDamage(
@@ -74,14 +127,43 @@ void AGJRocketProjectile::AutoExplode()
 		GetActorLocation(),
 		DamageRadius,
 		nullptr,
-		TArray<AActor*>(),
+		OverlappedActors,
 		this,
 		GetInstigatorController(),
 		true
 	);
 
+
+	for (AActor* Actor : OverlappedActors)
+	{
+		if (Actor && Actor->ActorHasTag("NPC")) // NPC 태그를 확인
+		{
+			FVector ImpactDirection = (Actor->GetActorLocation() - GetActorLocation()).GetSafeNormal();
+			ApplyKnockback(Actor, -ImpactDirection);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("This Actor is not NPC! -> %s"), *Actor->GetName());
+		}
+	}
+
 	// 로켓을 삭제
 	Destroy();
+}
+
+void AGJRocketProjectile::ApplyKnockback(AActor* HitActor, FVector ImpactNormal)
+{
+	UE_LOG(LogTemp, Warning, TEXT("This Actor is not CharacterClass!"))
+	// 액터가 ACharacter인 경우 (NPC가 캐릭터를 상속받을 경우)
+	ACharacter* HitCharacter = Cast<ACharacter>(HitActor);
+	if (HitCharacter)
+	{
+		FVector KnockbackDirection = -ImpactNormal * 1000.0f; // 충돌 방향의 반대로 넉백
+		KnockbackDirection.Z = 300.0f; //위쪽으로 살짝 띄우기
+
+		HitCharacter->LaunchCharacter(KnockbackDirection, true, true);
+		return;
+	}
 }
 
 void AGJRocketProjectile::BeginPlay()
