@@ -71,7 +71,7 @@ void AGJCharacter::FireWeapon()
         return;
     }
 
-    CurrentGun->Fire();
+    CurrentGun->Fire(); // 발싸
 }
 
 void AGJCharacter::ReloadWeapon()
