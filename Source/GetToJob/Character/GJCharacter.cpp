@@ -45,6 +45,7 @@ AGJCharacter::AGJCharacter()
     SprintSpeedMultiplier = 1.5f; // 스프린트 속도 배율
     CrouchSpeed = 200.0f; // 앉기 속도
     SprintSpeed = NormalSpeed * SprintSpeedMultiplier; // 스프린트 속도 적용
+    BackwardSpeedMultiplier = 0.5f; // 뒤로 가는 속도 배율
 
     // 마우스 감도 설정
     LookSensitivity = 1.0f; // 감도 조절을 위한 변수
@@ -281,6 +282,9 @@ void AGJCharacter::Move(const FInputActionValue& value)
     // Value는 Axis2D로 설정된 IA_Move의 입력값(WASD)
     const FVector2D MoveInput = value.Get<FVector2D>();
 
+    // 기본 이동 속도
+    float MoveSpeed = GetCharacterMovement()->MaxWalkSpeed;
+
     if (!FMath::IsNearlyZero(MoveInput.X))
     {
         // 캐릭터가 바라보는 방향(정면)으로 X축 이동
@@ -291,6 +295,13 @@ void AGJCharacter::Move(const FInputActionValue& value)
     {
         // 캐릭터의 오른쪽 방향으로 Y축 이동
         AddMovementInput(GetActorRightVector(), MoveInput.Y);
+    }
+
+    if (!FMath::IsNearlyZero(MoveInput.X))
+    {
+        // 후진 시 속도를 줄이기 (예: 기본 속도의 50%)
+        float SpeedMultiplier = (MoveInput.X < 0) ? 0.5f : 1.0f;
+        AddMovementInput(GetActorForwardVector(), MoveInput.X * BackwardSpeedMultiplier);
     }
 }
 

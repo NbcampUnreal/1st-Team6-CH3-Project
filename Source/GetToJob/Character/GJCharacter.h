@@ -63,9 +63,12 @@ protected:
 	float SprintSpeed; 	// 실제 스프린트 속도
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement")
 	float CrouchSpeed; // 앉은 상태 속도
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Look", meta = (ClampMin = "0.1", ClampMax = "5.0"))
 	float LookSensitivity; // 마우스 감도 조절을 위한 변수
 
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	float BackwardSpeedMultiplier;  // 후진 속도 배율
 
 
 	// 입력 바인딩을 처리할 함수
