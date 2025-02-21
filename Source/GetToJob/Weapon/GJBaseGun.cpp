@@ -4,6 +4,7 @@
 #include "Character/GJCharacter.h"
 #include "Weapon/GJBaseGunAttachment.h"
 #include "Weapon/GJScope.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
@@ -50,6 +51,7 @@ AGJBaseGun::AGJBaseGun()
 	bIsReloading = false;
 	bPickupGun = false;
 	bCanPickup = true;
+	MagazineCount = 3;
 }
 
 void AGJBaseGun::OnBeginOverlap(
@@ -87,6 +89,37 @@ void AGJBaseGun::Fire()
 
 void AGJBaseGun::Reload()
 {
+	// 재장전을 할 필요가 없을 때
+	if (bIsReloading || MagazineCount <= 0)
+	{
+		return;
+	}
+
+	bIsReloading = true;
+	MagazineCount--;
+
+	if (ReloadSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			GetWorld(),
+			ReloadSound,
+			GetActorLocation()
+		);
+	}
+
+	// 애님 몽타주 실행 (TODO: add Anim Montage)
+	AGJCharacter* GJCharacter = Cast<AGJCharacter>(GetOwner());
+	if (GJCharacter && ReloadMontage && GJCharacter)
+	{
+		GJCharacter->GetMesh()->GetAnimInstance()->Montage_Play(ReloadMontage);
+	}
+	GetWorldTimerManager().SetTimer(
+		ReloadTimerHandle,
+		this,
+		&AGJBaseGun::FinishReload,
+		ReloadTime,
+		false
+	);
 }
 
 bool AGJBaseGun::IsReloading()
@@ -197,6 +230,12 @@ void AGJBaseGun::EnablePickup()
 
 }
 
+void AGJBaseGun::FinishReload()
+{
+	CurrentAmmo = MaxAmmo;
+	bIsReloading = false;
+}
+
 void AGJBaseGun::EquipAttachment(AGJBaseGunAttachment* Attachment)
 {
 	if (!Attachment)
@@ -261,5 +300,10 @@ void AGJBaseGun::BeginPlay()
 {
 	Super::BeginPlay();
 
+}
+
+EGunType AGJBaseGun::GetGunType() const
+{
+	 return GunType; 
 }
 
