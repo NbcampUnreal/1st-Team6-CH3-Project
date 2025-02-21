@@ -1,12 +1,14 @@
 #include "GameManager/GJGameState.h"
 #include "GameManager/GJGameInstance.h"
 #include "Kismet/GameplayStatics.h"
+#include "UI/GJHUD.h"
+#include "Character/GJPlayerController.h"
 
 AGJGameState::AGJGameState()
 {
 	Score = 0;
 	EnemyKillCount = 0;
-	LevelLimitTime = 10.0f;
+	LevelLimitTime = 60.0f;
 	CurrentWaveIndex = 0;
 	MaxLevels = 3;
 	LevelMapNames = { "LoopStage", "LoopStage", "LoopStage" };
@@ -37,6 +39,23 @@ void AGJGameState::BeginPlay()
 	Super::BeginPlay();
 
 	StartWave();
+
+	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+	{
+		if (AGJPlayerController* GJPlayerController = Cast<AGJPlayerController>(PlayerController))
+		{
+			if (AGJHUD* HUD = Cast<AGJHUD>(PlayerController->GetHUD()))
+			{
+				GetWorldTimerManager().SetTimer(
+					UIUpdateTimerHandle,
+					HUD,
+					&AGJHUD::UpdateMainHUD,
+					0.1f,
+					true
+				);
+			}
+		}
+	}
 }
 
 void AGJGameState::StartWave()
@@ -48,6 +67,17 @@ void AGJGameState::StartWave()
 		if (GJGameInstance)
 		{
 			CurrentWaveIndex = GJGameInstance->CurrentWaveIndex;
+		}
+	}
+
+	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+	{
+		if (AGJPlayerController* GJPlayerController = Cast<AGJPlayerController>(PlayerController))
+		{
+			if (AGJHUD* HUD = Cast<AGJHUD>(PlayerController->GetHUD()))
+			{
+				HUD->DisplayHUD(GJHUDState::MainHUD);
+			}
 		}
 	}
 

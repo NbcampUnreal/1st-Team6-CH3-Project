@@ -16,7 +16,8 @@ public class GetToJob : ModuleRules
 			"EnhancedInput",
 			"AIModule",
             "GameplayTasks",
-            "NavigationSystem"
+            "NavigationSystem",
+			"UMG"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
