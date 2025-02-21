@@ -5,6 +5,10 @@
 
 AGJScope::AGJScope()
 {
+	SkeletalMeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("StaticMesh"));
+	SkeletalMeshComp->SetupAttachment(RootComponent);
+
+
 	ZoomFOV = 30.0f; // 조준 시 FOV 값
 }
 
@@ -43,6 +47,8 @@ void AGJScope::AttachToGun(AGJBaseGun* Gun)
 
 void AGJScope::DetachFromGun()
 {
+	Super::DetachFromGun();
+
 	DisableScopeView();
 	Super::DetachFromGun();
 }

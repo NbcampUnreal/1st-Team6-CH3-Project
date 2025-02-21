@@ -46,6 +46,7 @@ protected:
 	UParticleSystem* HitEffect;
 
 	virtual void Pickup(ACharacter* PlayerCharacter) override;
+	virtual void ThrowAway() override;
 	
 
 private:

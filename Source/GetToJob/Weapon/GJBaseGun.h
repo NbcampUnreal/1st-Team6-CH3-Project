@@ -23,6 +23,10 @@ public:
 	USphereComponent* CollisionComp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	USkeletalMeshComponent* GunMesh;
+	UPROPERTY(EditDefaultsOnly, Category = "Attachment")
+	FName AttachmentSocketName = TEXT("AttachmentSocket");
+	UPROPERTY(EditDefaultsOnly, Category = "Socket | Gun")
+	FName GunSocketName = TEXT("AttachmentSocket");
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Own Weapon")
 	bool bPickupGun;
@@ -45,6 +49,9 @@ public:
 	virtual bool IsReloading() override;
 	
 	virtual void Pickup(ACharacter* PlayerCharacter) override;
+	virtual void ThrowAway() override;
+	
+	void EnablePickup();
 	
 	UFUNCTION(BlueprintCallable, Category = "Weapon Attachment")
 	void EquipAttachment(AGJBaseGunAttachment* Attachment);
@@ -54,6 +61,8 @@ public:
 	virtual float GetDamage() override;
 	virtual int32 GetCurrentAmmo() const override;
 	virtual int32 GetMaxAmmo() const override;
+
+	virtual void BeginPlay() override;
 
 
 protected:
@@ -91,12 +100,13 @@ protected:
 	// 부착물 관련 변수
 	bool bIsSilenced;
 	bool bHasScope;
+
 	
 
 
 
 
 private:
-	
+	bool bCanPickup;
 
 };

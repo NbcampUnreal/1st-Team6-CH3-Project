@@ -12,6 +12,11 @@ class GETTOJOB_API AGJScope : public AGJBaseGunAttachment
 public:
 	AGJScope();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StaticMesh")
+	USkeletalMeshComponent* SkeletalMeshComp;
+
+
+
 	// Scope의 기능 조준을 구현
 	UFUNCTION()
 	void EnableScopeView();
@@ -25,6 +30,7 @@ protected:
 	float DefaultFOV;
 	UPROPERTY()
 	APlayerController* PlayerController;
+	
 
 
 
