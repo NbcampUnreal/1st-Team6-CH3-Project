@@ -27,11 +27,14 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
-	float ExplosionRadius = 300.f;
+	float ExplosionRadius;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
 	float InitialSpeed; // 로켓의 초기 속도
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
 	float CoolDownDelay;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Own Weapon")
+	bool bPickRocketLauncher;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")
 	USoundBase* FireSound;
@@ -42,6 +45,9 @@ protected:
 	float ReloadTime; //재장전 시간
 
 	virtual void Pickup(ACharacter* PlayerCharacter) override;
+	virtual void ThrowAway() override;
+
+	virtual void BeginPlay() override;
 
 private:
 	FTimerHandle CoolDownTimerHandle;

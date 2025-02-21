@@ -7,6 +7,10 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Weapon/GJBaseGun.h"
+#include "Weapon/GJRevolver.h"
+#include "Weapon/GJRifle.h"
+#include "Weapon/GJRocketLauncher.h"
+#include "Components/CapsuleComponent.h"
 //#include "Components/WidgetComponent.h"
 //#include "Components/TextBlock.h"
 //#include "Components/ProgressBar.h"
@@ -45,9 +49,8 @@ AGJCharacter::AGJCharacter()
     // 마우스 감도 설정
     LookSensitivity = 1.0f; // 감도 조절을 위한 변수
 
-    // 체력 설정
-    MaxHealth = 100.0f; // 최대체력
-    Health = MaxHealth; // 생성시 현재체력
+    //// 체력 설정
+    //MaxHealth = 100.0f; // 최대체력
 
     // 기본 무기 설정(일단 캐릭터에서 설정하고 후에 인벤토리에서 재구현?)
     GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
@@ -57,6 +60,7 @@ AGJCharacter::AGJCharacter()
     
     // 현재 소지 총 초기화
     CurrentGun = nullptr;
+    SetHealth(100.f);
 }
 
 void AGJCharacter::FireWeapon()
@@ -67,7 +71,7 @@ void AGJCharacter::FireWeapon()
         return;
     }
 
-    CurrentGun->Fire();
+    CurrentGun->Fire(); // 발싸
 }
 
 void AGJCharacter::ReloadWeapon()
@@ -80,6 +84,56 @@ void AGJCharacter::ReloadWeapon()
     }
 
     CurrentGun->Reload();
+}
+
+void AGJCharacter::DropWeapon()
+{
+    if (CurrentGun)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Weapon Dropped!"));
+
+        // 무기를 손에서 떼고 물리 적용
+//        CurrentGun->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+//        CurrentGun->SetActorEnableCollision(true);
+        CurrentGun->ThrowAway();
+        // 무기 포인터 초기화 (더 이상 장착 중이 아님)
+        // 1. 무슨 무기를 가지고 있는지 인식 Cast to 사용
+        // 2. 그것에 대한 변수값에 bpickrifle~ 기타등등
+        // 3. 그 변수들에 대한 변수 값을 set(false)
+        // 4. 그래야 그 총들이 소유되지 않았다는 것을 인식한다.
+         // 현재 무기의 타입을 판별하여 상태 변수 업데이트
+        /*if (Cast<AGJRevolver>(CurrentGun))
+        {
+            bPickRevolver = false;
+        }
+        else if (Cast<AGJRifle>(CurrentGun))
+        {
+            bPickRifle = false;
+        }
+        else if (Cast<AGJRocketLauncher>(CurrentGun))
+        {
+            bPickRocketLauncher = false;
+        }*/
+    }
+}
+
+float AGJCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamgeCauser)
+{
+    float ActualDamage = Super::TakeDamage(DamageAmount,
+        DamageEvent,
+        EventInstigator,
+        DamgeCauser);
+    SetHealth(FMath::Clamp(GetHealth() - DamageAmount, 0.0f, GetMaxHealth()));
+    if (auto const Player = Cast<AGJCharacter>(this))
+    {
+        if (GetHealth() <= 0)
+        {
+            UE_LOG(LogTemp, Error, TEXT("Dead"));
+            OnDeath();
+            bIsDead = true;  // 중복 실행 방지
+        }
+    }
+    return ActualDamage;
 }
 
 void AGJCharacter::BeginPlay()
@@ -195,6 +249,26 @@ void AGJCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
                     &AGJCharacter::ReloadWeapon
                 );
             }
+
+            if (PlayerController->ESCAction)
+            {
+                // 메인메뉴 (ESC)
+                EnhancedInput->BindAction(
+                    PlayerController->ESCAction, 
+                    ETriggerEvent::Triggered, 
+                    PlayerController,
+                    &AGJPlayerController::OpenMainMenu);
+            }
+
+            if (PlayerController->DropWeaponAction)
+            {
+                // 무기 드롭(G)
+                EnhancedInput->BindAction(
+                    PlayerController->DropWeaponAction, 
+                    ETriggerEvent::Triggered, 
+                    this, 
+                    &AGJCharacter::DropWeapon);
+            }
         }
     }
 }
@@ -282,48 +356,31 @@ void AGJCharacter::StopSit(const FInputActionValue& value)
     }
 }
 
-// 체력 얻는 함수
-int AGJCharacter::GetHealth() const
-{
-    return Health; // Health는 클래스의 멤버 변수
-}
-
-// 체력 회복 함수
-void AGJCharacter::AddHealth(float Amount)
-{
-    // 체력을 회복시킴. 최대 체력을 초과하지 않도록 제한함
-    Health = FMath::Clamp(Health + Amount, 0.0f, MaxHealth);
-    UE_LOG(LogTemp, Log, TEXT("Health increased to: %f"), Health);
-}
-
-// 데미지 처리 함수
-float AGJCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-    // 기본 데미지 처리 로직 호출 (필수는 아님)
-    float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-
-    // 체력을 데미지만큼 감소시키고, 0 이하로 떨어지지 않도록 Clamp
-    Health = FMath::Clamp(Health - DamageAmount, 0.0f, MaxHealth);
-    UE_LOG(LogTemp, Warning, TEXT("Health decreased to: %f"), Health);
-
-    // 체력이 0 이하가 되면 사망 처리
-    if (Health <= 0.0f)
-    {
-        OnDeath();
-    }
-
-    // 실제 적용된 데미지를 반환
-    return ActualDamage;
-}
-
-// 사망 처리 함수
 void AGJCharacter::OnDeath()
 {
-    /*if (AGJCharacter* GameState = GetWorld() ? GetWorld()->GetGameState<AGJGameState>() : nullptr)
+    // 추가적인 사망 후 로직 (예: 게임 오버 처리)
+    if (GetController())
+    {
+        GetController()->DisableInput(nullptr);  // 입력 비활성화
+        GetController()->UnPossess();  // 컨트롤러 해제 (더 이상 캐릭터 조작 불가)
+    }
+
+    UE_LOG(LogTemp, Error, TEXT("Player has died! Game Over"));
+
+    // 레그돌 활성화
+    GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));  // 충돌 프로파일을 래그돌로 변경
+    GetMesh()->SetSimulatePhysics(true);  // 물리 시뮬레이션 활성화
+
+    // 캡슐 콜라이더(캐릭터 충돌 상자) 비활성화
+    GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Ignore);
+
+    // 일정 시간이 지나면 캐릭터 제거 (예: 10초 후)
+    SetLifeSpan(10.0f);
+
+    // 게임 오버 처리
+    /*if (AGJGameState* GameState = GetWorld() ? GetWorld()->GetGameState<AGJGameState>() : nullptr)
     {
         GameState->OnGameOver();
     }*/
-    UE_LOG(LogTemp, Error, TEXT("Character is Dead!"));
-
-    // 사망 후 로직
 }

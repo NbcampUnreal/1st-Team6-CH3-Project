@@ -27,7 +27,8 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Own Weapon")
+	bool bPickRevolver;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
 	float TraceRange;
@@ -41,8 +42,11 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Reload")
 	float ReloadTime; //재장전 시간
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Particle")
+	UParticleSystem* HitEffect;
 
 	virtual void Pickup(ACharacter* PlayerCharacter) override;
+	virtual void ThrowAway() override;
 	
 
 private:

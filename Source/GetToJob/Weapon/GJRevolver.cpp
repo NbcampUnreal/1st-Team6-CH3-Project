@@ -20,6 +20,7 @@ AGJRevolver::AGJRevolver()
 	MaxAmmo = 5;
 	CurrentAmmo = MaxAmmo;
 	ReloadTime = 3.0f;
+	bPickRevolver = false;
 
 }
 
@@ -49,7 +50,8 @@ void AGJRevolver::Fire()
 	}
 	//캐릭터의 컨트롤러에서 시점 정보를 가져오는 함수 
 	AController* OwnerController = GetOwner() ? GetOwner()->GetInstigatorController() : nullptr;
-	if (OwnerController)
+	// 카메라 방향 기준으로 라인 트레이스
+	 if (OwnerController)
 	{
 		FVector CameraLocation;
 		FRotator CameraRotation;
@@ -99,6 +101,15 @@ void AGJRevolver::Fire()
 					this,
 					nullptr
 				);
+				if (HitActor->ActorHasTag(FName("NPC")))
+				{
+					UGameplayStatics::SpawnEmitterAtLocation(
+						GetWorld(),
+						HitEffect,
+						HitResult.ImpactPoint,
+						HitResult.ImpactNormal.Rotation()
+					);
+				}
 			}
 			// 맞췄을 때 디버그 라인
 			DrawDebugLine(GetWorld(), TraceStart, HitResult.ImpactPoint, FColor::Red, false, 3.0f);
@@ -109,6 +120,7 @@ void AGJRevolver::Fire()
 			DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Blue, false, 3.0f);
 		}
 	}
+
 
 	// 사격 속도에 따른 Delay 필요
 	bCanFire = false;
@@ -176,31 +188,13 @@ void AGJRevolver::BeginPlay()
 
 void AGJRevolver::Pickup(ACharacter* PlayerCharacter)
 {
-	if (!PlayerCharacter) return;
+	Super::Pickup(PlayerCharacter);
+	bPickRevolver = true;
 
-	// 플레이어 캐릭터가 총을 가지고 있는지 확인
-	AGJCharacter* GJCharacter = Cast<AGJCharacter>(PlayerCharacter);
-	if (GJCharacter && GJCharacter->CurrentGun)
-	{
-		return; // 총을 가지고 있으면 줍지 않는다.
-	}
+}
 
-	// 총을 플레이어의 오른쪽 손 본에 장착
-	AttachToComponent(PlayerCharacter->GetMesh(),
-		FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-		TEXT("Revolver")
-	);
-
-	// 플레이어가 총을 소유
-	SetOwner(PlayerCharacter);
-
-
-	// 캐릭터가 가진 현재 총 = 장착한 총
-	if (GJCharacter)
-	{
-		GJCharacter->CurrentGun = this;
-	}
-
-	// 주운 이후에는 콜리전 제거
-	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+void AGJRevolver::ThrowAway()
+{
+	Super::ThrowAway();
+	bPickRevolver = false;
 }

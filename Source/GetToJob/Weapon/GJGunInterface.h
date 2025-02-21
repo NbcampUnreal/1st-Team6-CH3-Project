@@ -27,6 +27,7 @@ public:
 	virtual bool IsReloading() = 0;
 	virtual float GetDamage() = 0;
 	virtual void Pickup(ACharacter* PlayerCharacter) = 0;
+	virtual void ThrowAway() = 0;
 	virtual int32 GetCurrentAmmo() const = 0;
 	virtual int32 GetMaxAmmo() const = 0;
 };

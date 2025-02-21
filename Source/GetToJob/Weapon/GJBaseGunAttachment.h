@@ -1,11 +1,11 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Weapon/GJGunAttachmentInterface.h"
 #include "GJBaseGunAttachment.generated.h"
+
+class USphereComponent;
 
 UCLASS()
 class GETTOJOB_API AGJBaseGunAttachment : public AActor, public IGJGunAttachmentInterface
@@ -13,18 +13,39 @@ class GETTOJOB_API AGJBaseGunAttachment : public AActor, public IGJGunAttachment
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	AGJBaseGunAttachment();
 
-	virtual void AttachToGun(class ABaseGun* Gun) override;
-	virtual void DetachToGun(class ABaseGun* Gun) override;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Attachment")
+	USceneComponent* RootComp;
+	UPROPERTY()
+	USphereComponent* CollisionComp;
+
+
+	UFUNCTION()
+	virtual void AttachToGun(class AGJBaseGun* Gun) override;
+	UFUNCTION()
+	virtual void DetachFromGun() override;
+
+	UFUNCTION()
+	void OnOverlapBegin(
+		UPrimitiveComponent* OverlapeedComp,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult
+	);
 
 protected:
-	// Called when the game starts or when spawned
+
+	UPROPERTY()
+	AGJBaseGun* AttachedGun;
+
+
+
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+
 
 };

@@ -1,14 +1,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
+#include "NPC/AICharacterBase.h"
+#include "NPC/CombatInterface.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "PatrolPath.h"
 #include "Animation/AnimMontage.h"
 #include "GJNPC.generated.h"
 
 UCLASS()
-class GETTOJOB_API AGJNPC : public ACharacter
+class GETTOJOB_API AGJNPC : public AAICharacterBase, public ICombatInterface
 {
 	GENERATED_BODY()
 
@@ -21,6 +22,11 @@ public:
 
 	UAnimMontage* GetMontage() const;
 
+	void SetPatrolPath(APatrolPath* Path);
+
+	void SetBehaviorTree(UBehaviorTree* ChooseTree);
+
+	int MeleeAttack_Implementation() override;
 
 	virtual void Tick(float DeltaTime) override;
 

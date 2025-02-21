@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "NPC/AICharacterBase.h"
 #include "GameFramework/Character.h"
 #include "GJCharacter.generated.h"
 
@@ -10,7 +11,7 @@ struct FInputActionValue; // Enhanced Input에서 액션 값을 받을 때 사�
 class AGJBaseGun;
 
 UCLASS()
-class GETTOJOB_API AGJCharacter : public ACharacter
+class GETTOJOB_API AGJCharacter : public AAICharacterBase
 {
 	GENERATED_BODY()
 
@@ -27,18 +28,16 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Gun")
 	AGJBaseGun* CurrentGun;
 
-	// 현재 체력을 가져오는 함수
-	UFUNCTION(BlueprintPure, Category = "Health")
-	int32 GetHealth() const;
-	// 체력을 회복시키는 함수
-	UFUNCTION(BlueprintCallable, Category = "Health")
-	void AddHealth(float Amount);
-
-
 
 protected:
-	/*UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Gun")
-	AGJRevolver* CurrentGun;*/
+	virtual float TakeDamage(
+		float DamageAmount,
+		struct FDamageEvent const& DamageEvent,
+		AController* EventInstigator,
+		AActor* DamgeCauser
+	) override;
+
+
 
 	// 무기 발사 함수
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
@@ -48,7 +47,13 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void ReloadWeapon();
 
+	// 무기 버리기 함수
+	UFUNCTION()
+	void DropWeapon();  // 무기 버리기 함수
+
+	/*virtual void Tick(float DeltaTime) override;*/
 	virtual void BeginPlay() override;
+
 	// 이동 속도 관련 프로퍼티들
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float NormalSpeed; // 기본 걷기 속도
@@ -85,20 +90,8 @@ protected:
 	UFUNCTION()
 	void StopSit(const FInputActionValue& value);
 
-	// 최대 체력
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
-	float MaxHealth;
-	// 현재 체력
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Health")
-	float Health;
-	// 사망 처리 함수 (체력이 0 이하가 되었을 때 호출)
 	UFUNCTION(BlueprintCallable, Category = "Health")
-	virtual void OnDeath();
+	void OnDeath();
 
-	// 데미지 처리 함수 - 외부로부터 데미지를 받을 때 호출됨
-	// 또는 AActor의 TakeDamage()를 오버라이드
-	virtual float TakeDamage(float DamageAmount, 
-							struct FDamageEvent const& DamageEvent, 
-							AController* EventInstigator, 
-							AActor* DamageCauser) override;
+	bool bIsDead = false;
 };

@@ -9,7 +9,9 @@ AGJPlayerController::AGJPlayerController()
     SprintAction(nullptr),
     SitAction(nullptr),
     FireAction(nullptr),
-    ReloadAction(nullptr)
+    ReloadAction(nullptr),
+    DropWeaponAction(nullptr),
+    ESCAction(nullptr)
 {
 }
 
@@ -33,8 +35,28 @@ void AGJPlayerController::BeginPlay()
     }
 }
 
-void AGJPlayerController::ShowMainMenu(bool bIsRestart)
+void AGJPlayerController::OpenMainMenu()
 {
+    //if (!MainMenuWidget)
+    //{
+    //    if (MainMenuClass)
+    //    {
+    //        MainMenuWidget = CreateWidget<UUserWidget>(this, MainMenuClass);
+    //        if (MainMenuWidget)
+    //        {
+    //            MainMenuWidget->AddToViewport();
+    //            SetShowMouseCursor(true);
+    //            SetInputMode(FInputModeUIOnly());
+    //        }
+    //    }
+    //}
+    //else
+    //{
+    //    MainMenuWidget->RemoveFromParent();
+    //    MainMenuWidget = nullptr;
+    //    SetShowMouseCursor(false);
+    //    SetInputMode(FInputModeGameOnly());
+    //}
 }
 
 void AGJPlayerController::ShowGameHUD()
