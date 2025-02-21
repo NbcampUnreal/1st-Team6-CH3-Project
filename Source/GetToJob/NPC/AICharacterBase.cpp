@@ -8,7 +8,8 @@
 
 AAICharacterBase::AAICharacterBase():
 	Health{ MaxHealth },
-	RightFistCollisionBox{ CreateDefaultSubobject<UBoxComponent>(TEXT("RightFirstCollisionBox")) }
+	RightFistCollisionBox{ CreateDefaultSubobject<UBoxComponent>(TEXT("RightFirstCollisionBox")) },
+	Attack{10.f}
 {
 	PrimaryActorTick.bCanEverTick = true;
 	bCanAttack = true;
@@ -31,16 +32,9 @@ float AAICharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 		DamageEvent,
 		EventInstigator,
 		DamgeCauser);
-	Health = FMath::Clamp(Health - DamageAmount, 0.0f, MaxHealth);
-	if (auto const Player = Cast<AAICharacterBase>(this))
-	{
-		if (Health <= 0)
-		{
-			UE_LOG(LogTemp, Error, TEXT("Dead"));
-		}
-	}
 	if (auto const NPC = Cast<AGJNPC>(this))
 	{
+		Health = FMath::Clamp(Health - DamageAmount, 0.0f, MaxHealth);
 		if (Health <= 0)
 		{
 			UE_LOG(LogTemp, Error, TEXT("Killed"));
@@ -62,24 +56,12 @@ void AAICharacterBase::OnAttackOverlapBegin(UPrimitiveComponent* const Overlappe
 	{
 		return;
 	}
-	if (auto const Enemy = Cast<AGJNPC>(OtherActor))
-	{
-		UGameplayStatics::ApplyDamage(
-			Enemy,
-			5.0f,
-			nullptr,
-			this,
-			UDamageType::StaticClass()
-		);
-		UE_LOG(LogTemp, Error, TEXT("Hit"));
-		StartAttackCooldown(); 
-	}
 	if (auto const Player = Cast<AGJCharacter>(OtherActor))
 	{
 		
 		UGameplayStatics::ApplyDamage(
 			Player,
-			5.0f,
+			Attack,
 			nullptr,
 			this,
 			UDamageType::StaticClass()
@@ -121,6 +103,11 @@ float AAICharacterBase::GetHealth() const
 	return Health;
 }
 
+float AAICharacterBase::GetAttack() const
+{
+	return Attack;
+}
+
 float AAICharacterBase::GetMaxHealth() const
 {
 	return MaxHealth;
@@ -129,6 +116,11 @@ float AAICharacterBase::GetMaxHealth() const
 void AAICharacterBase::SetHealth(float const NewHealth)
 {
 	Health = NewHealth;
+}
+
+void AAICharacterBase::SetAttack(float const NewAttack)
+{
+	Attack = NewAttack;
 }
 
 void AAICharacterBase::AttackStart() const
