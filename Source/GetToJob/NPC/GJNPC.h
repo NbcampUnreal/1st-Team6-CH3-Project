@@ -22,6 +22,10 @@ public:
 
 	UAnimMontage* GetMontage() const;
 
+	void SetPatrolPath(APatrolPath* Path);
+
+	void SetBehaviorTree(UBehaviorTree* ChooseTree);
+
 	int MeleeAttack_Implementation() override;
 
 	virtual void Tick(float DeltaTime) override;

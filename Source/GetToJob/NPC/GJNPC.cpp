@@ -1,4 +1,5 @@
 #include "NPC/GJNPC.h"
+#include "NPC/GJ_AIController.h"
 
 AGJNPC::AGJNPC()
 {
@@ -18,6 +19,23 @@ APatrolPath* AGJNPC::GetPatrolParth() const
 UAnimMontage* AGJNPC::GetMontage() const
 {
 	return Montage;
+}
+
+void AGJNPC::SetPatrolPath(APatrolPath* Path)
+{
+	PatrolPath = Path;
+}
+
+void AGJNPC::SetBehaviorTree(UBehaviorTree* ChooseTree)
+{
+	if (AIControllerClass) // AIController가 존재하는 경우에만 변경
+	{
+		AAIController* NPCAIController = Cast<AGJ_AIController>(GetController());
+		if (NPCAIController)
+		{
+			NPCAIController->RunBehaviorTree(ChooseTree);
+		}
+	}
 }
 
 void AGJNPC::BeginPlay()
