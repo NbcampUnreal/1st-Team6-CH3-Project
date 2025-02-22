@@ -11,10 +11,10 @@ class GETTOJOB_API AGJ_AIController : public AAIController
 {
 	GENERATED_BODY()
 public:
-	explicit AGJ_AIController(FObjectInitializer const& FObjectInitializer); // AI ÀÇ ÀÎÁö´É·ÂÀ» ´ã´çÇÒ Perception ¸ðµâ Setup
+	explicit AGJ_AIController(FObjectInitializer const& FObjectInitializer); // AI ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½É·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ Perception ï¿½ï¿½ï¿½ Setup
 
 protected:
-	virtual void OnPossess(APawn* InPawn) override; // OnPossess »ó¼Ó ¹Þ°í BehaviorTree ¹ÙÀÎµå
+	virtual void OnPossess(APawn* InPawn) override; // OnPossess ï¿½ï¿½ï¿½ ï¿½Þ°ï¿½ BehaviorTree ï¿½ï¿½ï¿½Îµï¿½
 
 private:
 	class UAISenseConfig_Sight* SightConfig;
