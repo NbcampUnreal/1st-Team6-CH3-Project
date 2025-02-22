@@ -4,8 +4,8 @@
 #include "GameFramework/PlayerController.h"
 #include "GJPlayerController.generated.h"
 
-class UInputMappingContext; // IMC °ü·Ã Àü¹æ ¼±¾ð
-class UInputAction; // IA °ü·Ã Àü¹æ ¼±¾ð
+class UInputMappingContext; // IMC ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+class UInputAction; // IA ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
 UCLASS()
 class GETTOJOB_API AGJPlayerController : public APlayerController
@@ -15,22 +15,22 @@ class GETTOJOB_API AGJPlayerController : public APlayerController
 public:
 	AGJPlayerController();
 
-	// ¿¡µðÅÍ¿¡¼­ ¼¼ÆÃÇÒ IMC
+	// ï¿½ï¿½ï¿½ï¿½ï¿½Í¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ IMC
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputMappingContext* InputMappingContext;
-	// IA_Move¸¦ ÁöÁ¤ÇÒ º¯¼ö
+	// IA_Moveï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* MoveAction;
-	// IA_Jump¸¦ ÁöÁ¤ÇÒ º¯¼ö
+	// IA_Jumpï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* JumpAction;
-	// IA_Look¸¦ ÁöÁ¤ÇÒ º¯¼ö
+	// IA_Lookï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* LookAction;
-	// IA_Sprint¸¦ ÁöÁ¤ÇÒ º¯¼ö
+	// IA_Sprintï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* SprintAction;
-	// IA_Sit¸¦ ÁöÁ¤ÇÒ º¯¼ö
+	// IA_Sitï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* SitAction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
@@ -42,13 +42,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* ESCAction;
 
-	// HUD Ç¥½Ã
+	// HUD Ç¥ï¿½ï¿½
 	UFUNCTION(BlueprintCallable, Category = "HUD")
 	void ShowGameHUD();
-	// ¸ÞÀÎ ¸Þ´º Ç¥½Ã
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½Þ´ï¿½ Ç¥ï¿½ï¿½
 	UFUNCTION(BlueprintCallable, Category = "Menu")
 	void OpenMainMenu();
-	// °ÔÀÓ ½ÃÀÛ
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	UFUNCTION(BlueprintCallable, Category = "Menu")
 	void StartGame();
 
