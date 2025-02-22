@@ -127,7 +127,7 @@ void AGJRocketProjectile::AutoExplode()
 		GetActorLocation(),
 		DamageRadius,
 		nullptr,
-		OverlappedActors,
+		TArray<AActor*>(),
 		this,
 		GetInstigatorController(),
 		true
