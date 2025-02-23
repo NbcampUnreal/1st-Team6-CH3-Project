@@ -16,7 +16,7 @@ class GETTOJOB_API AGJNPC : public AAICharacterBase, public ICombatInterface
 public:
 	AGJNPC();
 
-	UBehaviorTree* GetBehaviorTree() const; //Tree Return ÇÔ¼ö
+	UBehaviorTree* GetBehaviorTree() const; //Tree Return ï¿½Ô¼ï¿½
 
 	APatrolPath* GetPatrolParth() const;
 
@@ -35,7 +35,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrviateAccess = "true")) // UPROPERTY ·Î ÁöÁ¤ °¡´ÉÇÑ BehaviorTree ÀÎ½ºÅÏ½º »ý¼º
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrviateAccess = "true")) // UPROPERTY ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ BehaviorTree ï¿½Î½ï¿½ï¿½Ï½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	UBehaviorTree* Tree;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrviateAccess = "true"))

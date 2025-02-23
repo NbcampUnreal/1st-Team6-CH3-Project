@@ -35,11 +35,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")
 	USoundBase* FireSound;
-	UPROPERTY(EditDefaultsOnly, Category = "Sound")
-	USoundBase* ReloadSound;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Reload")
-	float ReloadTime; //재장전 시간
 
 	virtual void Pickup(ACharacter* PlayerCharacter) override;
 	virtual void ThrowAway() override;

@@ -4,6 +4,7 @@
 #include "Character/GJCharacter.h"
 #include "Weapon/GJBaseGunAttachment.h"
 #include "Weapon/GJScope.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
@@ -20,7 +21,7 @@ AGJBaseGun::AGJBaseGun()
 	// GunMesh 설정
 	GunMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("GunMesh"));
 	RootComponent = GunMesh;
-	CollisionComp->SetupAttachment(RootComponent);
+	CollisionComp->SetupAttachment(GunMesh); // 이거 RootComponent->GunMesh로 바꿈
 
 	//// 플레이어가 총을 들고 있지 않을 때만 충돌 비활성화
 	//GunMesh->SetSimulatePhysics(false);
@@ -50,6 +51,7 @@ AGJBaseGun::AGJBaseGun()
 	bIsReloading = false;
 	bPickupGun = false;
 	bCanPickup = true;
+	MagazineCount = 3;
 }
 
 void AGJBaseGun::OnBeginOverlap(
@@ -87,6 +89,37 @@ void AGJBaseGun::Fire()
 
 void AGJBaseGun::Reload()
 {
+	// 재장전을 할 필요가 없을 때
+	if (bIsReloading || MagazineCount <= 0)
+	{
+		return;
+	}
+
+	bIsReloading = true;
+	MagazineCount--;
+
+	if (ReloadSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			GetWorld(),
+			ReloadSound,
+			GetActorLocation()
+		);
+	}
+
+	// 애님 몽타주 실행 (TODO: add Anim Montage)
+	AGJCharacter* GJCharacter = Cast<AGJCharacter>(GetOwner());
+	if (GJCharacter && ReloadMontage && GJCharacter)
+	{
+		GJCharacter->GetMesh()->GetAnimInstance()->Montage_Play(ReloadMontage);
+	}
+	GetWorldTimerManager().SetTimer(
+		ReloadTimerHandle,
+		this,
+		&AGJBaseGun::FinishReload,
+		ReloadTime,
+		false
+	);
 }
 
 bool AGJBaseGun::IsReloading()
@@ -101,37 +134,83 @@ void AGJBaseGun::Pickup(ACharacter* PlayerCharacter)
 		UE_LOG(LogTemp, Warning, TEXT("No Player!!"));
 		return;
 	}
-	// 플레이어 캐릭터가 총을 가지고 있는지 확인
+
 	AGJCharacter* GJCharacter = Cast<AGJCharacter>(PlayerCharacter);
-	if (GJCharacter && GJCharacter->CurrentGun)
+	if (GJCharacter)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("No Gun Or No Cast!!"));
-		return; // 총을 가지고 있으면 줍지 않는다.
+		UE_LOG(LogTemp, Warning, TEXT("Pickup: GJCharacter->CurrentGun 상태: %s"),
+			GJCharacter->CurrentGun ? *GJCharacter->CurrentGun->GetName() : TEXT("nullptr"));
+
+		if (GJCharacter->CurrentGun)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Pickup: 이미 총을 가지고 있음 - 줍기 불가"));
+			return;
+		}
 	}
 
-	// 총을 플레이어의 오른쪽 손 본에 장착
-	AttachToComponent(PlayerCharacter->GetMesh(),
-		FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-		GunSocketName
-	);
+	// 물리 시뮬레이션 완전히 끄기
+	GunMesh->SetSimulatePhysics(false);
+	GunMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	// 줍기 감지 충돌 제거
+	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	// `SetSimulatePhysics(false);`가 확실히 적용되었는지 0.05초 후 확인
+	FTimerHandle TimerHandle_CheckPhysics;
+	GetWorldTimerManager().SetTimer(TimerHandle_CheckPhysics, [this]()
+		{
+			if (GunMesh->IsSimulatingPhysics())
+			{
+				UE_LOG(LogTemp, Error, TEXT("GunMesh 물리 시뮬레이션이 꺼지지 않음!"));
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("GunMesh 물리 시뮬레이션이 정상적으로 꺼짐!"));
+			}
+		}, 0.05f, false);
+
+	// 0.05초 후 소켓에 부착 (물리 충돌 방지)
+	FTimerHandle TimerHandle_Attach;
+	GetWorldTimerManager().SetTimer(TimerHandle_Attach, [this, PlayerCharacter]()
+		{
+			if (!PlayerCharacter) return;
+
+			UE_LOG(LogTemp, Warning, TEXT("GunSocketName 확인: %s"), *GunSocketName.ToString());
+
+			// `AttachToComponent()` 실행 여부 확인
+			bool bAttachSuccess = GunMesh->AttachToComponent(
+				PlayerCharacter->GetMesh(),
+				FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+				GunSocketName
+			);
+
+			if (!bAttachSuccess)
+			{
+				UE_LOG(LogTemp, Error, TEXT("AttachToComponent 실패!"));
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Pickup: 총이 정상적으로 소켓에 부착됨!"));
+
+				// 부착 후 위치 갱신
+				GunMesh->SetRelativeLocationAndRotation(FVector::ZeroVector, FRotator::ZeroRotator);
+			}
+
+		}, 0.05f, false);
 
 	// 플레이어가 총을 소유
 	SetOwner(PlayerCharacter);
 	bPickupGun = true;
 
-
-	// 캐릭터가 가진 현재 총 = 장착한 총
 	if (GJCharacter)
 	{
 		GJCharacter->CurrentGun = this;
+		UE_LOG(LogTemp, Warning, TEXT("Pickup: CurrentGun 설정 완료"));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("No CurrentGun!!"));
+		UE_LOG(LogTemp, Warning, TEXT("Pickup: No CurrentGun!!"));
 	}
-
-	// 주운 이후에는 콜리전 제거
-	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AGJBaseGun::ThrowAway()
@@ -142,48 +221,48 @@ void AGJBaseGun::ThrowAway()
 		return;
 	}
 
-	// 소켓에서 분리 (부모 컴포넌트를 떼어내야 함)
+	// 소켓에서 분리
 	GunMesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 	bCanPickup = false;
 
+	// 캐릭터에서 현재 무기를 해제
 	ACharacter* PlayerCharacter = Cast<ACharacter>(GetOwner());
 	if (PlayerCharacter)
 	{
 		AGJCharacter* GJCharacter = Cast<AGJCharacter>(PlayerCharacter);
 		if (GJCharacter && GJCharacter->CurrentGun == this)
 		{
-			GJCharacter->CurrentGun = nullptr;
+			GJCharacter->CurrentGun = nullptr;  // 확실히 해제
+			UE_LOG(LogTemp, Warning, TEXT("ThrowAway: 총을 버려서 CurrentGun을 nullptr로 설정"));
 		}
 	}
 
-	//// 물리 활성화
-	//GunMesh->SetSimulatePhysics(true);
-	//GunMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	// 물리 활성화
+	GunMesh->SetSimulatePhysics(true);
+	GunMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
+	// 줍기 감지 비활성화
+	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-
-	// 총을 약간 앞쪽으로 떨어뜨리기
+	// 바닥으로 자연스럽게 떨어지도록 힘 적용
 	FVector ThrowDirection = PlayerCharacter ? PlayerCharacter->GetActorForwardVector() : FVector::ForwardVector;
-	SetActorLocation(GetActorLocation() + ThrowDirection * 100.0f);
+	FVector ThrowForce = ThrowDirection * 200.0f + FVector(0.0f, 0.0f, 300.0f);
+	GunMesh->AddImpulse(ThrowForce, NAME_None, true);
 
-
-
+	// 0.5초 후 줍기 가능하게 설정
 	FTimerHandle TimerHandle_EnablePickup;
-	// 2초 후 충돌 다시 활성화
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle_EnablePickup, this, &AGJBaseGun::EnablePickup, 2.0f, false);
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle_EnablePickup, this, &AGJBaseGun::EnablePickup, 0.5f, false);
 
 	SetOwner(nullptr);
 	bPickupGun = false;
 
-	UE_LOG(LogTemp, Warning, TEXT("ThrowAway 완료 - 2초 후 다시 줍기 가능"));
-
-
+	UE_LOG(LogTemp, Warning, TEXT("ThrowAway 완료 - 총이 바닥으로 떨어짐, 0.5초 후 다시 줍기 가능"));
 }
 
 void AGJBaseGun::EnablePickup()
 {
 	// 다시 충돌 활성화하여 주울 수 있도록 함
-	CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	CollisionComp->SetCollisionResponseToAllChannels(ECR_Overlap);
 
 
@@ -195,6 +274,12 @@ void AGJBaseGun::EnablePickup()
 
 
 
+}
+
+void AGJBaseGun::FinishReload()
+{
+	CurrentAmmo = MaxAmmo;
+	bIsReloading = false;
 }
 
 void AGJBaseGun::EquipAttachment(AGJBaseGunAttachment* Attachment)
@@ -261,5 +346,10 @@ void AGJBaseGun::BeginPlay()
 {
 	Super::BeginPlay();
 
+}
+
+EGunType AGJBaseGun::GetGunType() const
+{
+	 return GunType; 
 }
 
