@@ -5,6 +5,7 @@
 #include "GJHUD.generated.h"
 
 class UUserWidget;
+class UGJ_MainWidget;
 
 UENUM(BlueprintType)
 enum class GJHUDState : uint8
@@ -35,7 +36,7 @@ public:
 	TSubclassOf<UUserWidget> StartHUDClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<UUserWidget> MainHUDClass;
+	TSubclassOf<UGJ_MainWidget> MainHUDClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> HitEffectClass;
@@ -44,7 +45,7 @@ public:
 	UUserWidget* StartHUDWidget = nullptr;
 
 	UPROPERTY()
-	UUserWidget* MainHUDWidget = nullptr;
+	UGJ_MainWidget* MainHUDWidget = nullptr;
 
 	UPROPERTY()
 	UUserWidget* HitEffectWidget = nullptr;
