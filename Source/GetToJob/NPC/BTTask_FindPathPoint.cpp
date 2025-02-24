@@ -2,6 +2,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GJ_AIController.h"
 #include "GJNPC.h"
+#include "PatrolPath.h"
 
 UBTTask_FindPathPoint::UBTTask_FindPathPoint(FObjectInitializer const& ObjectInitializer) :
 	UBTTask_BlackboardBase{ ObjectInitializer }
@@ -22,8 +23,19 @@ EBTNodeResult::Type UBTTask_FindPathPoint::ExecuteTask(UBehaviorTreeComponent& O
 			// get the NPC
 			if (auto* npc = Cast<AGJNPC>(cont->GetPawn()))
 			{
+				APatrolPath* PatrolPath = npc->GetPatrolParth();
+				if (PatrolPath == nullptr)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("PatrolPath is null!"));
+					return EBTNodeResult::Failed;
+				}
 				// get the current patrol path vector from the NPC - this is local to the patrol path actor
 				auto const Point = npc->GetPatrolParth()->GetPatrolPoint(Index);
+				if (Point.IsNearlyZero())
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Invalid Point returned from GetPatrolPoint!"));
+					return EBTNodeResult::Failed;
+				}
 
 				// convert the local vector to a global point
 				auto const GlobalPoint = npc->GetPatrolParth()->GetActorTransform().TransformPosition(Point);
