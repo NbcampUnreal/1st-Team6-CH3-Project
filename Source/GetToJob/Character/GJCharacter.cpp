@@ -64,6 +64,27 @@ AGJCharacter::AGJCharacter()
     SetHealth(100.f);
 }
 
+void AGJCharacter::Interact()
+{
+    // 간단한 로그 출력
+    UE_LOG(LogTemp, Log, TEXT("Interact Key Pressed"));
+
+    // 추후 오브젝트 상호작용 로직 구현 가능
+}
+
+void AGJCharacter::SelectWeapon(int32 WeaponSlot)
+{
+    if (OwnedWeapons.IsValidIndex(WeaponSlot - 1))
+    {
+        CurrentGun = OwnedWeapons[WeaponSlot - 1];
+        UE_LOG(LogTemp, Log, TEXT("Weapon Slot %d Selected"), WeaponSlot);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Invalid Weapon Slot: %d"), WeaponSlot);
+    }
+}
+
 void AGJCharacter::FireWeapon()
 {
     if (!CurrentGun)
@@ -92,29 +113,7 @@ void AGJCharacter::DropWeapon()
     if (CurrentGun)
     {
         UE_LOG(LogTemp, Warning, TEXT("Weapon Dropped!"));
-
-        // 무기를 손에서 떼고 물리 적용
-//        CurrentGun->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-//        CurrentGun->SetActorEnableCollision(true);
         CurrentGun->ThrowAway();
-        // 무기 포인터 초기화 (더 이상 장착 중이 아님)
-        // 1. 무슨 무기를 가지고 있는지 인식 Cast to 사용
-        // 2. 그것에 대한 변수값에 bpickrifle~ 기타등등
-        // 3. 그 변수들에 대한 변수 값을 set(false)
-        // 4. 그래야 그 총들이 소유되지 않았다는 것을 인식한다.
-         // 현재 무기의 타입을 판별하여 상태 변수 업데이트
-        /*if (Cast<AGJRevolver>(CurrentGun))
-        {
-            bPickRevolver = false;
-        }
-        else if (Cast<AGJRifle>(CurrentGun))
-        {
-            bPickRifle = false;
-        }
-        else if (Cast<AGJRocketLauncher>(CurrentGun))
-        {
-            bPickRocketLauncher = false;
-        }*/
     }
 }
 
@@ -140,6 +139,34 @@ float AGJCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 void AGJCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+    //// 초기 무기 설정 (예시로 3개 무기 장착)
+    //OwnedWeapons.Add(NewObject<AGJRevolver>());
+    //OwnedWeapons.Add(NewObject<AGJRifle>());
+    //OwnedWeapons.Add(NewObject<AGJRocketLauncher>());
+
+    //// 기본 장착 무기 설정
+    //if (OwnedWeapons.Num() > 0)
+    //{
+    //    CurrentGun = OwnedWeapons[0]; // 기본적으로 첫 번째 무기 장착
+    //}
+
+        // 무기가 없으면 기본 무기 생성
+    //if (OwnedWeapons.Num() == 0)
+    //{
+    //    UE_LOG(LogTemp, Warning, TEXT("No weapons found! Initializing default weapons."));
+
+    //    OwnedWeapons.Add(NewObject<AGJRevolver>(this)); // Outer 지정
+    //    OwnedWeapons.Add(NewObject<AGJRifle>(this));
+    //    OwnedWeapons.Add(NewObject<AGJRocketLauncher>(this));
+    //}
+
+    //// 기본 무기 장착
+    //if (OwnedWeapons.IsValidIndex(0))
+    //{
+    //    CurrentGun = OwnedWeapons[0];
+    //    UE_LOG(LogTemp, Log, TEXT("Equipped default weapon: %s"), *CurrentGun->GetName());
+    //}
 }
 
 void AGJCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -270,6 +297,48 @@ void AGJCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
                     this, 
                     &AGJCharacter::DropWeapon);
             }
+
+            if (PlayerController->InteractAction)
+            {
+                // E키 - 상호작용
+                EnhancedInput->BindAction(
+                    PlayerController->InteractAction,
+                    ETriggerEvent::Triggered,
+                    this,
+                    &AGJCharacter::Interact
+                );
+            }
+
+            // 무기 선택 (1, 2, 3)
+            if (PlayerController->WeaponSlot1Action)
+            {
+                EnhancedInput->BindAction(
+                    PlayerController->WeaponSlot1Action,
+                    ETriggerEvent::Triggered,
+                    this,
+                    &AGJCharacter::SelectWeapon, 1
+                );
+            }
+
+            if (PlayerController->WeaponSlot2Action)
+            {
+                EnhancedInput->BindAction(
+                    PlayerController->WeaponSlot2Action,
+                    ETriggerEvent::Triggered,
+                    this,
+                    &AGJCharacter::SelectWeapon, 2
+                );
+            }
+
+            if (PlayerController->WeaponSlot3Action)
+            {
+                EnhancedInput->BindAction(
+                    PlayerController->WeaponSlot3Action,
+                    ETriggerEvent::Triggered,
+                    this,
+                    &AGJCharacter::SelectWeapon, 3
+                );
+            }
         }
     }
 }
@@ -307,14 +376,31 @@ void AGJCharacter::Move(const FInputActionValue& value)
 
 void AGJCharacter::StartJump(const FInputActionValue& value)
 {
-    // Jump 함수는 Character가 기본 제공
-    Jump(); // 조건문 없이 바로 실행
+    if (!bCanJump) // 점프 가능 여부 체크
+    {
+        return;
+    }
+
+    Jump(); // 점프 실행
+    bCanJump = false; // 점프 비활성화 (쿨다운 시작)
 }
 
 void AGJCharacter::StopJump(const FInputActionValue& value)
 {
     // StopJumping 함수도 Character가 기본 제공
     StopJumping(); // 마찬가지로 바로 실행
+}
+
+void AGJCharacter::Landed(const FHitResult& Hit) // 착지 시점 감지
+{
+    Super::Landed(Hit);
+    // 착지 후 점프 쿨다운 시작
+    GetWorldTimerManager().SetTimer(JumpCooldownTimer, this, &AGJCharacter::ResetJump, JumpCooldownTime, false);
+}
+
+void AGJCharacter::ResetJump() // 점프 재활성화 함수
+{
+    bCanJump = true;
 }
 
 void AGJCharacter::Look(const FInputActionValue& value)
