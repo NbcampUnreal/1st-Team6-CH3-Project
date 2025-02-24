@@ -41,13 +41,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon Blueprints")
 	TSubclassOf<AGJRocketLauncher> BP_GJRocketLauncher;
 
-protected:
-	virtual float TakeDamage(
-		float DamageAmount,
-		struct FDamageEvent const& DamageEvent,
-		AController* EventInstigator,
-		AActor* DamgeCauser
-	) override;
+	// 슬롯에 무기 추가 함수
+	void AddWeaponToSlot(AGJBaseGun* NewWeapon);
 
 	// 상호작용 함수
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
@@ -65,8 +60,13 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void EquipWeaponFromSlot(int32 SlotIndex);
 
-	// 슬롯에 무기 추가 함수
-	void AddWeaponToSlot(AGJBaseGun* NewWeapon);
+protected:
+	virtual float TakeDamage(
+		float DamageAmount,
+		struct FDamageEvent const& DamageEvent,
+		AController* EventInstigator,
+		AActor* DamgeCauser
+	) override;
 
 	// 무기 발사 함수
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
