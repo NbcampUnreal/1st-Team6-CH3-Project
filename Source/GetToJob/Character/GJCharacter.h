@@ -37,7 +37,17 @@ protected:
 		AActor* DamgeCauser
 	) override;
 
+	// 상호작용 함수
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void Interact();
 
+	// 무기 선택
+	UFUNCTION(BlueprintCallable, Category = "Weapon Selection")
+	void SelectWeapon(int32 WeaponSlot);
+
+	// 현재 장착된 무기를 관리하기 위한 배열
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
+	TArray<AGJBaseGun*> OwnedWeapons;
 
 	// 무기 발사 함수
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
@@ -63,9 +73,24 @@ protected:
 	float SprintSpeed; 	// 실제 스프린트 속도
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement")
 	float CrouchSpeed; // 앉은 상태 속도
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Look", meta = (ClampMin = "0.1", ClampMax = "5.0"))
 	float LookSensitivity; // 마우스 감도 조절을 위한 변수
 
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	float BackwardSpeedMultiplier;  // 후진 속도 배율
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Jump")
+	float JumpCooldownTime = 0.5f; // 점프 쿨다운 시간
+
+	FTimerHandle JumpCooldownTimer; // 점프 쿨다운 타이머 핸들
+
+	bool bCanJump = true; // 점프 가능 여부
+
+	virtual void Landed(const FHitResult& Hit) override;
+
+	UFUNCTION()
+	void ResetJump(); // 쿨다운이 끝난 후 점프를 다시 가능하게 만드는 함수
 
 
 	// 입력 바인딩을 처리할 함수

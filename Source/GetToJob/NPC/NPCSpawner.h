@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "NPC/GJNPC.h"
+#include "NPC/NPCSpawnRow.h"
 #include "NPCSpawner.generated.h"
 
 class UBoxComponent;
@@ -15,17 +16,19 @@ class GETTOJOB_API ANPCSpawner : public AActor
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	ANPCSpawner();
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spawning")
     USceneComponent* Scene;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spawning")
     UBoxComponent* SpawningBox;
-    virtual void BeginPlay() override;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawning")
+    UDataTable* NPCDataTable;
 protected:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
-    TSubclassOf<AGJNPC> NPCClass; // 스폰할 NPC 클래스
+
+
+    virtual void BeginPlay() override;
+
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning", meta = (ClampMin = "0.0"))
     float SpawnInterval = 2.5f;
@@ -38,10 +41,15 @@ protected:
 
     FTimerHandle SpawnTimerHandle;
 
+
+    UFUNCTION(BlueprintCallable, Category = "Spawning")
+    AGJNPC* SpawnRandomNPC();
+    FNPCSpawnRow* GetRandomNPC() const;
+
     UFUNCTION()
     void SpawnNPCs();
 
-    AGJNPC* SpawnNPC();
+    AGJNPC* SpawnNPC(TSubclassOf<AGJNPC> NPCClass);
 
     APatrolPath* FindPatrolPath(); // PatrolPath 찾는 함수
 };
