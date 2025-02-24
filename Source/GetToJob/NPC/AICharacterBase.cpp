@@ -7,7 +7,7 @@
 #include "Character/GJCharacter.h"
 
 AAICharacterBase::AAICharacterBase():
-	Health{ MaxHealth },
+	Health{ 100.f },
 	RightFistCollisionBox{ CreateDefaultSubobject<UBoxComponent>(TEXT("RightFirstCollisionBox")) },
 	Attack{10.f}
 {
