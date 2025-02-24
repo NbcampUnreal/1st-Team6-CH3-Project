@@ -12,59 +12,59 @@ class GETTOJOB_API AGJGameState : public AGameState
 public:
 	AGJGameState();
 
-	//Á¡¼ö
+	//ï¿½ï¿½ï¿½ï¿½
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Score")
 	int32 Score;
 	
-	//ÃÖ´ë Å¸ÀÓ ¼³Á¤
+	//ï¿½Ö´ï¿½ Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level")
 	float LevelLimitTime;
 
-	//¸ó½ºÅÍ Å³ Ä«¿îÆ®
+	//ï¿½ï¿½ï¿½ï¿½ Å³ Ä«ï¿½ï¿½Æ®
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "KillCount")
 	int32 EnemyKillCount;
 
-	//ÇöÀç ·¹º§ÀÇ °ª
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Level")
 	int32 CurrentWaveIndex;
 
-	//ÃÖ´ë ·¹º§ÀÇ °³¼ö
+	//ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Level")
 	int32 MaxLevels;
 
-	//·¹º§ ÀúÀå
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Level")
 	TArray<FName> LevelMapNames;
 
 
 	FTimerHandle LevelTimerHandle;
 
-	//Á¡¼ö °¡Á®¿À±â
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	UFUNCTION(BlueprintPure, Category = "Score")
 	int32 GetScore() const;
 
-	//Á¡¼ö Ãß°¡
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ß°ï¿½
 	UFUNCTION(BlueprintCallable, Category = "Score")
 	void AddScore(int32 Amount);
 
-	//¸ó½ºÅÍ Å³ °¡Á®¿À±â
+	//ï¿½ï¿½ï¿½ï¿½ Å³ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	UFUNCTION(BlueprintPure, Category = "KillCount")
 	int32 GetEnemyKillCount() const;
 
-	//¸ó½ºÅÍ Å³ Ãß°¡
+	//ï¿½ï¿½ï¿½ï¿½ Å³ ï¿½ß°ï¿½
 	UFUNCTION(BlueprintCallable, Category = "KillCount")
 	void AddEnemyKillCount(int32 Amount);
 
-	//Å¸ÀÌ¸Ó°¡ µ¹¾Æ°¥ BeginPlay Ãß°¡
+	//Å¸ï¿½Ì¸Ó°ï¿½ ï¿½ï¿½ï¿½Æ°ï¿½ BeginPlay ï¿½ß°ï¿½
 	virtual void BeginPlay() override;
 
-	//¿þÀÌºê ½ÃÀÛ ¼¼ÆÃ
+	//ï¿½ï¿½ï¿½Ìºï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	void StartWave();
 
-	//´ÙÀ½ ¿þÀÌºê·Î ³Ñ¾î°¡´Â ÇÔ¼ö
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ìºï¿½ï¿½ ï¿½Ñ¾î°¡ï¿½ï¿½ ï¿½Ô¼ï¿½
 	void NextWave();
 
-	//º¸½º ·¹º§·Î ³Ñ¾î°¡´Â ÇÔ¼ö
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ñ¾î°¡ï¿½ï¿½ ï¿½Ô¼ï¿½
 
 	
 };
