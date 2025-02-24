@@ -29,7 +29,9 @@ AGJMiniGun::AGJMiniGun()
 
 	// 처음에는 숨김 상태로 시작
 	GunMesh->SetVisibility(false);
+	// 주울 일 없으니까 Collision은 없앤다.
 	GunMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AGJMiniGun::ActivateMiniGun()
@@ -44,22 +46,43 @@ void AGJMiniGun::ActivateMiniGun()
 	// 기존 무기 비활성화
 	if (GJCharacter->CurrentGun)
 	{
-		// 나중에는 인벤토리에 넣는 함수로 대체해야 한다.
-		GJCharacter->CurrentGun->ThrowAway();
-		GunMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-
-		GJCharacter->CurrentGun = this;
+		
+		GJCharacter->CurrentGun->ThrowAway(); // 나중에는 인벤토리에 넣는 함수로 대체해야 한다.
+		GunMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
 	GunMesh->SetVisibility(true);
+	GJCharacter->CurrentGun = this;
+
+	UE_LOG(LogTemp, Warning, TEXT("MiniGun Activated!"));
+
+	// 제한 시간이 지나면 미니건 비활성화
+	StartDeactivationTimer();
 }
 
 void AGJMiniGun::DeactivateMiniGun()
 {
+	AGJCharacter* GJCharacter = Cast<AGJCharacter>(GetOwner());
+	if (GJCharacter && GJCharacter->CurrentGun == this)
+	{
+		GunMesh->SetVisibility(false);
+	}
+
+	// 기존 무기 다시 보이게 하기 (큇슬롯 로직 구현 시 구현하자)
+	GJCharacter->CurrentGun = nullptr; // 추후 수정
+	UE_LOG(LogTemp, Warning, TEXT("MiniGun Deactivated!!"));
+
+	ResetGauge();
 }
 
 void AGJMiniGun::IncreaseGauge(float Amount)
 {
+	CurrentGauge += Amount;
+	if (CurrentGauge >= MaxGauge)
+	{
+		CurrentGauge = MaxGauge;
+		ActivateMiniGun();
+	}
 }
 
 void AGJMiniGun::Fire()

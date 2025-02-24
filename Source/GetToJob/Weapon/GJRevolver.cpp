@@ -14,15 +14,16 @@ AGJRevolver::AGJRevolver()
 
 
 	FireSound = nullptr;
-	FireRate = 30.0f;
+	FireRate = 100.0f;
 	CoolDownDelay = 1 / (FireRate / 60);
 	TraceRange = 2000.0f;
 	bCanFire = true;
 	bIsReloading = false;
-	MaxAmmo = 5;
+	MaxAmmo = 10;
 	CurrentAmmo = MaxAmmo;
-	ReloadTime = 3.0f;
+	ReloadTime = 2.0f;
 	bPickRevolver = false;
+	MagazineCount = INT32_MAX;
 
 	GunType = EGunType::Revolver;
 }
@@ -104,31 +105,35 @@ void AGJRevolver::Fire()
 					this,
 					nullptr
 				);
-				UParticleSystemComponent* SpawnedEffect = UGameplayStatics::SpawnEmitterAtLocation(
-					GetWorld(),
-					HitEffect,
-					HitResult.ImpactPoint,
-					HitResult.ImpactNormal.Rotation()
-				);
-				if (HitEffect)
+				if (HitActor->ActorHasTag(FName("NPC")))
 				{
-
-					// 3초 후에 이펙트를 제거하는 타이머 설정
-					FTimerHandle ExplosionEffectTimer;
-					GetWorldTimerManager().SetTimer(
-						ExplosionEffectTimer,
-						[SpawnedEffect]()
-						{
-							if (SpawnedEffect)
-							{
-								SpawnedEffect->DeactivateSystem(); // 이펙트 중지
-								SpawnedEffect->DestroyComponent(); // 컴포넌트 삭제
-							}
-						},
-						1.0f,
-						false
+					UParticleSystemComponent* SpawnedEffect = UGameplayStatics::SpawnEmitterAtLocation(
+						GetWorld(),
+						HitEffect,
+						HitResult.ImpactPoint,
+						HitResult.ImpactNormal.Rotation()
 					);
+					if (HitEffect)
+					{
+
+						// 3초 후에 이펙트를 제거하는 타이머 설정
+						FTimerHandle ExplosionEffectTimer;
+						GetWorldTimerManager().SetTimer(
+							ExplosionEffectTimer,
+							[SpawnedEffect]()
+							{
+								if (SpawnedEffect)
+								{
+									SpawnedEffect->DeactivateSystem(); // 이펙트 중지
+									SpawnedEffect->DestroyComponent(); // 컴포넌트 삭제
+								}
+							},
+							1.0f,
+							false
+						);
+					}
 				}
+				
 			}
 			// 맞췄을 때 디버그 라인
 			DrawDebugLine(GetWorld(), TraceStart, HitResult.ImpactPoint, FColor::Red, false, 3.0f);
