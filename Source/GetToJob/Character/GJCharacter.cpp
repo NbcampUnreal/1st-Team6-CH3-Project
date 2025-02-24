@@ -192,11 +192,14 @@ void AGJCharacter::AddWeaponToSlot(AGJBaseGun* NewWeapon)
         return;
     }
 
-    // 슬롯이 가득 찼다면 추가할 수 없음
+    // 슬롯이 가득 찼다면 오래된 무기를 제거하고 새 무기 추가
     if (WeaponSlots.Num() >= MaxWeaponSlots)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Weapon slots are full!"));
-        return;
+        UE_LOG(LogTemp, Warning, TEXT("Weapon slots are full! Removing oldest weapon."));
+
+        AGJBaseGun* OldWeapon = WeaponSlots[0];
+        OldWeapon->ThrowAway();
+        WeaponSlots.RemoveAt(0);
     }
 
     // 슬롯에 무기 추가
@@ -226,11 +229,10 @@ void AGJCharacter::EquipWeaponFromSlot(int32 SlotIndex)
         return;
     }
 
-    // 기존 무기 해제
+    // 현재 장착 중인 무기 해제
     if (CurrentGun)
     {
         CurrentGun->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-        CurrentGun = nullptr;
     }
 
     // 새로운 무기 장착
