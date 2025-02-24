@@ -1,5 +1,212 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿#include "Weapon/GJMiniGun.h"
+#include "Engine/World.h"
+#include "DrawDebugHelpers.h"
+#include "GameFramework/Controller.h"
+#include "Components/SphereComponent.h"
+#include "Character/GJCharacter.h"
+#include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystem.h"
+#include "Particles/ParticleSystemComponent.h"
+
+AGJMiniGun::AGJMiniGun()
+{
+	// 총기 관련
+	Damage = 100.0f;
+	FireRate = 1000.0f;
+	CoolDownDelay = 1 / (FireRate / 60);
+	MaxAmmo = INT32_MAX;
+	CurrentAmmo = MaxAmmo;
+	FireSound = nullptr;
+	TraceRange = 6000.0f;
+	bCanFire = true;
+	bPickMiniGun = false;
+	GunType = EGunType::MiniGun;
+
+	// 게이지 관련
+	CurrentGauge = 0.0f;
+	MaxGauge = 100.0f;
+	MiniGunDuration = 30.0f;
+
+	// 처음에는 숨김 상태로 시작
+	GunMesh->SetVisibility(false);
+	GunMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void AGJMiniGun::ActivateMiniGun()
+{
+	AGJCharacter* GJCharacter = Cast<AGJCharacter>(GetOwner());
+	if (!GJCharacter)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("MiniGun activation failed: No valid Owner"));
+		return;
+	}
+
+	// 기존 무기 비활성화
+	if (GJCharacter->CurrentGun)
+	{
+		// 나중에는 인벤토리에 넣는 함수로 대체해야 한다.
+		GJCharacter->CurrentGun->ThrowAway();
+		GunMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+		GJCharacter->CurrentGun = this;
+	}
+
+	GunMesh->SetVisibility(true);
+}
+
+void AGJMiniGun::DeactivateMiniGun()
+{
+}
+
+void AGJMiniGun::IncreaseGauge(float Amount)
+{
+}
+
+void AGJMiniGun::Fire()
+{
+	// 재장전 중이거나, 탄이 없을 경우 발사 불가
+	if (!bCanFire || bIsReloading || CurrentAmmo <= 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Cannot Fire!!"));
+		return;
+	}
+	UE_LOG(LogTemp, Warning, TEXT("Fire!!"));
+
+	// 탄을 소비
+	CurrentAmmo--;
+
+	// 총 소리 재생
+	if (FireSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			GetWorld(),
+			FireSound,
+			GetActorLocation()
+		);
+	}
+	//캐릭터의 컨트롤러에서 시점 정보를 가져오는 함수 
+	AController* OwnerController = GetOwner() ? GetOwner()->GetInstigatorController() : nullptr;
+	if (OwnerController)
+	{
+		FVector CameraLocation;
+		FRotator CameraRotation;
+		OwnerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
+
+		// 캐릭터가 가진 소켓 위치 가져오기 // TODO 나중에 총구 소켓(Muzzle)을 만들어서 변경
+		AGJCharacter* GJCharacter = Cast<AGJCharacter>(GetOwner());
+		FVector MuzzleLocation = FVector::ZeroVector;
+
+		if (GJCharacter && GJCharacter->GetMesh())
+		{
+			MuzzleLocation = GJCharacter->GetMesh()->GetSocketLocation(TEXT("Revolver"));
+		}
+		else
+		{
+			// 못 가져올 경우에는 카메라 Location을 사용
+			MuzzleLocation = CameraLocation;
+		}
+
+		FVector TraceStart = MuzzleLocation;
+		FVector TraceEnd = TraceStart + (CameraRotation.Vector() * TraceRange);
+
+		FHitResult HitResult;
+		FCollisionQueryParams Params;
+		Params.AddIgnoredActor(this);
+		Params.AddIgnoredActor(GetOwner());
+
+		bool bHit = GetWorld()->LineTraceSingleByChannel(
+			HitResult,
+			TraceStart,
+			TraceEnd,
+			ECC_Visibility,
+			Params
+		);
+
+		if (bHit)
+		{
+			AActor* HitActor = HitResult.GetActor();
+			if (HitActor)
+			{
+				UGameplayStatics::ApplyPointDamage(
+					HitActor,
+					Damage,
+					CameraRotation.Vector(),
+					HitResult,
+					OwnerController,
+					this,
+					nullptr
+				);
+
+				if (HitActor->ActorHasTag(FName("NPC")))
+				{
+					UParticleSystemComponent* SpawnedEffect = UGameplayStatics::SpawnEmitterAtLocation(
+						GetWorld(),
+						HitEffect,
+						HitResult.ImpactPoint,
+						HitResult.ImpactNormal.Rotation()
+					);
+					if (HitEffect)
+					{
+
+						// 3초 후에 이펙트를 제거하는 타이머 설정
+						FTimerHandle ExplosionEffectTimer;
+						GetWorldTimerManager().SetTimer(
+							ExplosionEffectTimer,
+							[SpawnedEffect]()
+							{
+								if (SpawnedEffect)
+								{
+									SpawnedEffect->DeactivateSystem(); // 이펙트 중지
+									SpawnedEffect->DestroyComponent(); // 컴포넌트 삭제
+								}
+							},
+							1.0f,
+							false
+						);
+					}
+				}
 
 
-#include "Weapon/GJMiniGun.h"
+			}
+			// 맞췄을 때 디버그 라인
+			DrawDebugLine(GetWorld(), TraceStart, HitResult.ImpactPoint, FColor::Red, false, 3.0f);
+		}
+		else
+		{
+			// 못 맞췄을 때 디버그 라인
+			DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Blue, false, 3.0f);
+		}
+	}
 
+	// 사격 속도에 따른 Delay 필요
+	bCanFire = false;
+	GetWorldTimerManager().SetTimer(
+		CoolDownTimerHandle,
+		this,
+		&AGJMiniGun::EnableFire,
+		CoolDownDelay,
+		false
+	);
+}
+
+bool AGJMiniGun::IsMiniGunActive() const
+{
+	return false;
+}
+
+void AGJMiniGun::EnableFire()
+{
+	bCanFire = true;
+}
+
+void AGJMiniGun::BeginPlay()
+{
+}
+
+void AGJMiniGun::StartDeactivationTimer()
+{
+}
+
+void AGJMiniGun::ResetGauge()
+{
+}

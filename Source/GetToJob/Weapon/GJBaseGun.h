@@ -52,6 +52,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")
 	USoundBase* ReloadSound;
 
+	// 총기 타입
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
+	EGunType GunType;
+
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Own Weapon")
@@ -117,9 +121,7 @@ protected:
 	UPROPERTY()
 	AGJBaseGunAttachment* CurrentAttachment;
 
-	// 총기 타입
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
-	EGunType GunType;
+
 	
 
 

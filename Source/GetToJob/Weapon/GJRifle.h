@@ -33,6 +33,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
 	float CoolDownDelay;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Particle")
+	UParticleSystem* HitEffect;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")
 	USoundBase* FireSound;
 

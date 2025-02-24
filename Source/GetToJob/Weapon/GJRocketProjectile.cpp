@@ -158,7 +158,7 @@ void AGJRocketProjectile::ApplyKnockback(AActor* HitActor, FVector ImpactNormal)
 	ACharacter* HitCharacter = Cast<ACharacter>(HitActor);
 	if (HitCharacter)
 	{
-		FVector KnockbackDirection = -ImpactNormal * 1000.0f; // 충돌 방향의 반대로 넉백
+		FVector KnockbackDirection = -ImpactNormal * 2000.0f; // 충돌 방향의 반대로 넉백
 		KnockbackDirection.Z = 300.0f; //위쪽으로 살짝 띄우기
 
 		HitCharacter->LaunchCharacter(KnockbackDirection, true, true);

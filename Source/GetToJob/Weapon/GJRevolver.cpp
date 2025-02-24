@@ -5,6 +5,8 @@
 #include "Components/SphereComponent.h"
 #include "Character/GJCharacter.h"
 #include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystem.h"
+#include "Particles/ParticleSystemComponent.h"
 
 AGJRevolver::AGJRevolver()
 {
@@ -102,13 +104,29 @@ void AGJRevolver::Fire()
 					this,
 					nullptr
 				);
-				if (HitActor->ActorHasTag(FName("NPC")))
+				UParticleSystemComponent* SpawnedEffect = UGameplayStatics::SpawnEmitterAtLocation(
+					GetWorld(),
+					HitEffect,
+					HitResult.ImpactPoint,
+					HitResult.ImpactNormal.Rotation()
+				);
+				if (HitEffect)
 				{
-					UGameplayStatics::SpawnEmitterAtLocation(
-						GetWorld(),
-						HitEffect,
-						HitResult.ImpactPoint,
-						HitResult.ImpactNormal.Rotation()
+
+					// 3초 후에 이펙트를 제거하는 타이머 설정
+					FTimerHandle ExplosionEffectTimer;
+					GetWorldTimerManager().SetTimer(
+						ExplosionEffectTimer,
+						[SpawnedEffect]()
+						{
+							if (SpawnedEffect)
+							{
+								SpawnedEffect->DeactivateSystem(); // 이펙트 중지
+								SpawnedEffect->DestroyComponent(); // 컴포넌트 삭제
+							}
+						},
+						1.0f,
+						false
 					);
 				}
 			}
