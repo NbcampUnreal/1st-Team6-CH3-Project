@@ -15,8 +15,11 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	float GetHealth() const;
+	float GetAttack() const;
 	float GetMaxHealth() const;
 	void SetHealth(float const NewHealth);
+	UFUNCTION()
+	void SetAttack(float const NewAttack);
 	void AttackStart() const;
 	void AttackEnd() const;
 	bool bCanAttack;
@@ -37,6 +40,8 @@ private:
 	class UBoxComponent* RightFistCollisionBox;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Status", meta = (AllowPrivateAccess = "ture"))
 	float Health;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Status", meta = (AllowPrivateAccess = "ture"))
+	float Attack;
 	FTimerHandle AttackCooldownTimer;
 
 	UFUNCTION()

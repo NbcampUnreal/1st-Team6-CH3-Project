@@ -22,6 +22,8 @@ AGJRocketLauncher::AGJRocketLauncher()
 	ReloadTime = 4.0f;
 	bPickRocketLauncher= false;
 	ExplosionRadius = 300.f;
+
+	GunType = EGunType::RocketLauncher;
 }
 
 
@@ -117,36 +119,7 @@ void AGJRocketLauncher::Fire()
 
 void AGJRocketLauncher::Reload()
 {
-	// 재장전을 할 필요가 없을 때
-	if (bIsReloading || CurrentAmmo == MaxAmmo)
-	{
-		return;
-	}
-
-	bIsReloading = true;
-
-	if (ReloadSound)
-	{
-		UGameplayStatics::PlaySoundAtLocation(
-			GetWorld(),
-			ReloadSound,
-			GetActorLocation()
-		);
-	}
-
-	// 애님 몽타주 실행 (TODO: add Anim Montage)
-	AGJCharacter* GJCharacter = Cast<AGJCharacter>(GetOwner());
-	if (GJCharacter && ReloadMontage && GJCharacter)
-	{
-		GJCharacter->GetMesh()->GetAnimInstance()->Montage_Play(ReloadMontage);
-	}
-	GetWorldTimerManager().SetTimer(
-		ReloadTimerHandle,
-		this,
-		&AGJRocketLauncher::FinishReload,
-		ReloadTime,
-		false
-	);
+	Super::Reload();
 }
 
 

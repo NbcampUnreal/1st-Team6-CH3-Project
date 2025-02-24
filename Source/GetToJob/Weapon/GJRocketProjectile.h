@@ -50,10 +50,10 @@ public:
 		const FHitResult& Hit
 	);
 
-
-
 	// 일정 시간 후 폭발
 	void AutoExplode();
+
+	void ApplyKnockback(AActor* HitActor, FVector ImpactNormal);
 
 protected:
 	virtual void BeginPlay() override;
