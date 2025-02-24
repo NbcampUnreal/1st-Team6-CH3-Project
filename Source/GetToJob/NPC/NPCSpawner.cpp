@@ -18,7 +18,7 @@ ANPCSpawner::ANPCSpawner()
 void ANPCSpawner::BeginPlay()
 {
 	Super::BeginPlay();
-	if (NPCClass)
+	if (NPCDataTable)
 	{
 		GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &ANPCSpawner::SpawnNPCs, SpawnInterval, true);
 	}
@@ -28,17 +28,64 @@ void ANPCSpawner::BeginPlay()
 	}
 }
 
+AGJNPC* ANPCSpawner::SpawnRandomNPC()
+{
+    if (FNPCSpawnRow* SelectedRow = GetRandomNPC())
+    {
+        if (UClass* ActualClass = SelectedRow->NPCClass.Get())
+        {
+            return SpawnNPC(ActualClass);
+        }
+    }
+    return nullptr;
+}
+
+FNPCSpawnRow* ANPCSpawner::GetRandomNPC() const
+{
+    if (!NPCDataTable) return nullptr;
+
+    TArray<FNPCSpawnRow*> AllRows;
+    static const FString ContextString(TEXT("NPCSpawnContext"));
+
+    NPCDataTable->GetAllRows(ContextString, AllRows);
+
+    if (AllRows.IsEmpty()) return nullptr;
+
+    float TotalChance = 0.0f;
+    for (const FNPCSpawnRow* Row : AllRows)
+    {
+        if (Row)
+        {
+            TotalChance += Row->SpawnChance;
+        }
+    }
+
+    const float RandValue = FMath::FRandRange(0.0f, TotalChance);
+    float AccumulateChance = 0.0f;
+
+    for (FNPCSpawnRow* Row : AllRows)
+    {
+        AccumulateChance += Row->SpawnChance;
+        if (RandValue <= AccumulateChance)
+        {
+            return Row;
+        }
+    }
+
+    return nullptr;
+}
+
 void ANPCSpawner::SpawnNPCs()
 {
-    if (!NPCClass)
+    if (!NPCDataTable)
     {
-        UE_LOG(LogTemp, Warning, TEXT("NPCClass not set!"));
+        UE_LOG(LogTemp, Warning, TEXT("NPCDataTable not set!"));
         return;
     }
 
     for (int32 i = 0; i < NumberOfActorsToSpawn; ++i)
     {
-        AGJNPC* SpawnedNPC = SpawnNPC();
+        AGJNPC* SpawnedNPC = SpawnRandomNPC();
         if (SpawnedNPC)
         {
             APatrolPath* FoundPath = FindPatrolPath();
@@ -64,7 +111,7 @@ void ANPCSpawner::SpawnNPCs()
     }
 }
 
-AGJNPC* ANPCSpawner::SpawnNPC()
+AGJNPC* ANPCSpawner::SpawnNPC(TSubclassOf<AGJNPC> NPCClass)
 {
     FVector SpawnLocation = GetActorLocation(); // 스포너 위치
     FRotator SpawnRotation = GetActorRotation();
