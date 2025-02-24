@@ -31,6 +31,7 @@ EBTNodeResult::Type UBTTask_FindPathPoint::ExecuteTask(UBehaviorTreeComponent& O
 				}
 				// get the current patrol path vector from the NPC - this is local to the patrol path actor
 				auto const Point = npc->GetPatrolParth()->GetPatrolPoint(Index);
+
 				// convert the local vector to a global point
 				auto const GlobalPoint = npc->GetPatrolParth()->GetActorTransform().TransformPosition(Point);
 				bc->SetValueAsVector(PatrolPathVectorKey.SelectedKeyName, GlobalPoint);
