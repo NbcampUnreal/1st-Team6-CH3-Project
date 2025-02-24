@@ -11,7 +11,11 @@ AGJPlayerController::AGJPlayerController()
     FireAction(nullptr),
     ReloadAction(nullptr),
     DropWeaponAction(nullptr),
-    ESCAction(nullptr)
+    ESCAction(nullptr),
+    InteractAction(nullptr),
+    WeaponSlot1Action(nullptr),
+    WeaponSlot2Action(nullptr),
+    WeaponSlot3Action(nullptr)
 {
 }
 
