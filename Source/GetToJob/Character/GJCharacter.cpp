@@ -11,7 +11,7 @@
 #include "Weapon/GJRevolver.h"
 #include "Weapon/GJRifle.h"
 #include "Weapon/GJRocketLauncher.h"
-#include "UI/GJHUD.h"
+//#include "UI/GJHUD.h"
 #include "Components/CapsuleComponent.h"
 //#include "Components/WidgetComponent.h"
 //#include "Components/TextBlock.h"
@@ -70,6 +70,8 @@ AGJCharacter::AGJCharacter()
 
     // 초기 무기 상태 초기화
     CurrentWeaponType = EWeaponType::None;
+    
+    PrimaryActorTick.bCanEverTick = true;
 }
 
 void AGJCharacter::Interact()
@@ -215,22 +217,22 @@ void AGJCharacter::BeginPlay()
 
 void AGJCharacter::Tick(float Deltatime)
 {
-    Super::Tick(Deltatime);
-    float Speed = GetVelocity().Size();
-    if (FMath::Abs(Speed - LastSpeed) > 5.0f)
-    {
-        LastSpeed = Speed;
-        float NewSpread = FMath::GetMappedRangeValueClamped(
-            FVector2D(0.0f, 450.0f),
-            FVector2D(5.0f, 70.0f),
-            Speed
-        );
+    //Super::Tick(Deltatime);
+    //float Speed = GetVelocity().Size();
+    //if (FMath::Abs(Speed - LastSpeed) > 5.0f)
+    //{
+    //    LastSpeed = Speed;
+    //    float NewSpread = FMath::GetMappedRangeValueClamped(
+    //        FVector2D(0.0f, 450.0f),
+    //        FVector2D(5.0f, 70.0f),
+    //        Speed
+    //    );
 
-        if (AGJPlayerController* GJController = Cast<AGJPlayerController>(GetController()))
-        {
-            GJController->HUD->UpdateCrosshairSize(NewSpread);
-        }
-    }
+    //    if (AGJPlayerController* GJController = Cast<AGJPlayerController>(GetController()))
+    //    {
+    //        GJController->HUD->UpdateCrosshairSize(NewSpread);
+    //    }
+    //}
 }
 
 void AGJCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
