@@ -1,8 +1,9 @@
 ﻿#include "Character/GJCharacter.h"
 #include "GJPlayerController.h"
-//#include "GJGameState.h"
+#include "GameManager/GJGameState.h"
 #include "EnhancedInputComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Sound/SoundCue.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -10,6 +11,7 @@
 #include "Weapon/GJRevolver.h"
 #include "Weapon/GJRifle.h"
 #include "Weapon/GJRocketLauncher.h"
+#include "UI/GJHUD.h"
 #include "Components/CapsuleComponent.h"
 //#include "Components/WidgetComponent.h"
 //#include "Components/TextBlock.h"
@@ -62,6 +64,12 @@ AGJCharacter::AGJCharacter()
     // 현재 소지 총 초기화
     CurrentGun = nullptr;
     SetHealth(100.f);
+
+    // 인벤토리 연결
+    InventoryComponent = CreateDefaultSubobject<UGJInventoryComponent>(TEXT("InventoryComponent"));
+
+    // 초기 무기 상태 초기화
+    CurrentWeaponType = EWeaponType::None;
 }
 
 void AGJCharacter::Interact()
@@ -104,6 +112,83 @@ void AGJCharacter::DropWeapon()
     }
 }
 
+void AGJCharacter::EquipWeapon(AGJBaseGun* NewWeapon)
+{
+    if (!NewWeapon)
+    {
+        UE_LOG(LogTemp, Error, TEXT("EquipWeapon Failed: Weapon is nullptr!"));
+        return;
+    }
+
+    // 기존 무기 해제 및 숨김 처리
+    if (CurrentGun)
+    {
+        CurrentGun->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+        CurrentGun->SetActorHiddenInGame(true);
+        CurrentGun->SetActorEnableCollision(false);
+    }
+
+    // 새 무기 장착
+    CurrentGun = NewWeapon;
+    FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, true);
+    CurrentGun->AttachToComponent(GetMesh(), AttachRules, CurrentGun->GunSocketName);
+
+    // 무기 다시 보이게 활성화
+    CurrentGun->SetActorHiddenInGame(false);
+    CurrentGun->SetActorEnableCollision(true);
+    CurrentGun->SetOwner(this);
+
+    // 무기 업데이트
+    UpdateWeaponState(CurrentGun);
+}
+
+void AGJCharacter::UnequipCurrentWeapon()
+{
+    if (CurrentGun)
+    {
+        CurrentGun->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+        CurrentGun = nullptr;
+        UE_LOG(LogTemp, Log, TEXT("Current Weapon Unequipped"));
+    }
+}
+
+void AGJCharacter::EquipWeaponFromInventory(int32 SlotIndex)
+{
+    if (InventoryComponent)
+    {
+        InventoryComponent->EquipWeaponFromSlot(SlotIndex);
+    }
+}
+
+void AGJCharacter::UpdateWeaponState(AGJBaseGun* NewWeapon)
+{
+    if (!NewWeapon)
+    {
+        CurrentWeaponType = EWeaponType::None;
+        return;
+    }
+
+    // 무기 클래스에 따라 무기 타입 업데이트
+    if (Cast<AGJRevolver>(NewWeapon))
+    {
+        CurrentWeaponType = EWeaponType::Revolver;
+    }
+    else if (Cast<AGJRifle>(NewWeapon))
+    {
+        CurrentWeaponType = EWeaponType::Rifle;
+    }
+    else if (Cast<AGJRocketLauncher>(NewWeapon))
+    {
+        CurrentWeaponType = EWeaponType::RocketLauncher;
+    }
+    else
+    {
+        CurrentWeaponType = EWeaponType::None;
+    }
+
+    UE_LOG(LogTemp, Log, TEXT("Weapon type updated: %d"), static_cast<uint8>(CurrentWeaponType));
+}
+
 float AGJCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamgeCauser)
 {
     float ActualDamage = Super::TakeDamage(DamageAmount,
@@ -126,121 +211,26 @@ float AGJCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 void AGJCharacter::BeginPlay()
 {
     Super::BeginPlay();
-
-    // 무기가 없으면 블루프린트 무기 생성
-    /*if (WeaponSlots.Num() == 0)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("No weapons found! Initializing default BP weapons."));
-
-        if (BP_GJRevolver)
-        {
-            AGJRevolver* Revolver = GetWorld()->SpawnActor<AGJRevolver>(BP_GJRevolver);
-            if (Revolver)
-            {
-                AddWeaponToSlot(Revolver);
-                UE_LOG(LogTemp, Log, TEXT("Revolver successfully spawned and added to slot."));
-            }
-            else
-            {
-                UE_LOG(LogTemp, Error, TEXT("Failed to spawn Revolver!"));
-            }
-        }
-
-        if (BP_GJRifle)
-        {
-            AGJRifle* Rifle = GetWorld()->SpawnActor<AGJRifle>(BP_GJRifle);
-            if (Rifle)
-            {
-                AddWeaponToSlot(Rifle);
-                UE_LOG(LogTemp, Log, TEXT("Rifle successfully spawned and added to slot."));
-            }
-            else
-            {
-                UE_LOG(LogTemp, Error, TEXT("Failed to spawn Rifle!"));
-            }
-        }
-
-        if (BP_GJRocketLauncher)
-        {
-            AGJRocketLauncher* RocketLauncher = GetWorld()->SpawnActor<AGJRocketLauncher>(BP_GJRocketLauncher);
-            if (RocketLauncher)
-            {
-                AddWeaponToSlot(RocketLauncher);
-                UE_LOG(LogTemp, Log, TEXT("Rocket Launcher successfully spawned and added to slot."));
-            }
-            else
-            {
-                UE_LOG(LogTemp, Error, TEXT("Failed to spawn Rocket Launcher!"));
-            }
-        }
-    }*/
-
-
-    //// 첫 번째 무기 장착
-    //if (WeaponSlots.IsValidIndex(0))
-    //{
-    //    EquipWeaponFromSlot(0);
-    //}
 }
 
-
-void AGJCharacter::AddWeaponToSlot(AGJBaseGun* NewWeapon)
+void AGJCharacter::Tick(float Deltatime)
 {
-    if (!NewWeapon)
+    Super::Tick(Deltatime);
+    float Speed = GetVelocity().Size();
+    if (FMath::Abs(Speed - LastSpeed) > 5.0f)
     {
-        UE_LOG(LogTemp, Error, TEXT("Cannot add weapon: Invalid weapon"));
-        return;
+        LastSpeed = Speed;
+        float NewSpread = FMath::GetMappedRangeValueClamped(
+            FVector2D(0.0f, 450.0f),
+            FVector2D(5.0f, 70.0f),
+            Speed
+        );
+
+        if (AGJPlayerController* GJController = Cast<AGJPlayerController>(GetController()))
+        {
+            GJController->HUD->UpdateCrosshairSize(NewSpread);
+        }
     }
-
-    // 슬롯이 가득 찼다면 오래된 무기를 제거하고 새 무기 추가
-    if (WeaponSlots.Num() >= MaxWeaponSlots)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Weapon slots are full! Removing oldest weapon."));
-
-        AGJBaseGun* OldWeapon = WeaponSlots[0];
-        OldWeapon->ThrowAway();
-        WeaponSlots.RemoveAt(0);
-    }
-
-    // 슬롯에 무기 추가
-    WeaponSlots.Add(NewWeapon);
-    UE_LOG(LogTemp, Log, TEXT("Weapon added to slot %d: %s"), WeaponSlots.Num(), *NewWeapon->GetName());
-
-    // 장착된 무기가 없다면 첫 번째 무기로 자동 장착
-    if (!CurrentGun)
-    {
-        EquipWeaponFromSlot(WeaponSlots.Num() - 1);
-    }
-}
-
-void AGJCharacter::EquipWeaponFromSlot(int32 SlotIndex)
-{
-    if (!WeaponSlots.IsValidIndex(SlotIndex))
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Invalid weapon slot index: %d"), SlotIndex);
-        return;
-    }
-
-    AGJBaseGun* NewWeapon = WeaponSlots[SlotIndex];
-
-    if (!NewWeapon)
-    {
-        UE_LOG(LogTemp, Error, TEXT("No weapon in slot %d"), SlotIndex);
-        return;
-    }
-
-    // 현재 장착 중인 무기 해제
-    if (CurrentGun)
-    {
-        CurrentGun->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-    }
-
-    // 새로운 무기 장착
-    CurrentGun = NewWeapon;
-    FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, true);
-    CurrentGun->AttachToComponent(GetMesh(), AttachRules, CurrentGun->GunSocketName);
-
-    UE_LOG(LogTemp, Log, TEXT("Equipped weapon from slot %d: %s"), SlotIndex + 1, *CurrentGun->GetName());
 }
 
 void AGJCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -390,7 +380,7 @@ void AGJCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
                     PlayerController->WeaponSlot1Action,
                     ETriggerEvent::Triggered,
                     this,
-                    &AGJCharacter::EquipWeaponFromSlot, 0
+                    &AGJCharacter::EquipWeaponFromInventory, 0
                 );
             }
 
@@ -400,7 +390,7 @@ void AGJCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
                     PlayerController->WeaponSlot2Action,
                     ETriggerEvent::Triggered,
                     this,
-                    &AGJCharacter::EquipWeaponFromSlot, 1
+                    &AGJCharacter::EquipWeaponFromInventory, 1
                 );
             }
 
@@ -410,7 +400,18 @@ void AGJCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
                     PlayerController->WeaponSlot3Action,
                     ETriggerEvent::Triggered,
                     this,
-                    &AGJCharacter::EquipWeaponFromSlot, 2
+                    &AGJCharacter::EquipWeaponFromInventory, 2
+                );
+            }
+
+            if (PlayerController->TestDeathAction)
+            {
+                // 테스트용 죽음 트리거 (예: K 키)
+                EnhancedInput->BindAction(
+                    PlayerController->TestDeathAction,
+                    ETriggerEvent::Triggered,
+                    this,
+                    &AGJCharacter::TriggerDeathTest
                 );
             }
         }
@@ -450,7 +451,8 @@ void AGJCharacter::Move(const FInputActionValue& value)
 
 void AGJCharacter::StartJump(const FInputActionValue& value)
 {
-    if (!bCanJump) // 점프 가능 여부 체크
+    // 앉은 상태에서는 점프하지 않도록 조건 추가
+    if (!bCanJump || GetCharacterMovement()->IsCrouching())
     {
         return;
     }
@@ -520,10 +522,13 @@ void AGJCharacter::StartSit(const FInputActionValue& value)
 
 void AGJCharacter::StopSit(const FInputActionValue& value)
 {
-    if (GetCharacterMovement()->NavAgentProps.bCanCrouch) // 예외 처리
+    if (GetCharacterMovement()->NavAgentProps.bCanCrouch)
     {
         UnCrouch(); // 앉기 해제
         GetCharacterMovement()->MaxWalkSpeed = NormalSpeed; // 원래 속도로 복귀
+
+        // 앉기에서 일어났을 때 점프 가능하게 재설정
+        bCanJump = true;
     }
 }
 
@@ -538,6 +543,12 @@ void AGJCharacter::OnDeath()
 
     UE_LOG(LogTemp, Error, TEXT("Player has died! Game Over"));
 
+    // 죽음 사운드 재생
+    if (DeathSound)
+    {
+        UGameplayStatics::PlaySoundAtLocation(this, DeathSound, GetActorLocation());
+    }
+
     // 레그돌 활성화
     GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));  // 충돌 프로파일을 래그돌로 변경
     GetMesh()->SetSimulatePhysics(true);  // 물리 시뮬레이션 활성화
@@ -546,12 +557,19 @@ void AGJCharacter::OnDeath()
     GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Ignore);
 
-    // 일정 시간이 지나면 캐릭터 제거 (예: 10초 후)
-    SetLifeSpan(10.0f);
+    // 일정 시간이 지나면 캐릭터 제거 (예: 30초 후)
+    SetLifeSpan(30.0f);
 
     // 게임 오버 처리
     /*if (AGJGameState* GameState = GetWorld() ? GetWorld()->GetGameState<AGJGameState>() : nullptr)
     {
         GameState->OnGameOver();
     }*/
+}
+
+// 테스트용 죽이기 함수
+void AGJCharacter::TriggerDeathTest()
+{
+    UE_LOG(LogTemp, Warning, TEXT("Test Death Triggered!"));
+    OnDeath();
 }
