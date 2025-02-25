@@ -145,79 +145,50 @@ void AGJBaseGun::Pickup(ACharacter* PlayerCharacter)
 			return;
 		}
 
+		// 기존 무기 비활성화 (겹쳐 보이는 현상 방지)
+		if (GJCharacter->CurrentGun)
+		{
+			GJCharacter->CurrentGun->SetActorHiddenInGame(true);
+			GJCharacter->CurrentGun->SetActorEnableCollision(false);
+		}
+
+		// 인벤토리에 무기 추가
 		GJCharacter->InventoryComponent->AddWeapon(this);
+
+		// 이전 무기 상태 업데이트
+		GJCharacter->PreviousWeaponType = GJCharacter->CurrentWeaponType;
 	}
 
-	// 무기가 장착되지 않았다면 자동 장착
+	// 자동 장착 로직
 	if (!GJCharacter->CurrentGun)
 	{
 		GJCharacter->CurrentGun = GJCharacter->InventoryComponent->EquipWeaponFromSlot(0);
 	}
+	else
+	{
+		GJCharacter->EquipWeapon(this); // 자동 장착
+	}
 
-	// 물리 시뮬레이션 완전히 끄기
+	// 물리 시뮬레이션 끄기
 	GunMesh->SetSimulatePhysics(false);
 	GunMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-	// 줍기 감지 충돌 제거
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	// `SetSimulatePhysics(false);`가 확실히 적용되었는지 0.05초 후 확인
-	FTimerHandle TimerHandle_CheckPhysics;
-	GetWorldTimerManager().SetTimer(TimerHandle_CheckPhysics, [this]()
-		{
-			if (GunMesh->IsSimulatingPhysics())
-			{
-				UE_LOG(LogTemp, Error, TEXT("GunMesh 물리 시뮬레이션이 꺼지지 않음!"));
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("GunMesh 물리 시뮬레이션이 정상적으로 꺼짐!"));
-			}
-		}, 0.05f, false);
+	// 부착
+	AttachToComponent(
+		PlayerCharacter->GetMesh(),
+		FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+		GunSocketName
+	);
 
-	// 0.05초 후 소켓에 부착 (물리 충돌 방지)
-	FTimerHandle TimerHandle_Attach;
-	GetWorldTimerManager().SetTimer(TimerHandle_Attach, [this, PlayerCharacter]()
-		{
-			if (!PlayerCharacter) return;
-
-			UE_LOG(LogTemp, Warning, TEXT("GunSocketName 확인: %s"), *GunSocketName.ToString());
-
-			// `AttachToComponent()` 실행 여부 확인
-			bool bAttachSuccess = GunMesh->AttachToComponent(
-				PlayerCharacter->GetMesh(),
-				FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-				GunSocketName
-			);
-
-			if (!bAttachSuccess)
-			{
-				UE_LOG(LogTemp, Error, TEXT("AttachToComponent 실패!"));
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Pickup: 총이 정상적으로 소켓에 부착됨!"));
-
-				// 부착 후 위치 갱신
-				GunMesh->SetRelativeLocationAndRotation(FVector::ZeroVector, FRotator::ZeroRotator);
-			}
-
-		}, 0.05f, false);
-
-	// 플레이어가 총을 소유
+	// 플레이어 소유 설정
 	SetOwner(PlayerCharacter);
 	bPickupGun = true;
 
-	if (GJCharacter)
-	{
-		GJCharacter->CurrentGun = this;
-		UE_LOG(LogTemp, Warning, TEXT("Pickup: CurrentGun 설정 완료"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Pickup: No CurrentGun!!"));
-	}
+	// 로그 출력 (최종 상태 업데이트)
+	UE_LOG(LogTemp, Warning, TEXT("Pickup: 무기 장착 및 상태 업데이트 완료"));
 }
+
 
 void AGJBaseGun::ThrowAway()
 {

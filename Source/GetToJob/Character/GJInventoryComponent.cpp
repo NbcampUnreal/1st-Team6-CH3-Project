@@ -42,6 +42,7 @@ void UGJInventoryComponent::RemoveWeapon(AGJBaseGun* WeaponToRemove)
 
 AGJBaseGun* UGJInventoryComponent::EquipWeaponFromSlot(int32 SlotIndex)
 {
+    // 슬롯 인덱스 유효성 체크
     if (WeaponSlots.IsValidIndex(SlotIndex))
     {
         AGJBaseGun* SelectedWeapon = WeaponSlots[SlotIndex];
@@ -49,6 +50,10 @@ AGJBaseGun* UGJInventoryComponent::EquipWeaponFromSlot(int32 SlotIndex)
         AGJCharacter* OwnerCharacter = Cast<AGJCharacter>(GetOwner());
         if (OwnerCharacter)
         {
+            // 이전 무기 상태 저장
+            OwnerCharacter->PreviousWeaponType = OwnerCharacter->CurrentWeaponType;
+
+            // 무기 장착
             OwnerCharacter->EquipWeapon(SelectedWeapon);
         }
 
@@ -56,6 +61,7 @@ AGJBaseGun* UGJInventoryComponent::EquipWeaponFromSlot(int32 SlotIndex)
         return SelectedWeapon;
     }
 
-    UE_LOG(LogTemp, Warning, TEXT("Invalid Weapon Slot: %d"), SlotIndex);
+    // 잘못된 인덱스 접근 방지
+    UE_LOG(LogTemp, Warning, TEXT("Invalid Weapon Slot: %d. WeaponSlots length: %d"), SlotIndex, WeaponSlots.Num());
     return nullptr;
 }

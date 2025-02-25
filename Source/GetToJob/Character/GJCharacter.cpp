@@ -110,7 +110,24 @@ void AGJCharacter::DropWeapon()
     if (CurrentGun)
     {
         UE_LOG(LogTemp, Warning, TEXT("Weapon Dropped!"));
+
+        // 인벤토리에서 무기 제거
+        if (InventoryComponent)
+        {
+            InventoryComponent->RemoveWeapon(CurrentGun);
+        }
+
+        // 무기 비활성화 및 던지기 처리
         CurrentGun->ThrowAway();
+
+        // 무기 애니메이션 상태 초기화
+        CurrentWeaponType = EWeaponType::None;
+
+        // 현재 무기 제거
+        CurrentGun = nullptr;
+
+        // 애니메이션 상태 업데이트 로그
+        UE_LOG(LogTemp, Log, TEXT("Weapon successfully dropped and removed from inventory. Weapon state set to NoWeapon."));
     }
 }
 
@@ -119,6 +136,12 @@ void AGJCharacter::EquipWeapon(AGJBaseGun* NewWeapon)
     if (!NewWeapon)
     {
         UE_LOG(LogTemp, Error, TEXT("EquipWeapon Failed: Weapon is nullptr!"));
+        return;
+    }
+
+    if (CurrentGun == NewWeapon)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Weapon is already equipped."));
         return;
     }
 
@@ -156,14 +179,36 @@ void AGJCharacter::UnequipCurrentWeapon()
 
 void AGJCharacter::EquipWeaponFromInventory(int32 SlotIndex)
 {
-    if (InventoryComponent)
+    // 인벤토리 및 슬롯 유효성 검사
+    if (InventoryComponent && InventoryComponent->WeaponSlots.IsValidIndex(SlotIndex))
     {
-        InventoryComponent->EquipWeaponFromSlot(SlotIndex);
+        // 슬롯에 무기가 실제로 존재하는 경우
+        if (InventoryComponent->WeaponSlots[SlotIndex])
+        {
+            InventoryComponent->EquipWeaponFromSlot(SlotIndex);
+            UE_LOG(LogTemp, Log, TEXT("Equipped weapon from slot %d."), SlotIndex);
+        }
+        else
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Slot %d is valid but empty."), SlotIndex);
+        }
+    }
+    else
+    {
+        // 슬롯 유효성 검사에서 실패한 경우
+        UE_LOG(LogTemp, Warning, TEXT("Invalid Slot: %d. Total slots available: %d"),
+            SlotIndex, InventoryComponent->WeaponSlots.Num());
+
+        // 무기 장착 시도 방지
+        return;
     }
 }
 
 void AGJCharacter::UpdateWeaponState(AGJBaseGun* NewWeapon)
 {
+    // 이전 무기 상태 저장
+    PreviousWeaponType = CurrentWeaponType;
+
     if (!NewWeapon)
     {
         CurrentWeaponType = EWeaponType::None;
@@ -188,7 +233,9 @@ void AGJCharacter::UpdateWeaponState(AGJBaseGun* NewWeapon)
         CurrentWeaponType = EWeaponType::None;
     }
 
-    UE_LOG(LogTemp, Log, TEXT("Weapon type updated: %d"), static_cast<uint8>(CurrentWeaponType));
+    UE_LOG(LogTemp, Log, TEXT("Weapon type updated: %d -> %d"),
+        static_cast<uint8>(PreviousWeaponType),
+        static_cast<uint8>(CurrentWeaponType));
 }
 
 float AGJCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamgeCauser)
