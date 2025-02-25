@@ -36,8 +36,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Level")
 	TArray<FName> LevelMapNames;
 
-
+	//timer
 	FTimerHandle LevelTimerHandle;
+	//ui
+	FTimerHandle UIUpdateTimerHandle;
 
 	//���� ��������
 	UFUNCTION(BlueprintPure, Category = "Score")
