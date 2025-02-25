@@ -6,11 +6,8 @@ AGJGameState::AGJGameState()
 {
 	Score = 0;
 	EnemyKillCount = 0;
-<<<<<<< Updated upstream
 	LevelLimitTime = 600.0f;
-=======
 	LevelLimitTime = 100.0f;
->>>>>>> Stashed changes
 	CurrentWaveIndex = 0;
 	MaxLevels = 3;
 	LevelMapNames = { "LoopStage", "LoopStage", "LoopStage" };

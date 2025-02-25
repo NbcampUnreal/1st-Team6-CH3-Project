@@ -52,6 +52,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* TestDeathAction;
 
+	AGJHUD* HUD;
+
 	// HUD ǥ��
 	UFUNCTION(BlueprintCallable, Category = "HUD")
 	void ShowGameHUD();

@@ -70,6 +70,8 @@ AGJCharacter::AGJCharacter()
 
     // 초기 무기 상태 초기화
     CurrentWeaponType = EWeaponType::None;
+    
+    PrimaryActorTick.bCanEverTick = true;
 }
 
 void AGJCharacter::Interact()
