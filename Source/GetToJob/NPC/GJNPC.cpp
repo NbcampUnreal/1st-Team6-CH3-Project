@@ -8,7 +8,7 @@ AGJNPC::AGJNPC()
 
 UBehaviorTree* AGJNPC::GetBehaviorTree() const
 {
-	return Tree; // Tree ¹ÝÈ¯ ÇÔ¼ö
+	return Tree; // Tree ï¿½ï¿½È¯ ï¿½Ô¼ï¿½
 }
 
 APatrolPath* AGJNPC::GetPatrolParth() const
@@ -28,7 +28,7 @@ void AGJNPC::SetPatrolPath(APatrolPath* Path)
 
 void AGJNPC::SetBehaviorTree(UBehaviorTree* ChooseTree)
 {
-	if (AIControllerClass) // AIController°¡ Á¸ÀçÇÏ´Â °æ¿ì¿¡¸¸ º¯°æ
+	if (AIControllerClass) // AIControllerï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ì¿¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	{
 		AAIController* NPCAIController = Cast<AGJ_AIController>(GetController());
 		if (NPCAIController)

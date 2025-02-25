@@ -2,13 +2,25 @@
 
 #include "CoreMinimal.h"
 #include "NPC/AICharacterBase.h"
+#include "Weapon/GJRevolver.h"
+#include "Weapon/GJRifle.h"
+#include "Weapon/GjRocketLauncher.h"
 #include "GameFramework/Character.h"
+#include "Character/GJInventoryComponent.h"
 #include "GJCharacter.generated.h"
 
 class USpringArmComponent; // 스프링 암 관련 클래스 헤더
 class UCameraComponent; // 카메라 관련 클래스 전방 선언
 struct FInputActionValue; // Enhanced Input에서 액션 값을 받을 때 사용하는 구조체
 class AGJBaseGun;
+UENUM(BlueprintType)
+enum class EWeaponType : uint8
+{
+	None UMETA(DisplayName = "None"),
+	Revolver UMETA(DisplayName = "Revolver"),
+	Rifle UMETA(DisplayName = "Rifle"),
+	RocketLauncher UMETA(DisplayName = "Rocket Launcher")
+};
 
 UCLASS()
 class GETTOJOB_API AGJCharacter : public AAICharacterBase
@@ -28,6 +40,37 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Gun")
 	AGJBaseGun* CurrentGun;
 
+	// 블루프린트 무기 클래스 참조
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon Blueprints")
+	TSubclassOf<AGJRevolver> BP_GJRevolver;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon Blueprints")
+	TSubclassOf<AGJRifle> BP_GJRifle;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon Blueprints")
+	TSubclassOf<AGJRocketLauncher> BP_GJRocketLauncher;
+
+	// 상호작용 함수
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void Interact();
+
+	// 인벤토리 연결
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
+	UGJInventoryComponent* InventoryComponent;
+
+	// 무기 장착
+	void EquipWeapon(AGJBaseGun* NewWeapon);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	EWeaponType CurrentWeaponType;
+
+	void UpdateWeaponState(AGJBaseGun* NewWeapon);
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	EWeaponType GetCurrentWeaponType() const { return CurrentWeaponType; }
+
+	virtual void Tick(float Deltatime) override;
+	float LastSpeed = 0.0f;
 
 protected:
 	virtual float TakeDamage(
@@ -37,7 +80,13 @@ protected:
 		AActor* DamgeCauser
 	) override;
 
+	// 무기 장착 해제
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void UnequipCurrentWeapon();
 
+	// 무기 장착 요청(인벤토리에서)
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void EquipWeaponFromInventory(int32 SlotIndex);
 
 	// 무기 발사 함수
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
@@ -63,10 +112,32 @@ protected:
 	float SprintSpeed; 	// 실제 스프린트 속도
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement")
 	float CrouchSpeed; // 앉은 상태 속도
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Look", meta = (ClampMin = "0.1", ClampMax = "5.0"))
 	float LookSensitivity; // 마우스 감도 조절을 위한 변수
 
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	float BackwardSpeedMultiplier;  // 후진 속도 배율
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Jump")
+	float JumpCooldownTime = 0.5f; // 점프 쿨다운 시간
+
+	FTimerHandle JumpCooldownTimer; // 점프 쿨다운 타이머 핸들
+
+	bool bCanJump = true; // 점프 가능 여부
+
+	virtual void Landed(const FHitResult& Hit) override;
+
+	UFUNCTION()
+	void ResetJump(); // 쿨다운이 끝난 후 점프를 다시 가능하게 만드는 함수
+
+	// 사운드 재생 변수
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	USoundBase* DeathSound;
+
+	// 테스트용 죽이기
+	UFUNCTION(BlueprintCallable, Category = "Test")
+	void TriggerDeathTest();
 
 	// 입력 바인딩을 처리할 함수
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

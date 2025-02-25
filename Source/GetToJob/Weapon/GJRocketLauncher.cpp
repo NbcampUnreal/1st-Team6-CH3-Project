@@ -20,8 +20,10 @@ AGJRocketLauncher::AGJRocketLauncher()
 	MaxAmmo = 5;
 	CurrentAmmo = MaxAmmo;
 	ReloadTime = 4.0f;
-	bPickRocketLauncher= false;
+	bPickupRocketLauncher= false;
+	bPickRocketLauncher = false;
 	ExplosionRadius = 300.f;
+	RecoilStrength = 10.0f;
 
 	GunType = EGunType::RocketLauncher;
 }
@@ -44,6 +46,9 @@ void AGJRocketLauncher::Fire()
 			GetActorLocation()
 		);
 	}
+
+	// 반동 함수 호출
+	ApplyRecoil();
 
 	if (ProjectileClass)
 	{
@@ -138,12 +143,14 @@ void AGJRocketLauncher::Pickup(ACharacter* PlayerCharacter)
 {
 	Super::Pickup(PlayerCharacter);
 	bPickRocketLauncher = true;
+	bPickupRocketLauncher = true;
 }
 
 void AGJRocketLauncher::ThrowAway()
 {
 	Super::ThrowAway();
 	bPickRocketLauncher = false;
+	bPickupRocketLauncher = false;
 }
 
 void AGJRocketLauncher::BeginPlay()

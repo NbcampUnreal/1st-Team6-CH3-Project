@@ -49,7 +49,15 @@ void AGJ_AIController::SetupPerceptionSystem()
 
 void AGJ_AIController::OnTargetDetected(AActor* Actor, FAIStimulus const Stimulus)
 {
-	
+	if (auto* const ch = Cast<AGJCharacter>(Actor))
+	{
+		float const DistanceToPlayer = ch->GetDistanceTo(GetPawn()); // 플레이어와 NPC 사이의 거리 계산
+
+		if (DistanceToPlayer <= 500.f) // 500 거리 이내에 있을 경우
+		{
+			GetBlackboardComponent()->SetValueAsBool("CanSeePlayer", Stimulus.WasSuccessfullySensed()); // 즉시 추적
+		}
+	}
 	if (auto* const ch = Cast<AGJCharacter>(Actor))
 	{
 		GetBlackboardComponent()->SetValueAsBool("CanSeePlayer", Stimulus.WasSuccessfullySensed());

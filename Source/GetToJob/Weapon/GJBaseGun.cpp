@@ -5,6 +5,7 @@
 #include "Weapon/GJBaseGunAttachment.h"
 #include "Weapon/GJScope.h"
 #include "Kismet/GameplayStatics.h"
+#include "Character/GJInventoryComponent.h"
 
 
 // Sets default values
@@ -40,7 +41,6 @@ AGJBaseGun::AGJBaseGun()
 	Accuracy = 100.0f;
 	AmmoVelocity = 100.0f;
 	FireRate = 200.0f;
-
 	MaxAmmo = 30;
 	CurrentAmmo = MaxAmmo;
 
@@ -51,6 +51,7 @@ AGJBaseGun::AGJBaseGun()
 	bIsReloading = false;
 	bPickupGun = false;
 	bCanPickup = true;
+	bPickupMiniGun = false;
 	MagazineCount = 3;
 }
 
@@ -136,16 +137,21 @@ void AGJBaseGun::Pickup(ACharacter* PlayerCharacter)
 	}
 
 	AGJCharacter* GJCharacter = Cast<AGJCharacter>(PlayerCharacter);
-	if (GJCharacter)
+	if (GJCharacter && GJCharacter->InventoryComponent)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Pickup: GJCharacter->CurrentGun 상태: %s"),
-			GJCharacter->CurrentGun ? *GJCharacter->CurrentGun->GetName() : TEXT("nullptr"));
-
-		if (GJCharacter->CurrentGun)
+		if (GJCharacter->InventoryComponent->WeaponSlots.Contains(this))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Pickup: 이미 총을 가지고 있음 - 줍기 불가"));
 			return;
 		}
+
+		GJCharacter->InventoryComponent->AddWeapon(this);
+	}
+
+	// 무기가 장착되지 않았다면 자동 장착
+	if (!GJCharacter->CurrentGun)
+	{
+		GJCharacter->CurrentGun = GJCharacter->InventoryComponent->EquipWeaponFromSlot(0);
 	}
 
 	// 물리 시뮬레이션 완전히 끄기
@@ -351,5 +357,70 @@ void AGJBaseGun::BeginPlay()
 EGunType AGJBaseGun::GetGunType() const
 {
 	 return GunType; 
+}
+
+void AGJBaseGun::ApplyRecoil()
+{
+	AController* OwnerController = GetOwner() ? GetOwner()->GetInstigatorController() : nullptr;
+	if (OwnerController)
+	{
+		APlayerController* PlayerController = Cast<APlayerController>(OwnerController);
+		if (PlayerController)
+		{
+			float RandomRecoil = FMath::RandRange(-0.1f, 0.1f);  // ✅ 좌우 랜덤 리코일 추가
+
+			// 반동 적용
+			PlayerController->AddPitchInput(-RecoilStrength);
+			PlayerController->AddYawInput(RandomRecoil);
+
+			// 반동 값 저장 (반동 복구를 위해)
+			InitialRecoilStrength = -RecoilStrength;
+			InitialYawRecoil = RandomRecoil;
+			CurrentRecoilStrength = InitialRecoilStrength;
+			CurrentYawRecoil = InitialYawRecoil;
+
+
+			// 일정 시간 후 반동 회복 시작
+			GetWorldTimerManager().ClearTimer(RecoilResetTimer);
+			GetWorldTimerManager().SetTimer(
+				RecoilResetTimer,
+				this,
+				&AGJBaseGun::ResetRecoil,
+				0.05f,  // 반동 회복 주기
+				true
+			);
+		}
+	}
+}
+
+void AGJBaseGun::ResetRecoil()
+{
+	AController* OwnerController = GetOwner() ? GetOwner()->GetInstigatorController() : nullptr;
+	if (OwnerController)
+	{
+		APlayerController* PlayerController = Cast<APlayerController>(OwnerController);
+		if (PlayerController)
+		{
+			float RecoveryRate = 0.05f; // 반동 회복 속도 (작을수록 부드러움)
+
+			if (FMath::Abs(CurrentRecoilStrength) > 0.01f || FMath::Abs(CurrentYawRecoil) > 0.01f)
+			{
+				PlayerController->AddPitchInput(-CurrentRecoilStrength * RecoveryRate);
+				PlayerController->AddYawInput(CurrentYawRecoil * RecoveryRate);
+
+				// 반동 수치 점진적으로 줄이기
+				CurrentRecoilStrength *= (1.0f - RecoveryRate);
+				CurrentYawRecoil *= (1.0f - RecoveryRate);
+			}
+			else
+			{
+				// 반동이 거의 원래대로 돌아오면 타이머 중지
+				GetWorldTimerManager().ClearTimer(RecoilResetTimer);
+				UE_LOG(LogTemp, Warning, TEXT("Recoil Finish!!"));
+				CurrentRecoilStrength = 0.0f;
+				CurrentYawRecoil = 0.0f;
+			}
+		}
+	}
 }
 

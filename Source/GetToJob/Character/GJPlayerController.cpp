@@ -1,4 +1,5 @@
 #include "GJPlayerController.h"
+#include "UI/GJHUD.h"
 #include "EnhancedInputSubsystems.h" // Enhanced Input System의 Local Player Subsystem을 사용하기 위해 포함
 
 AGJPlayerController::AGJPlayerController()
@@ -11,7 +12,13 @@ AGJPlayerController::AGJPlayerController()
     FireAction(nullptr),
     ReloadAction(nullptr),
     DropWeaponAction(nullptr),
-    ESCAction(nullptr)
+    ESCAction(nullptr),
+    InteractAction(nullptr),
+    WeaponSlot1Action(nullptr),
+    WeaponSlot2Action(nullptr),
+    WeaponSlot3Action(nullptr),
+    TestDeathAction(nullptr),
+    HUD(nullptr)
 {
 }
 
@@ -33,6 +40,8 @@ void AGJPlayerController::BeginPlay()
             }
         }
     }
+
+    HUD = Cast<AGJHUD>(this->GetHUD());
 }
 
 void AGJPlayerController::OpenMainMenu()

@@ -1,8 +1,9 @@
 ﻿#include "Character/GJCharacter.h"
 #include "GJPlayerController.h"
-//#include "GJGameState.h"
+#include "GameManager/GJGameState.h"
 #include "EnhancedInputComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Sound/SoundCue.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -10,6 +11,7 @@
 #include "Weapon/GJRevolver.h"
 #include "Weapon/GJRifle.h"
 #include "Weapon/GJRocketLauncher.h"
+#include "UI/GJHUD.h"
 #include "Components/CapsuleComponent.h"
 //#include "Components/WidgetComponent.h"
 //#include "Components/TextBlock.h"
@@ -45,6 +47,7 @@ AGJCharacter::AGJCharacter()
     SprintSpeedMultiplier = 1.5f; // 스프린트 속도 배율
     CrouchSpeed = 200.0f; // 앉기 속도
     SprintSpeed = NormalSpeed * SprintSpeedMultiplier; // 스프린트 속도 적용
+    BackwardSpeedMultiplier = 0.5f; // 뒤로 가는 속도 배율
 
     // 마우스 감도 설정
     LookSensitivity = 1.0f; // 감도 조절을 위한 변수
@@ -61,6 +64,22 @@ AGJCharacter::AGJCharacter()
     // 현재 소지 총 초기화
     CurrentGun = nullptr;
     SetHealth(100.f);
+
+    // 인벤토리 연결
+    InventoryComponent = CreateDefaultSubobject<UGJInventoryComponent>(TEXT("InventoryComponent"));
+
+    // 초기 무기 상태 초기화
+    CurrentWeaponType = EWeaponType::None;
+    
+    PrimaryActorTick.bCanEverTick = true;
+}
+
+void AGJCharacter::Interact()
+{
+    // 간단한 로그 출력
+    UE_LOG(LogTemp, Log, TEXT("Interact Key Pressed"));
+
+    // 추후 오브젝트 상호작용 로직 구현 가능
 }
 
 void AGJCharacter::FireWeapon()
@@ -91,30 +110,85 @@ void AGJCharacter::DropWeapon()
     if (CurrentGun)
     {
         UE_LOG(LogTemp, Warning, TEXT("Weapon Dropped!"));
-
-        // 무기를 손에서 떼고 물리 적용
-//        CurrentGun->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-//        CurrentGun->SetActorEnableCollision(true);
         CurrentGun->ThrowAway();
-        // 무기 포인터 초기화 (더 이상 장착 중이 아님)
-        // 1. 무슨 무기를 가지고 있는지 인식 Cast to 사용
-        // 2. 그것에 대한 변수값에 bpickrifle~ 기타등등
-        // 3. 그 변수들에 대한 변수 값을 set(false)
-        // 4. 그래야 그 총들이 소유되지 않았다는 것을 인식한다.
-         // 현재 무기의 타입을 판별하여 상태 변수 업데이트
-        /*if (Cast<AGJRevolver>(CurrentGun))
-        {
-            bPickRevolver = false;
-        }
-        else if (Cast<AGJRifle>(CurrentGun))
-        {
-            bPickRifle = false;
-        }
-        else if (Cast<AGJRocketLauncher>(CurrentGun))
-        {
-            bPickRocketLauncher = false;
-        }*/
     }
+}
+
+void AGJCharacter::EquipWeapon(AGJBaseGun* NewWeapon)
+{
+    if (!NewWeapon)
+    {
+        UE_LOG(LogTemp, Error, TEXT("EquipWeapon Failed: Weapon is nullptr!"));
+        return;
+    }
+
+    // 기존 무기 해제 및 숨김 처리
+    if (CurrentGun)
+    {
+        CurrentGun->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+        CurrentGun->SetActorHiddenInGame(true);
+        CurrentGun->SetActorEnableCollision(false);
+    }
+
+    // 새 무기 장착
+    CurrentGun = NewWeapon;
+    FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, true);
+    CurrentGun->AttachToComponent(GetMesh(), AttachRules, CurrentGun->GunSocketName);
+
+    // 무기 다시 보이게 활성화
+    CurrentGun->SetActorHiddenInGame(false);
+    CurrentGun->SetActorEnableCollision(true);
+    CurrentGun->SetOwner(this);
+
+    // 무기 업데이트
+    UpdateWeaponState(CurrentGun);
+}
+
+void AGJCharacter::UnequipCurrentWeapon()
+{
+    if (CurrentGun)
+    {
+        CurrentGun->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+        CurrentGun = nullptr;
+        UE_LOG(LogTemp, Log, TEXT("Current Weapon Unequipped"));
+    }
+}
+
+void AGJCharacter::EquipWeaponFromInventory(int32 SlotIndex)
+{
+    if (InventoryComponent)
+    {
+        InventoryComponent->EquipWeaponFromSlot(SlotIndex);
+    }
+}
+
+void AGJCharacter::UpdateWeaponState(AGJBaseGun* NewWeapon)
+{
+    if (!NewWeapon)
+    {
+        CurrentWeaponType = EWeaponType::None;
+        return;
+    }
+
+    // 무기 클래스에 따라 무기 타입 업데이트
+    if (Cast<AGJRevolver>(NewWeapon))
+    {
+        CurrentWeaponType = EWeaponType::Revolver;
+    }
+    else if (Cast<AGJRifle>(NewWeapon))
+    {
+        CurrentWeaponType = EWeaponType::Rifle;
+    }
+    else if (Cast<AGJRocketLauncher>(NewWeapon))
+    {
+        CurrentWeaponType = EWeaponType::RocketLauncher;
+    }
+    else
+    {
+        CurrentWeaponType = EWeaponType::None;
+    }
+
+    UE_LOG(LogTemp, Log, TEXT("Weapon type updated: %d"), static_cast<uint8>(CurrentWeaponType));
 }
 
 float AGJCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamgeCauser)
@@ -138,7 +212,27 @@ float AGJCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 
 void AGJCharacter::BeginPlay()
 {
-	Super::BeginPlay();
+    Super::BeginPlay();
+}
+
+void AGJCharacter::Tick(float Deltatime)
+{
+    Super::Tick(Deltatime);
+    float Speed = GetVelocity().Size();
+    if (FMath::Abs(Speed - LastSpeed) > 5.0f)
+    {
+        LastSpeed = Speed;
+        float NewSpread = FMath::GetMappedRangeValueClamped(
+            FVector2D(0.0f, 450.0f),
+            FVector2D(5.0f, 70.0f),
+            Speed
+        );
+
+        if (AGJPlayerController* GJController = Cast<AGJPlayerController>(GetController()))
+        {
+            GJController->HUD->UpdateCrosshairSize(NewSpread);
+        }
+    }
 }
 
 void AGJCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -269,6 +363,59 @@ void AGJCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
                     this, 
                     &AGJCharacter::DropWeapon);
             }
+
+            if (PlayerController->InteractAction)
+            {
+                // E키 - 상호작용
+                EnhancedInput->BindAction(
+                    PlayerController->InteractAction,
+                    ETriggerEvent::Triggered,
+                    this,
+                    &AGJCharacter::Interact
+                );
+            }
+
+            // 무기 선택 (1, 2, 3)
+            if (PlayerController->WeaponSlot1Action)
+            {
+                EnhancedInput->BindAction(
+                    PlayerController->WeaponSlot1Action,
+                    ETriggerEvent::Triggered,
+                    this,
+                    &AGJCharacter::EquipWeaponFromInventory, 0
+                );
+            }
+
+            if (PlayerController->WeaponSlot2Action)
+            {
+                EnhancedInput->BindAction(
+                    PlayerController->WeaponSlot2Action,
+                    ETriggerEvent::Triggered,
+                    this,
+                    &AGJCharacter::EquipWeaponFromInventory, 1
+                );
+            }
+
+            if (PlayerController->WeaponSlot3Action)
+            {
+                EnhancedInput->BindAction(
+                    PlayerController->WeaponSlot3Action,
+                    ETriggerEvent::Triggered,
+                    this,
+                    &AGJCharacter::EquipWeaponFromInventory, 2
+                );
+            }
+
+            if (PlayerController->TestDeathAction)
+            {
+                // 테스트용 죽음 트리거 (예: K 키)
+                EnhancedInput->BindAction(
+                    PlayerController->TestDeathAction,
+                    ETriggerEvent::Triggered,
+                    this,
+                    &AGJCharacter::TriggerDeathTest
+                );
+            }
         }
     }
 }
@@ -281,6 +428,9 @@ void AGJCharacter::Move(const FInputActionValue& value)
     // Value는 Axis2D로 설정된 IA_Move의 입력값(WASD)
     const FVector2D MoveInput = value.Get<FVector2D>();
 
+    // 기본 이동 속도
+    float MoveSpeed = GetCharacterMovement()->MaxWalkSpeed;
+
     if (!FMath::IsNearlyZero(MoveInput.X))
     {
         // 캐릭터가 바라보는 방향(정면)으로 X축 이동
@@ -292,18 +442,43 @@ void AGJCharacter::Move(const FInputActionValue& value)
         // 캐릭터의 오른쪽 방향으로 Y축 이동
         AddMovementInput(GetActorRightVector(), MoveInput.Y);
     }
+
+    if (!FMath::IsNearlyZero(MoveInput.X))
+    {
+        // 후진 시 속도를 줄이기 (예: 기본 속도의 50%)
+        float SpeedMultiplier = (MoveInput.X < 0) ? 0.5f : 1.0f;
+        AddMovementInput(GetActorForwardVector(), MoveInput.X * BackwardSpeedMultiplier);
+    }
 }
 
 void AGJCharacter::StartJump(const FInputActionValue& value)
 {
-    // Jump 함수는 Character가 기본 제공
-    Jump(); // 조건문 없이 바로 실행
+    // 앉은 상태에서는 점프하지 않도록 조건 추가
+    if (!bCanJump || GetCharacterMovement()->IsCrouching())
+    {
+        return;
+    }
+
+    Jump(); // 점프 실행
+    bCanJump = false; // 점프 비활성화 (쿨다운 시작)
 }
 
 void AGJCharacter::StopJump(const FInputActionValue& value)
 {
     // StopJumping 함수도 Character가 기본 제공
     StopJumping(); // 마찬가지로 바로 실행
+}
+
+void AGJCharacter::Landed(const FHitResult& Hit) // 착지 시점 감지
+{
+    Super::Landed(Hit);
+    // 착지 후 점프 쿨다운 시작
+    GetWorldTimerManager().SetTimer(JumpCooldownTimer, this, &AGJCharacter::ResetJump, JumpCooldownTime, false);
+}
+
+void AGJCharacter::ResetJump() // 점프 재활성화 함수
+{
+    bCanJump = true;
 }
 
 void AGJCharacter::Look(const FInputActionValue& value)
@@ -349,10 +524,13 @@ void AGJCharacter::StartSit(const FInputActionValue& value)
 
 void AGJCharacter::StopSit(const FInputActionValue& value)
 {
-    if (GetCharacterMovement()->NavAgentProps.bCanCrouch) // 예외 처리
+    if (GetCharacterMovement()->NavAgentProps.bCanCrouch)
     {
         UnCrouch(); // 앉기 해제
         GetCharacterMovement()->MaxWalkSpeed = NormalSpeed; // 원래 속도로 복귀
+
+        // 앉기에서 일어났을 때 점프 가능하게 재설정
+        bCanJump = true;
     }
 }
 
@@ -367,6 +545,12 @@ void AGJCharacter::OnDeath()
 
     UE_LOG(LogTemp, Error, TEXT("Player has died! Game Over"));
 
+    // 죽음 사운드 재생
+    if (DeathSound)
+    {
+        UGameplayStatics::PlaySoundAtLocation(this, DeathSound, GetActorLocation());
+    }
+
     // 레그돌 활성화
     GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));  // 충돌 프로파일을 래그돌로 변경
     GetMesh()->SetSimulatePhysics(true);  // 물리 시뮬레이션 활성화
@@ -375,12 +559,19 @@ void AGJCharacter::OnDeath()
     GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Ignore);
 
-    // 일정 시간이 지나면 캐릭터 제거 (예: 10초 후)
-    SetLifeSpan(10.0f);
+    // 일정 시간이 지나면 캐릭터 제거 (예: 30초 후)
+    SetLifeSpan(30.0f);
 
     // 게임 오버 처리
     /*if (AGJGameState* GameState = GetWorld() ? GetWorld()->GetGameState<AGJGameState>() : nullptr)
     {
         GameState->OnGameOver();
     }*/
+}
+
+// 테스트용 죽이기 함수
+void AGJCharacter::TriggerDeathTest()
+{
+    UE_LOG(LogTemp, Warning, TEXT("Test Death Triggered!"));
+    OnDeath();
 }
