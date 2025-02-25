@@ -47,11 +47,9 @@ void AGJMiniGun::ActivateMiniGun()
 	if (GJCharacter->CurrentGun)
 	{
 		
-		GJCharacter->CurrentGun->ThrowAway(); // 나중에는 인벤토리에 넣는 함수로 대체해야 한다.
+		GJCharacter->CurrentGun->SetActorHiddenInGame(true);
 		GunMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
-
-
 
 	GunMesh->SetVisibility(true);
 	GJCharacter->CurrentGun = this;
