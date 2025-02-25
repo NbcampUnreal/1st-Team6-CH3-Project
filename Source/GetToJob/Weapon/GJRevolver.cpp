@@ -6,6 +6,7 @@
 #include "Character/GJCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystem.h"
+#include "NPC/GJNPC.h"
 #include "Particles/ParticleSystemComponent.h"
 
 AGJRevolver::AGJRevolver()
@@ -25,6 +26,7 @@ AGJRevolver::AGJRevolver()
 	bPickRevolver = false;
 	MagazineCount = INT32_MAX;
 	bPickupRevolver = false;
+	RecoilStrength = 0.3f;
 
 
 	GunType = EGunType::Revolver;
@@ -56,12 +58,16 @@ void AGJRevolver::Fire()
 	}
 	//캐릭터의 컨트롤러에서 시점 정보를 가져오는 함수 
 	AController* OwnerController = GetOwner() ? GetOwner()->GetInstigatorController() : nullptr;
+	
 	// 카메라 방향 기준으로 라인 트레이스
-	 if (OwnerController)
+	if (OwnerController)
 	{
 		FVector CameraLocation;
 		FRotator CameraRotation;
 		OwnerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
+
+		// 반동 호출
+		ApplyRecoil();
 
 		// 캐릭터가 가진 소켓 위치 가져오기 // TODO 나중에 총구 소켓(Muzzle)을 만들어서 변경
 		AGJCharacter* GJCharacter = Cast<AGJCharacter>(GetOwner());
@@ -107,6 +113,22 @@ void AGJRevolver::Fire()
 					this,
 					nullptr
 				);
+				//// 적 처치 시 게이지 상승 로직
+				//if (HitActor->ActorHasTag(FName("NPC")))
+				//{
+				//	UE_LOG(LogTemp, Warning, TEXT("Hit NPC!"));
+
+				//	AGJNPC* HitEnemy = Cast<AGJNPC>(HitActor);
+				//	if (HitEnemy && HitEnemy->bIsDead)
+				//	{
+				//		UE_LOG(LogTemp, Warning, TEXT("NPC is Dead! Increasing MiniGun Gauge!"));
+				//		if (GJCharacter && GJCharacter->MiniGun)
+				//		{
+				//			GJCharacter->MiniGun->IncreaseGauge(20.0f);
+				//		}
+				//	}
+				//}
+
 				if (HitActor->ActorHasTag(FName("NPC")))
 				{
 					UParticleSystemComponent* SpawnedEffect = UGameplayStatics::SpawnEmitterAtLocation(

@@ -10,7 +10,8 @@
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "GameFramework/Character.h"
-
+#include "Character/GJCharacter.h"
+#include "NPC/GJNPC.h"
 
 // Sets default values
 AGJRocketProjectile::AGJRocketProjectile()
@@ -106,9 +107,11 @@ void AGJRocketProjectile::AutoExplode()
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn)); // 캐릭터만 감지
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_PhysicsBody)); // 물리 오브젝트도 포함
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldDynamic));
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_GameTraceChannel2)); // Knockback 오브젝트 포함
 
 	TArray<AActor*> IgnoreActors;
-	IgnoreActors.Add(this); // 자기 자신 제외
+	//	IgnoreActors.Add(this); // 자기 자신 제외
 
 	UKismetSystemLibrary::SphereOverlapActors(
 		GetWorld(),
@@ -140,20 +143,46 @@ void AGJRocketProjectile::AutoExplode()
 		{
 			FVector ImpactDirection = (Actor->GetActorLocation() - GetActorLocation()).GetSafeNormal();
 			ApplyKnockback(Actor, -ImpactDirection);
+			/*AGJNPC* HitEnemy = Cast<AGJNPC>(Actor);
+			if (HitEnemy && HitEnemy->bIsDead)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("NPC is Dead! Increasing MiniGun Gauge!"));
+				if (GJCharacter && GJCharacter->MiniGun)
+				{
+					GJCharacter->MiniGun->IncreaseGauge(20.0f);
+				}
+			}*/
 		}
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("This Actor is not NPC! -> %s"), *Actor->GetName());
 		}
+		
+		
+		// OverlappedActors가 무엇인지 출력 디버그용
+		if (Actor)
+		{
+			FString ActorTags;
+			for (const FName& Tag : Actor->Tags)
+			{
+				ActorTags += Tag.ToString() + TEXT(" ");
+			}
+
+			UE_LOG(LogTemp, Warning, TEXT("Actor: %s | Class: %s"),
+				*Actor->GetName(),
+				*Actor->GetClass()->GetName()
+			);
+
+		}
+
+		// 로켓을 삭제
+		Destroy();
 	}
-
-	// 로켓을 삭제
-	Destroy();
 }
-
 void AGJRocketProjectile::ApplyKnockback(AActor* HitActor, FVector ImpactNormal)
 {
-	UE_LOG(LogTemp, Warning, TEXT("This Actor is not CharacterClass!"))
+	UE_LOG(LogTemp, Warning, TEXT("This Actor is not CharacterClass!"));
+
 	// 액터가 ACharacter인 경우 (NPC가 캐릭터를 상속받을 경우)
 	ACharacter* HitCharacter = Cast<ACharacter>(HitActor);
 	if (HitCharacter)
@@ -180,6 +209,7 @@ void AGJRocketProjectile::BeginPlay()
 		RocketLifetime,
 		false
 	);
+
 }
 
 

@@ -56,8 +56,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
 	EGunType GunType;
 
-
-
+	// 획득 관련 변수
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Own Weapon")
 	bool bPickupGun;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Own Weapon")
@@ -69,6 +68,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Own Weapon")
 	bool bPickupMiniGun;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fire")
+	float RecoilStrength;
+
+
+	// 반동 관련 변수
+	FTimerHandle RecoilResetTimer;
+	float CurrentRecoilStrength = 0.0f;
+	float CurrentYawRecoil = 0.0f;
+	float InitialRecoilStrength;
+	float InitialYawRecoil;
 
 	UFUNCTION()
 	void OnBeginOverlap(
@@ -106,6 +115,8 @@ public:
 
 	EGunType GetGunType() const;
 
+	void ApplyRecoil();
+	void ResetRecoil();
 
 protected:
 	// 무기의 스탯과 관련된 변수
@@ -113,6 +124,7 @@ protected:
 	float Damage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
 	float Accuracy;
+
 	
 	//CoolDownDelay = 1 / (FireRate / 60); // 초당 발사 간격 결정 가능
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
@@ -130,17 +142,10 @@ protected:
 	UPROPERTY()
 	AGJBaseGunAttachment* CurrentAttachment;
 
-
-	
-
-
-
-
 	// 부착물 관련 변수
 	bool bIsSilenced;
 	bool bHasScope;
 
-	
 
 
 
