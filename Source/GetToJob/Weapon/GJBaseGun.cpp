@@ -5,6 +5,7 @@
 #include "Weapon/GJBaseGunAttachment.h"
 #include "Weapon/GJScope.h"
 #include "Kismet/GameplayStatics.h"
+#include "Character/GJInventoryComponent.h"
 
 
 // Sets default values
@@ -136,16 +137,21 @@ void AGJBaseGun::Pickup(ACharacter* PlayerCharacter)
 	}
 
 	AGJCharacter* GJCharacter = Cast<AGJCharacter>(PlayerCharacter);
-	if (GJCharacter)
+	if (GJCharacter && GJCharacter->InventoryComponent)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Pickup: GJCharacter->CurrentGun 상태: %s"),
-			GJCharacter->CurrentGun ? *GJCharacter->CurrentGun->GetName() : TEXT("nullptr"));
-
-		if (GJCharacter->CurrentGun)
+		if (GJCharacter->InventoryComponent->WeaponSlots.Contains(this))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Pickup: 이미 총을 가지고 있음 - 줍기 불가"));
 			return;
 		}
+
+		GJCharacter->InventoryComponent->AddWeapon(this);
+	}
+
+	// 무기가 장착되지 않았다면 자동 장착
+	if (!GJCharacter->CurrentGun)
+	{
+		GJCharacter->CurrentGun = GJCharacter->InventoryComponent->EquipWeaponFromSlot(0);
 	}
 
 	// 물리 시뮬레이션 완전히 끄기
