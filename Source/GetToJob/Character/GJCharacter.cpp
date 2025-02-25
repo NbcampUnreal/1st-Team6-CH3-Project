@@ -72,19 +72,6 @@ void AGJCharacter::Interact()
     // 추후 오브젝트 상호작용 로직 구현 가능
 }
 
-void AGJCharacter::SelectWeapon(int32 WeaponSlot)
-{
-    if (OwnedWeapons.IsValidIndex(WeaponSlot - 1))
-    {
-        CurrentGun = OwnedWeapons[WeaponSlot - 1];
-        UE_LOG(LogTemp, Log, TEXT("Weapon Slot %d Selected"), WeaponSlot);
-    }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Invalid Weapon Slot: %d"), WeaponSlot);
-    }
-}
-
 void AGJCharacter::FireWeapon()
 {
     if (!CurrentGun)
@@ -138,35 +125,122 @@ float AGJCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 
 void AGJCharacter::BeginPlay()
 {
-	Super::BeginPlay();
+    Super::BeginPlay();
 
-    //// 초기 무기 설정 (예시로 3개 무기 장착)
-    //OwnedWeapons.Add(NewObject<AGJRevolver>());
-    //OwnedWeapons.Add(NewObject<AGJRifle>());
-    //OwnedWeapons.Add(NewObject<AGJRocketLauncher>());
+    // 무기가 없으면 블루프린트 무기 생성
+    /*if (WeaponSlots.Num() == 0)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("No weapons found! Initializing default BP weapons."));
 
-    //// 기본 장착 무기 설정
-    //if (OwnedWeapons.Num() > 0)
+        if (BP_GJRevolver)
+        {
+            AGJRevolver* Revolver = GetWorld()->SpawnActor<AGJRevolver>(BP_GJRevolver);
+            if (Revolver)
+            {
+                AddWeaponToSlot(Revolver);
+                UE_LOG(LogTemp, Log, TEXT("Revolver successfully spawned and added to slot."));
+            }
+            else
+            {
+                UE_LOG(LogTemp, Error, TEXT("Failed to spawn Revolver!"));
+            }
+        }
+
+        if (BP_GJRifle)
+        {
+            AGJRifle* Rifle = GetWorld()->SpawnActor<AGJRifle>(BP_GJRifle);
+            if (Rifle)
+            {
+                AddWeaponToSlot(Rifle);
+                UE_LOG(LogTemp, Log, TEXT("Rifle successfully spawned and added to slot."));
+            }
+            else
+            {
+                UE_LOG(LogTemp, Error, TEXT("Failed to spawn Rifle!"));
+            }
+        }
+
+        if (BP_GJRocketLauncher)
+        {
+            AGJRocketLauncher* RocketLauncher = GetWorld()->SpawnActor<AGJRocketLauncher>(BP_GJRocketLauncher);
+            if (RocketLauncher)
+            {
+                AddWeaponToSlot(RocketLauncher);
+                UE_LOG(LogTemp, Log, TEXT("Rocket Launcher successfully spawned and added to slot."));
+            }
+            else
+            {
+                UE_LOG(LogTemp, Error, TEXT("Failed to spawn Rocket Launcher!"));
+            }
+        }
+    }*/
+
+
+    //// 첫 번째 무기 장착
+    //if (WeaponSlots.IsValidIndex(0))
     //{
-    //    CurrentGun = OwnedWeapons[0]; // 기본적으로 첫 번째 무기 장착
+    //    EquipWeaponFromSlot(0);
     //}
+}
 
-        // 무기가 없으면 기본 무기 생성
-    //if (OwnedWeapons.Num() == 0)
-    //{
-    //    UE_LOG(LogTemp, Warning, TEXT("No weapons found! Initializing default weapons."));
 
-    //    OwnedWeapons.Add(NewObject<AGJRevolver>(this)); // Outer 지정
-    //    OwnedWeapons.Add(NewObject<AGJRifle>(this));
-    //    OwnedWeapons.Add(NewObject<AGJRocketLauncher>(this));
-    //}
+void AGJCharacter::AddWeaponToSlot(AGJBaseGun* NewWeapon)
+{
+    if (!NewWeapon)
+    {
+        UE_LOG(LogTemp, Error, TEXT("Cannot add weapon: Invalid weapon"));
+        return;
+    }
 
-    //// 기본 무기 장착
-    //if (OwnedWeapons.IsValidIndex(0))
-    //{
-    //    CurrentGun = OwnedWeapons[0];
-    //    UE_LOG(LogTemp, Log, TEXT("Equipped default weapon: %s"), *CurrentGun->GetName());
-    //}
+    // 슬롯이 가득 찼다면 오래된 무기를 제거하고 새 무기 추가
+    if (WeaponSlots.Num() >= MaxWeaponSlots)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Weapon slots are full! Removing oldest weapon."));
+
+        AGJBaseGun* OldWeapon = WeaponSlots[0];
+        OldWeapon->ThrowAway();
+        WeaponSlots.RemoveAt(0);
+    }
+
+    // 슬롯에 무기 추가
+    WeaponSlots.Add(NewWeapon);
+    UE_LOG(LogTemp, Log, TEXT("Weapon added to slot %d: %s"), WeaponSlots.Num(), *NewWeapon->GetName());
+
+    // 장착된 무기가 없다면 첫 번째 무기로 자동 장착
+    if (!CurrentGun)
+    {
+        EquipWeaponFromSlot(WeaponSlots.Num() - 1);
+    }
+}
+
+void AGJCharacter::EquipWeaponFromSlot(int32 SlotIndex)
+{
+    if (!WeaponSlots.IsValidIndex(SlotIndex))
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Invalid weapon slot index: %d"), SlotIndex);
+        return;
+    }
+
+    AGJBaseGun* NewWeapon = WeaponSlots[SlotIndex];
+
+    if (!NewWeapon)
+    {
+        UE_LOG(LogTemp, Error, TEXT("No weapon in slot %d"), SlotIndex);
+        return;
+    }
+
+    // 현재 장착 중인 무기 해제
+    if (CurrentGun)
+    {
+        CurrentGun->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+    }
+
+    // 새로운 무기 장착
+    CurrentGun = NewWeapon;
+    FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, true);
+    CurrentGun->AttachToComponent(GetMesh(), AttachRules, CurrentGun->GunSocketName);
+
+    UE_LOG(LogTemp, Log, TEXT("Equipped weapon from slot %d: %s"), SlotIndex + 1, *CurrentGun->GetName());
 }
 
 void AGJCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -316,7 +390,7 @@ void AGJCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
                     PlayerController->WeaponSlot1Action,
                     ETriggerEvent::Triggered,
                     this,
-                    &AGJCharacter::SelectWeapon, 1
+                    &AGJCharacter::EquipWeaponFromSlot, 0
                 );
             }
 
@@ -326,7 +400,7 @@ void AGJCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
                     PlayerController->WeaponSlot2Action,
                     ETriggerEvent::Triggered,
                     this,
-                    &AGJCharacter::SelectWeapon, 2
+                    &AGJCharacter::EquipWeaponFromSlot, 1
                 );
             }
 
@@ -336,7 +410,7 @@ void AGJCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
                     PlayerController->WeaponSlot3Action,
                     ETriggerEvent::Triggered,
                     this,
-                    &AGJCharacter::SelectWeapon, 3
+                    &AGJCharacter::EquipWeaponFromSlot, 2
                 );
             }
         }

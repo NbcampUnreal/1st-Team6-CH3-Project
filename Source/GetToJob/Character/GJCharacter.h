@@ -2,6 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "NPC/AICharacterBase.h"
+#include "Weapon/GJRevolver.h"
+#include "Weapon/GJRifle.h"
+#include "Weapon/GjRocketLauncher.h"
 #include "GameFramework/Character.h"
 #include "GJCharacter.generated.h"
 
@@ -28,6 +31,34 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Gun")
 	AGJBaseGun* CurrentGun;
 
+	// 블루프린트 무기 클래스 참조
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon Blueprints")
+	TSubclassOf<AGJRevolver> BP_GJRevolver;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon Blueprints")
+	TSubclassOf<AGJRifle> BP_GJRifle;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon Blueprints")
+	TSubclassOf<AGJRocketLauncher> BP_GJRocketLauncher;
+
+	// 슬롯에 무기 추가 함수
+	void AddWeaponToSlot(AGJBaseGun* NewWeapon);
+
+	// 상호작용 함수
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void Interact();
+
+	// 현재 장착된 무기를 관리하기 위한 배열
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
+	TArray<AGJBaseGun*> WeaponSlots;
+
+	// 슬롯 최대 크기 설정
+	UPROPERTY(EditDefaultsOnly, Category = "Weapons")
+	int32 MaxWeaponSlots = 3;
+
+	// 무기 장착 함수
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void EquipWeaponFromSlot(int32 SlotIndex);
 
 protected:
 	virtual float TakeDamage(
@@ -36,18 +67,6 @@ protected:
 		AController* EventInstigator,
 		AActor* DamgeCauser
 	) override;
-
-	// 상호작용 함수
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void Interact();
-
-	// 무기 선택
-	UFUNCTION(BlueprintCallable, Category = "Weapon Selection")
-	void SelectWeapon(int32 WeaponSlot);
-
-	// 현재 장착된 무기를 관리하기 위한 배열
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
-	TArray<AGJBaseGun*> OwnedWeapons;
 
 	// 무기 발사 함수
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
