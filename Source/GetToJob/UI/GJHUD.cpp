@@ -1,10 +1,5 @@
 ﻿#include "UI/GJHUD.h"
-#include "Character/GJPlayerController.h"
-#include "Character//GJCharacter.h"
-#include "Weapon/GJBaseGun.h"
 #include "GameManager/GJGameState.h"
-#include "Components/TextBlock.h"
-#include "Components/Image.h"
 #include "Blueprint/UserWidget.h"
 #include "UI/GJ_MainWidget.h"
 #include "Blueprint/WidgetBlueprintGeneratedClass.h"
@@ -22,8 +17,6 @@ void AGJHUD::DisplayHUD(GJHUDState HUDType)
 			MainHUDWidget->AddToViewport();
 		}
 		break;
-	case GJHUDState::HitEffect:
-		break;
 	case GJHUDState::PauseHUD:
 		break;
 	case GJHUDState::GameOver:
@@ -35,6 +28,11 @@ void AGJHUD::DisplayHUD(GJHUDState HUDType)
 	}
 }
 
+UGJ_MainWidget* AGJHUD::GetMainHUDWidget() const
+{
+	return MainHUDWidget;
+}
+
 void AGJHUD::HideHUD(GJHUDState HUDType)
 {
 	switch (HUDType)
@@ -42,8 +40,6 @@ void AGJHUD::HideHUD(GJHUDState HUDType)
 	case GJHUDState::StartHUD:
 		break;
 	case GJHUDState::MainHUD:
-		break;
-	case GJHUDState::HitEffect:
 		break;
 	case GJHUDState::PauseHUD:
 		break;
@@ -68,5 +64,16 @@ void AGJHUD::UpdateMainHUD()
 
 void AGJHUD::ShowHitEffect()
 {
+	if (MainHUDWidget)
+	{
+		MainHUDWidget->ShowHitAnim();
+	}
+}
 
+void AGJHUD::UpdateCrosshairSize(float NewSpread)
+{
+	if (MainHUDWidget)
+	{
+		MainHUDWidget->SetCrosshairSize(NewSpread);
+	}
 }

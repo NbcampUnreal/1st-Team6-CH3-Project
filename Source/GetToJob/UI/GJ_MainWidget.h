@@ -8,6 +8,8 @@ class UTextBlock;
 class UImage;
 class UWidgetAnimation;
 class UProgressBar;
+class UBorder;
+class AGJBaseGun;
 
 UCLASS()
 class GETTOJOB_API UGJ_MainWidget : public UUserWidget
@@ -19,6 +21,12 @@ protected:
 	
 public:
 	void UpdateHUD();
+	void ShowHitAnim();
+	UFUNCTION(BlueprintCallable, Category = "Crosshair Test")
+	void SetCrosshairSize(float NewSpread);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Crosshair")
+	float CrossSpread = 0.0f;
 
 private:
 	UPROPERTY(meta = (BindWidget))
@@ -57,6 +65,19 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	UImage* GunImage;
 
+	UPROPERTY(EditAnywhere, Category = "Gun Images")
+	UTexture2D* RevolverImage;
+
+	UPROPERTY(EditAnywhere, Category = "Gun Images")
+	UTexture2D* MiniGunImage;
+
+	UPROPERTY(EditAnywhere, Category = "Gun Images")
+	UTexture2D* RifleImage;
+
+	UPROPERTY(EditAnywhere, Category = "Gun Images")
+	UTexture2D* RocketLauncherImage;
+
+
 	UPROPERTY(Transient, meta = (BindWidgetAnim))
 	UWidgetAnimation* KillAnimation;
 
@@ -64,4 +85,30 @@ private:
 	UTextBlock* Time;
 
 	int32 CurrentKillCount = 0;
+
+	UPROPERTY(meta = (BindWidget))
+	UImage* HitImage;
+
+	UPROPERTY(Transient, meta = (BindWidgetAnim))
+	UWidgetAnimation* HitAnim;
+
+	//crosshair
+	UPROPERTY(meta = (BindWidget))
+	UBorder* CrosshairTop;
+
+	UPROPERTY(meta = (BindWidget))
+	UBorder* CrosshairBottom;
+
+	UPROPERTY(meta = (BindWidget))
+	UBorder* CrosshairLeft;
+
+	UPROPERTY(meta = (BindWidget))
+	UBorder* CrosshairRight;
+
+
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Crosshair")
+	float CrossLength = 10.0f;
+
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Crosshair")
+	float CrossThickness = 2.0f;
 };

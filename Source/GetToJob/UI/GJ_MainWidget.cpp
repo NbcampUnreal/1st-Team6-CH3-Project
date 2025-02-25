@@ -7,6 +7,8 @@
 #include "GameFramework/WorldSettings.h"
 #include "TimerManager.h"
 #include "Components/ProgressBar.h"
+#include "Components/Border.h"
+#include "Components/CanvasPanelSlot.h"
 #include "Kismet/KismetMathLibrary.h"
 
 void UGJ_MainWidget::NativeConstruct()
@@ -18,6 +20,13 @@ void UGJ_MainWidget::NativeConstruct()
 		KillCountText->SetVisibility(ESlateVisibility::Hidden);
 		KillText->SetVisibility(ESlateVisibility::Hidden);
 	}
+
+	if (HitImage)
+	{
+		HitImage->SetVisibility(ESlateVisibility::Hidden);
+	}
+
+	SetCrosshairSize(5.0f);
 }
 
 void UGJ_MainWidget::UpdateHUD()
@@ -89,6 +98,25 @@ void UGJ_MainWidget::UpdateHUD()
 		{
 			GunImage->SetVisibility(ESlateVisibility::Visible);
 
+			AGJBaseGun* CurrentGun = GJCharacter->CurrentGun;
+
+			switch (CurrentGun->GunType)
+			{
+			case EGunType::MiniGun:
+				GunImage->SetBrushFromTexture(MiniGunImage);
+				break;
+			case EGunType::Revolver:
+				GunImage->SetBrushFromTexture(RevolverImage);
+				break;
+			case EGunType::Rifle:
+				GunImage->SetBrushFromTexture(RifleImage);
+				break;
+			case EGunType::RocketLauncher:
+				GunImage->SetBrushFromTexture(RocketLauncherImage);
+				break;
+			default:
+				break;
+			}
 
 		}
 		else
@@ -158,6 +186,62 @@ void UGJ_MainWidget::UpdateHUD()
 		BGHpPercent = FMath::Lerp(BGHpPercent, NewHppercent, 0.2f);
 		HealthBGBar->SetPercent(BGHpPercent);
 	}
+
 }
+
+void UGJ_MainWidget::ShowHitAnim()
+{
+	if (HitImage && HitAnim)
+	{
+		HitImage->SetVisibility(ESlateVisibility::Visible);
+		PlayAnimation(HitAnim);
+	}
+}
+
+void UGJ_MainWidget::SetCrosshairSize(float NewSpread)
+{
+	if (!CrosshairTop || !CrosshairBottom || !CrosshairLeft || !CrosshairRight)
+		return;
+
+	CrossSpread = NewSpread;
+
+	FVector2D HorizontalSize(CrossLength, CrossThickness); //가로 크기
+	FVector2D VerticalSize(CrossThickness, CrossLength); //세로 크기
+
+	float x, y;
+	if (UCanvasPanelSlot* BottomSlot = Cast<UCanvasPanelSlot>(CrosshairBottom->Slot))
+	{
+		BottomSlot->SetSize(VerticalSize);
+		x = -(CrossThickness / 2);
+		y = (CrossLength - 8) + CrossSpread;
+		BottomSlot->SetPosition(FVector2D(x, y));
+	}
+
+	if (UCanvasPanelSlot* TopSlot = Cast<UCanvasPanelSlot>(CrosshairTop->Slot))
+	{
+		TopSlot->SetSize(VerticalSize);
+		x = -(CrossThickness / 2);
+		y = -CrossLength - CrossSpread;
+		TopSlot->SetPosition(FVector2D(x, y));
+	}
+
+	if (UCanvasPanelSlot* LeftSlot = Cast<UCanvasPanelSlot>(CrosshairLeft->Slot))
+	{
+		LeftSlot->SetSize(HorizontalSize);
+		x = -CrossLength - CrossSpread;
+		y = -(CrossThickness / 2);
+		LeftSlot->SetPosition(FVector2D(x, y));
+	}
+
+	if (UCanvasPanelSlot* RightSlot = Cast<UCanvasPanelSlot>(CrosshairRight->Slot))
+	{
+		RightSlot->SetSize(HorizontalSize);
+		x = (CrossLength + CrossSpread) - CrossLength;
+		y = -(CrossThickness / 2);
+		RightSlot->SetPosition(FVector2D(x, y));
+	}
+}
+
+
 
 
