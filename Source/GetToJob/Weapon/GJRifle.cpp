@@ -5,6 +5,8 @@
 #include "Components/SphereComponent.h"
 #include "Character/GJCharacter.h"
 #include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystem.h"
+#include "Particles/ParticleSystemComponent.h"
 
 AGJRifle::AGJRifle()
 {
@@ -20,7 +22,8 @@ AGJRifle::AGJRifle()
 	MaxAmmo = 30;
 	CurrentAmmo = MaxAmmo;
 	ReloadTime = 3.0f;
-	bPickRifle= false;
+	bPickupRifle= false;
+	bPickRifle = false;
 	GunType = EGunType::Rifle;
 }
 
@@ -98,6 +101,37 @@ void AGJRifle::Fire()
 					this,
 					nullptr
 				);
+
+				if (HitActor->ActorHasTag(FName("NPC")))
+				{
+					UParticleSystemComponent* SpawnedEffect = UGameplayStatics::SpawnEmitterAtLocation(
+						GetWorld(),
+						HitEffect,
+						HitResult.ImpactPoint,
+						HitResult.ImpactNormal.Rotation()
+					);
+					if (HitEffect)
+					{
+
+						// 3초 후에 이펙트를 제거하는 타이머 설정
+						FTimerHandle ExplosionEffectTimer;
+						GetWorldTimerManager().SetTimer(
+							ExplosionEffectTimer,
+							[SpawnedEffect]()
+							{
+								if (SpawnedEffect)
+								{
+									SpawnedEffect->DeactivateSystem(); // 이펙트 중지
+									SpawnedEffect->DestroyComponent(); // 컴포넌트 삭제
+								}
+							},
+							1.0f,
+							false
+						);
+					}
+				}
+
+				
 			}
 			// 맞췄을 때 디버그 라인
 			DrawDebugLine(GetWorld(), TraceStart, HitResult.ImpactPoint, FColor::Red, false, 3.0f);
@@ -144,11 +178,13 @@ void AGJRifle::BeginPlay()
 void AGJRifle::Pickup(ACharacter* PlayerCharacter)
 {
 	Super::Pickup(PlayerCharacter);
+	bPickupRifle = true;
 	bPickRifle = true;
 }
 
 void AGJRifle::ThrowAway()
 {
 	Super::ThrowAway();
-	bPickRifle = false;
+	bPickupRifle = false;
+	bPickRifle = false; 
 }

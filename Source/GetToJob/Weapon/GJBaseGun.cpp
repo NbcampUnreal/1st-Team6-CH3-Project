@@ -40,7 +40,6 @@ AGJBaseGun::AGJBaseGun()
 	Accuracy = 100.0f;
 	AmmoVelocity = 100.0f;
 	FireRate = 200.0f;
-
 	MaxAmmo = 30;
 	CurrentAmmo = MaxAmmo;
 
@@ -51,6 +50,7 @@ AGJBaseGun::AGJBaseGun()
 	bIsReloading = false;
 	bPickupGun = false;
 	bCanPickup = true;
+	bPickupMiniGun = false;
 	MagazineCount = 3;
 }
 

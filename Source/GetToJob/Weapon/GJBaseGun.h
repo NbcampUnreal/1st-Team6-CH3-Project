@@ -52,10 +52,23 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")
 	USoundBase* ReloadSound;
 
+	// 총기 타입
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
+	EGunType GunType;
+
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Own Weapon")
 	bool bPickupGun;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Own Weapon")
+	bool bPickupRevolver;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Own Weapon")
+	bool bPickupRifle;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Own Weapon")
+	bool bPickupRocketLauncher;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Own Weapon")
+	bool bPickupMiniGun;
+
 
 	UFUNCTION()
 	void OnBeginOverlap(
@@ -117,9 +130,7 @@ protected:
 	UPROPERTY()
 	AGJBaseGunAttachment* CurrentAttachment;
 
-	// 총기 타입
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
-	EGunType GunType;
+
 	
 
 
@@ -136,5 +147,4 @@ protected:
 
 private:
 	bool bCanPickup;
-	
 };
