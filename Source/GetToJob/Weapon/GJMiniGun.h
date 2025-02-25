@@ -56,7 +56,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "MiniGun")
 	float MaxGauge; // 최대 게이지 값
 
-	UPROPERTY(VisibleAnywhere, Category = "MiniGun")
+	UPROPERTY(EditDefaultsOnly, Category = "MiniGun")
 	float CurrentGauge; // 현재 게이지 값
 
 	UPROPERTY(EditDefaultsOnly, Category = "MiniGun")

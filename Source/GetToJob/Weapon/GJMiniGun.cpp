@@ -51,8 +51,11 @@ void AGJMiniGun::ActivateMiniGun()
 		GunMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
+
+
 	GunMesh->SetVisibility(true);
 	GJCharacter->CurrentGun = this;
+	bPickupMiniGun = true;
 
 	UE_LOG(LogTemp, Warning, TEXT("MiniGun Activated!"));
 
@@ -71,6 +74,7 @@ void AGJMiniGun::DeactivateMiniGun()
 	// 기존 무기 다시 보이게 하기 (큇슬롯 로직 구현 시 구현하자)
 	GJCharacter->CurrentGun = nullptr; // 추후 수정
 	UE_LOG(LogTemp, Warning, TEXT("MiniGun Deactivated!!"));
+	bPickupMiniGun = false;
 
 	ResetGauge();
 }
@@ -121,7 +125,7 @@ void AGJMiniGun::Fire()
 
 		if (GJCharacter && GJCharacter->GetMesh())
 		{
-			MuzzleLocation = GJCharacter->GetMesh()->GetSocketLocation(TEXT("Revolver"));
+			MuzzleLocation = GJCharacter->GetMesh()->GetSocketLocation(TEXT("MiniGun"));
 		}
 		else
 		{
@@ -214,7 +218,8 @@ void AGJMiniGun::Fire()
 
 bool AGJMiniGun::IsMiniGunActive() const
 {
-	return false;
+	AGJCharacter* GJCharacter = Cast<AGJCharacter>(GetOwner());
+	return (GJCharacter && GJCharacter->CurrentGun == this);
 }
 
 void AGJMiniGun::EnableFire()
@@ -224,12 +229,39 @@ void AGJMiniGun::EnableFire()
 
 void AGJMiniGun::BeginPlay()
 {
+	Super::BeginPlay();
+
+	FTimerHandle GaugeHandle;
+	GetWorld()->GetTimerManager().SetTimer(
+		GaugeHandle,
+		[this]()
+		{
+			CurrentGauge = MaxGauge;
+			UE_LOG(LogTemp, Warning, TEXT("Timer is over!"));
+			if (CurrentGauge == MaxGauge)
+			{
+				ActivateMiniGun();
+				UE_LOG(LogTemp, Warning, TEXT("MiniGun Activate!"));
+			}
+		},
+		5.0f,
+		false
+	);
 }
 
 void AGJMiniGun::StartDeactivationTimer()
 {
+	GetWorld()->GetTimerManager().SetTimer(
+		MiniGunTimerHandle,
+		this,
+		&AGJMiniGun::DeactivateMiniGun,
+		MiniGunDuration,
+		false
+	);
 }
 
 void AGJMiniGun::ResetGauge()
 {
+	CurrentGauge = 0.0f;
+	UE_LOG(LogTemp, Warning, TEXT("MiniGun Gauge Reset to 0!"));
 }

@@ -50,6 +50,7 @@ AGJBaseGun::AGJBaseGun()
 	bIsReloading = false;
 	bPickupGun = false;
 	bCanPickup = true;
+	bPickupMiniGun = false;
 	MagazineCount = 3;
 }
 

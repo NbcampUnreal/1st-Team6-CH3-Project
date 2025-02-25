@@ -24,6 +24,8 @@ AGJRevolver::AGJRevolver()
 	ReloadTime = 2.0f;
 	bPickRevolver = false;
 	MagazineCount = INT32_MAX;
+	bPickupRevolver = false;
+
 
 	GunType = EGunType::Revolver;
 }
@@ -184,12 +186,13 @@ void AGJRevolver::BeginPlay()
 void AGJRevolver::Pickup(ACharacter* PlayerCharacter)
 {
 	Super::Pickup(PlayerCharacter);
+	bPickupRevolver = true;
 	bPickRevolver = true;
-
 }
 
 void AGJRevolver::ThrowAway()
 {
 	Super::ThrowAway();
+	bPickupRevolver = false;
 	bPickRevolver = false;
 }

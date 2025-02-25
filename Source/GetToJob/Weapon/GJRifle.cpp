@@ -22,7 +22,8 @@ AGJRifle::AGJRifle()
 	MaxAmmo = 30;
 	CurrentAmmo = MaxAmmo;
 	ReloadTime = 3.0f;
-	bPickRifle= false;
+	bPickupRifle= false;
+	bPickRifle = false;
 	GunType = EGunType::Rifle;
 }
 
@@ -177,11 +178,13 @@ void AGJRifle::BeginPlay()
 void AGJRifle::Pickup(ACharacter* PlayerCharacter)
 {
 	Super::Pickup(PlayerCharacter);
+	bPickupRifle = true;
 	bPickRifle = true;
 }
 
 void AGJRifle::ThrowAway()
 {
 	Super::ThrowAway();
-	bPickRifle = false;
+	bPickupRifle = false;
+	bPickRifle = false; 
 }

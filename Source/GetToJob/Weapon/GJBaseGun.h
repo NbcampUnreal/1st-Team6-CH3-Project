@@ -60,6 +60,15 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Own Weapon")
 	bool bPickupGun;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Own Weapon")
+	bool bPickupRevolver;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Own Weapon")
+	bool bPickupRifle;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Own Weapon")
+	bool bPickupRocketLauncher;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Own Weapon")
+	bool bPickupMiniGun;
+
 
 	UFUNCTION()
 	void OnBeginOverlap(
@@ -138,5 +147,4 @@ protected:
 
 private:
 	bool bCanPickup;
-	
 };
