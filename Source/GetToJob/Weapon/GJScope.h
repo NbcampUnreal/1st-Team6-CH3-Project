@@ -28,6 +28,12 @@ protected:
 	float ZoomFOV;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scope")
 	float DefaultFOV;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scope")
+	float CameraRelativeX;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scope")
+	float CameraRelativeY;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scope")
+	float CameraRelativeZ;
 	UPROPERTY()
 	APlayerController* PlayerController;
 	
