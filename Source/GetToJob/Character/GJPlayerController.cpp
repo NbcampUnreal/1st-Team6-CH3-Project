@@ -15,7 +15,8 @@ AGJPlayerController::AGJPlayerController()
     InteractAction(nullptr),
     WeaponSlot1Action(nullptr),
     WeaponSlot2Action(nullptr),
-    WeaponSlot3Action(nullptr)
+    WeaponSlot3Action(nullptr),
+    TestDeathAction(nullptr)
 {
 }
 

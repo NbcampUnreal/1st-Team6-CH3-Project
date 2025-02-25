@@ -6,12 +6,21 @@
 #include "Weapon/GJRifle.h"
 #include "Weapon/GjRocketLauncher.h"
 #include "GameFramework/Character.h"
+#include "Character/GJInventoryComponent.h"
 #include "GJCharacter.generated.h"
 
 class USpringArmComponent; // 스프링 암 관련 클래스 헤더
 class UCameraComponent; // 카메라 관련 클래스 전방 선언
 struct FInputActionValue; // Enhanced Input에서 액션 값을 받을 때 사용하는 구조체
 class AGJBaseGun;
+UENUM(BlueprintType)
+enum class EWeaponType : uint8
+{
+	None UMETA(DisplayName = "None"),
+	Revolver UMETA(DisplayName = "Revolver"),
+	Rifle UMETA(DisplayName = "Rifle"),
+	RocketLauncher UMETA(DisplayName = "Rocket Launcher")
+};
 
 UCLASS()
 class GETTOJOB_API AGJCharacter : public AAICharacterBase
@@ -41,24 +50,27 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon Blueprints")
 	TSubclassOf<AGJRocketLauncher> BP_GJRocketLauncher;
 
-	// 슬롯에 무기 추가 함수
-	void AddWeaponToSlot(AGJBaseGun* NewWeapon);
-
 	// 상호작용 함수
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void Interact();
 
-	// 현재 장착된 무기를 관리하기 위한 배열
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
-	TArray<AGJBaseGun*> WeaponSlots;
+	// 인벤토리 연결
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
+	UGJInventoryComponent* InventoryComponent;
 
-	// 슬롯 최대 크기 설정
-	UPROPERTY(EditDefaultsOnly, Category = "Weapons")
-	int32 MaxWeaponSlots = 3;
+	// 무기 장착
+	void EquipWeapon(AGJBaseGun* NewWeapon);
 
-	// 무기 장착 함수
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	EWeaponType CurrentWeaponType;
+
+	void UpdateWeaponState(AGJBaseGun* NewWeapon);
+
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void EquipWeaponFromSlot(int32 SlotIndex);
+	EWeaponType GetCurrentWeaponType() const { return CurrentWeaponType; }
+
+	virtual void Tick(float Deltatime) override;
+	float LastSpeed = 0.0f;
 
 protected:
 	virtual float TakeDamage(
@@ -67,6 +79,14 @@ protected:
 		AController* EventInstigator,
 		AActor* DamgeCauser
 	) override;
+
+	// 무기 장착 해제
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void UnequipCurrentWeapon();
+
+	// 무기 장착 요청(인벤토리에서)
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void EquipWeaponFromInventory(int32 SlotIndex);
 
 	// 무기 발사 함수
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
@@ -111,6 +131,13 @@ protected:
 	UFUNCTION()
 	void ResetJump(); // 쿨다운이 끝난 후 점프를 다시 가능하게 만드는 함수
 
+	// 사운드 재생 변수
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	USoundBase* DeathSound;
+
+	// 테스트용 죽이기
+	UFUNCTION(BlueprintCallable, Category = "Test")
+	void TriggerDeathTest();
 
 	// 입력 바인딩을 처리할 함수
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

@@ -49,6 +49,8 @@ public:
 	UInputAction* WeaponSlot2Action;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* WeaponSlot3Action;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* TestDeathAction;
 
 	// HUD ǥ��
 	UFUNCTION(BlueprintCallable, Category = "HUD")
