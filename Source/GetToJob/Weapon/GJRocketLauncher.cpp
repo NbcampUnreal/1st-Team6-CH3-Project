@@ -23,6 +23,7 @@ AGJRocketLauncher::AGJRocketLauncher()
 	bPickupRocketLauncher= false;
 	bPickRocketLauncher = false;
 	ExplosionRadius = 300.f;
+	RecoilStrength = 20.0f;
 
 	GunType = EGunType::RocketLauncher;
 }
@@ -45,6 +46,9 @@ void AGJRocketLauncher::Fire()
 			GetActorLocation()
 		);
 	}
+
+	// 반동 함수 호출
+	ApplyRecoil();
 
 	if (ProjectileClass)
 	{

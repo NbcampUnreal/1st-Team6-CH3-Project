@@ -25,6 +25,7 @@ AGJRifle::AGJRifle()
 	bPickupRifle= false;
 	bPickRifle = false;
 	GunType = EGunType::Rifle;
+	RecoilStrength = 0.4f;
 }
 
 void AGJRifle::Fire()
@@ -56,6 +57,10 @@ void AGJRifle::Fire()
 		FVector CameraLocation;
 		FRotator CameraRotation;
 		OwnerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
+
+		// 반동 호출
+		ApplyRecoil();
+
 
 		// 캐릭터가 가진 소켓 위치 가져오기 // TODO 나중에 총구 소켓(Muzzle)을 만들어서 변경
 		AGJCharacter* GJCharacter = Cast<AGJCharacter>(GetOwner());
