@@ -20,8 +20,9 @@ AGJRevolver::AGJRevolver()
 	TraceRange = 2000.0f;
 	bCanFire = true;
 	bIsReloading = false;
-	MaxAmmo = 10;
-	CurrentAmmo = MaxAmmo;
+	MaxAmmo = INT32_MAX;
+	MagazineCapacity = 10;
+	CurrentAmmo = MagazineCapacity;
 	ReloadTime = 2.0f;
 	bPickRevolver = false;
 	MagazineCount = INT32_MAX;
@@ -35,7 +36,9 @@ AGJRevolver::AGJRevolver()
 
 void AGJRevolver::Fire()
 {
-	
+	UE_LOG(LogTemp, Warning, TEXT("Current: %d, Magazine: %d, Max: %d Ammo"), CurrentAmmo, MagazineCapacity, MaxAmmo);
+
+
 	// 재장전 중이거나, 탄이 없을 경우 발사 불가
 	if (!bCanFire || bIsReloading || CurrentAmmo <= 0)
 	{
@@ -194,11 +197,6 @@ void AGJRevolver::EnableFire()
 	bCanFire = true;
 }
 
-void AGJRevolver::FinishReload()
-{
-	CurrentAmmo = MaxAmmo;
-	bIsReloading = false;
-}
 
 void AGJRevolver::BeginPlay()
 {

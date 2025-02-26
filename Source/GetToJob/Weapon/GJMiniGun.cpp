@@ -15,7 +15,8 @@ AGJMiniGun::AGJMiniGun()
 	FireRate = 1000.0f;
 	CoolDownDelay = 1 / (FireRate / 60);
 	MaxAmmo = INT32_MAX;
-	CurrentAmmo = MaxAmmo;
+	MagazineCapacity = INT32_MAX;
+	CurrentAmmo = MagazineCapacity;
 	FireSound = nullptr;
 	TraceRange = 6000.0f;
 	bCanFire = true;

@@ -24,6 +24,7 @@ public:
 
 	virtual void Fire() = 0;
 	virtual void Reload() = 0;
+	virtual void FinishReload() = 0;
 	virtual bool IsReloading() = 0;
 	virtual float GetDamage() = 0;
 	virtual void Pickup(ACharacter* PlayerCharacter) = 0;

@@ -104,9 +104,10 @@ public:
 	
 	virtual void Pickup(ACharacter* PlayerCharacter) override;
 	virtual void ThrowAway() override;
-	
+	virtual void FinishReload() override;
+
 	void EnablePickup();
-	void FinishReload();
+	
 	
 	UFUNCTION(BlueprintCallable, Category = "Weapon Attachment")
 	void EquipAttachment(AGJBaseGunAttachment* Attachment);
@@ -139,6 +140,8 @@ protected:
 	float AmmoVelocity;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
 	int32 MaxAmmo;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
+	int32 MagazineCapacity;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
 	int32 CurrentAmmo;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")

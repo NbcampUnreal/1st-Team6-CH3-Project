@@ -19,8 +19,10 @@ AGJRifle::AGJRifle()
 	TraceRange = 2000.0f;
 	bCanFire = true;
 	bIsReloading = false;
-	MaxAmmo = 30;
-	CurrentAmmo = MaxAmmo;
+	MaxAmmo = 90;
+	MagazineCapacity = 30;
+	CurrentAmmo = MagazineCapacity;
+	MagazineCount = 100;
 	ReloadTime = 3.0f;
 	bPickupRifle= false;
 	bPickRifle = false;
@@ -169,11 +171,6 @@ void AGJRifle::EnableFire()
 	bCanFire = true;
 }
 
-void AGJRifle::FinishReload()
-{
-	bIsReloading = false;
-	CurrentAmmo = MaxAmmo;
-}
 
 void AGJRifle::BeginPlay()
 {

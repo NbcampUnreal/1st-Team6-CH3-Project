@@ -42,8 +42,9 @@ AGJBaseGun::AGJBaseGun()
 	Accuracy = 100.0f;
 	AmmoVelocity = 100.0f;
 	FireRate = 200.0f;
-	MaxAmmo = 30;
-	CurrentAmmo = MaxAmmo;
+	MaxAmmo = 90;
+	MagazineCapacity = 30;
+	CurrentAmmo = MagazineCapacity;
 
 
 	bIsSilenced = false;
@@ -53,7 +54,7 @@ AGJBaseGun::AGJBaseGun()
 	bPickupGun = false;
 	bCanPickup = true;
 	bPickupMiniGun = false;
-	MagazineCount = 3;
+	MagazineCount = 100;
 }
 
 void AGJBaseGun::OnBeginOverlap(
@@ -119,8 +120,23 @@ void AGJBaseGun::Fire()
 void AGJBaseGun::Reload()
 {
 	// 재장전을 할 필요가 없을 때
-	if (bIsReloading || MagazineCount <= 0)
+	/*if (bIsReloading || MagazineCount <= 0 || MaxAmmo <= 0)
 	{
+		return;
+	}*/
+	if (bIsReloading)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("bIsReloading!"));
+		return;
+	}
+	if (MagazineCount <=0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("MagazineCount!"));
+		return;
+	}
+	if (MaxAmmo <= 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("MaxAmmo!"));
 		return;
 	}
 
@@ -302,7 +318,10 @@ void AGJBaseGun::ThrowAway()
 
 void AGJBaseGun::FinishReload()
 {
-	CurrentAmmo = MaxAmmo;
+	int32 TempMax = MaxAmmo;
+	MaxAmmo = FMath::Max(0, MaxAmmo - (MagazineCapacity - CurrentAmmo));
+	UE_LOG(LogTemp, Warning, TEXT("Reload Finish!! MaxAmmo is %d | Using %d Ammo!!"), MaxAmmo, (MagazineCapacity - CurrentAmmo));
+	CurrentAmmo = FMath::Min(MagazineCapacity, TempMax);
 	bIsReloading = false;
 }
 
@@ -363,7 +382,7 @@ int32 AGJBaseGun::GetCurrentAmmo() const
 
 int32 AGJBaseGun::GetMaxAmmo() const
 {
-	return MaxAmmo;
+	return MagazineCapacity;
 }
 
 void AGJBaseGun::BeginPlay()
