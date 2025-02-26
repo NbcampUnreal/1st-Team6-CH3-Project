@@ -37,8 +37,7 @@ float AAICharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 		Health = FMath::Clamp(Health - DamageAmount, 0.0f, MaxHealth);
 		if (Health <= 0)
 		{
-			UE_LOG(LogTemp, Error, TEXT("Killed"));
-
+			NPC->SetNPCDead(true);
 			NPC->GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
 			NPC->GetMesh()->SetSimulatePhysics(true);
 			NPC->GetCapsuleComponent()->SetCollisionProfileName(TEXT("NoCollision"));
