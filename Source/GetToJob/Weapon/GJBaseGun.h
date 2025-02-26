@@ -89,6 +89,12 @@ public:
 		const FHitResult& SweepResult
 	);
 
+	UFUNCTION()
+	void OnEndOverlap(UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex);
+
 	UFUNCTION(BlueprintCallable, Category = "Weapon Combat")
 	virtual void Fire() override;
 	UFUNCTION(BlueprintCallable, Category = "Weapon Combat")

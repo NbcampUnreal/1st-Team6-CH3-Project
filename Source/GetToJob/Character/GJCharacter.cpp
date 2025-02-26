@@ -76,10 +76,20 @@ AGJCharacter::AGJCharacter()
 
 void AGJCharacter::Interact()
 {
-    // 간단한 로그 출력
-    UE_LOG(LogTemp, Log, TEXT("Interact Key Pressed"));
+    if (InteractableWeapon && InventoryComponent)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("상호작용 키로 무기 줍기 시도: %s"), *InteractableWeapon->GetName());
 
-    // 추후 오브젝트 상호작용 로직 구현 가능
+        // 인벤토리에 무기 추가
+        InteractableWeapon->Pickup(this);
+
+        // 인터랙션 완료 후 초기화
+        InteractableWeapon = nullptr;
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("상호작용할 무기가 없습니다."));
+    }
 }
 
 void AGJCharacter::FireWeapon()

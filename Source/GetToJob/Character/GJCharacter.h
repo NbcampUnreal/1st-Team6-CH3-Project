@@ -63,6 +63,9 @@ public:
 	virtual void Tick(float Deltatime) override;
 	float LastSpeed = 0.0f;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Interaction")
+	class AGJBaseGun* InteractableWeapon;
+
 protected:
 	virtual float TakeDamage(
 		float DamageAmount,
