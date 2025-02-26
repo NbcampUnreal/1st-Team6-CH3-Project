@@ -31,6 +31,7 @@ public:
 	void UpdateMainHUD();
 	void ShowHitEffect();
 	void UpdateCrosshairSize(float NewSpread);
+	void ShowFireAnim();
 
 
 	//ui 위젯 클래스 (blueprint에서 설정)

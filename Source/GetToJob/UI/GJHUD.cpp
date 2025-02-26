@@ -77,3 +77,11 @@ void AGJHUD::UpdateCrosshairSize(float NewSpread)
 		MainHUDWidget->SetCrosshairSize(NewSpread);
 	}
 }
+
+void AGJHUD::ShowFireAnim()
+{
+	if (MainHUDWidget)
+	{
+		MainHUDWidget->PlayFireAnim();
+	}
+}

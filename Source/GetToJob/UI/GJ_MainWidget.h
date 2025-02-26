@@ -25,6 +25,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Crosshair Test")
 	void SetCrosshairSize(float NewSpread);
 
+	void PlayFireAnim();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Crosshair")
 	float CrossSpread = 0.0f;
 
@@ -105,10 +107,13 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	UBorder* CrosshairRight;
 
+	UPROPERTY(Transient, meta = (BindWidgetAnim))
+	UWidgetAnimation* FireAnim;
+
 
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Crosshair")
 	float CrossLength = 10.0f;
 
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Crosshair")
-	float CrossThickness = 2.0f;
+	float CrossThickness = 5.0f;
 };
