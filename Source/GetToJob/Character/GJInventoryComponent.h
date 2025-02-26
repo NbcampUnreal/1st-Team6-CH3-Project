@@ -14,7 +14,7 @@ public:
     UGJInventoryComponent();
 
     // 무기 슬롯 배열
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Inventory")
     TArray<AGJBaseGun*> WeaponSlots;
 
     // 최대 슬롯 수 설정

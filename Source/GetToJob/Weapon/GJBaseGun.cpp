@@ -32,7 +32,8 @@ AGJBaseGun::AGJBaseGun()
 
 	// 오버랩 이벤트를 바인딩 (일단 접촉 시 이벤트가 발생하는 것을 초기 설정으로)
 	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AGJBaseGun::OnBeginOverlap);
-
+	// 충돌 종료 이벤트 바인딩 (무기 범위를 벗어나면 호출됨)
+	CollisionComp->OnComponentEndOverlap.AddDynamic(this, &AGJBaseGun::OnEndOverlap);
 
 
 
@@ -68,15 +69,42 @@ void AGJBaseGun::OnBeginOverlap(
 		AGJCharacter* GJCharacter = Cast<AGJCharacter>(OtherActor);
 		if (GJCharacter)
 		{
-
-
-			Pickup(GJCharacter);
+			// 상호작용 가능한 무기 설정 (자동 줍기 제거)
+			GJCharacter->InteractableWeapon = this;
+			UE_LOG(LogTemp, Warning, TEXT("무기를 주울 준비 완료: %s"), *GetName());
 		}
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("No Pickup!!"));
 		}
 	}
+}
+
+void AGJBaseGun::OnEndOverlap(UPrimitiveComponent* OverlappedComponent,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex)
+{
+	if (OtherActor && OtherActor->ActorHasTag("Player"))
+	{
+		AGJCharacter* GJCharacter = Cast<AGJCharacter>(OtherActor);
+		if (GJCharacter && GJCharacter->InteractableWeapon == this)
+		{
+			// 플레이어가 더 이상 이 무기와 상호작용할 수 없음
+			GJCharacter->InteractableWeapon = nullptr;
+			UE_LOG(LogTemp, Warning, TEXT("무기 상호작용 범위를 벗어남: %s"), *GetName());
+		}
+	}
+}
+
+void AGJBaseGun::EnablePickup()
+{
+	// 다시 충돌 활성화하여 주울 수 있도록 함
+	CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	CollisionComp->SetCollisionResponseToAllChannels(ECR_Overlap);
+
+	UE_LOG(LogTemp, Warning, TEXT("무기 줍기 가능"));
+	bCanPickup = true;
 }
 
 void AGJBaseGun::Fire()
@@ -145,20 +173,33 @@ void AGJBaseGun::Pickup(ACharacter* PlayerCharacter)
 			return;
 		}
 
+		// 기존 무기 비활성화 (겹쳐 보이는 현상 방지)
+		if (GJCharacter->CurrentGun)
+		{
+			GJCharacter->CurrentGun->SetActorHiddenInGame(true);
+			GJCharacter->CurrentGun->SetActorEnableCollision(false);
+		}
+
+		// 인벤토리에 무기 추가
 		GJCharacter->InventoryComponent->AddWeapon(this);
+
+		// 이전 무기 상태 업데이트
+		GJCharacter->PreviousWeaponType = GJCharacter->CurrentWeaponType;
 	}
 
-	// 무기가 장착되지 않았다면 자동 장착
+	// 자동 장착 로직
 	if (!GJCharacter->CurrentGun)
 	{
 		GJCharacter->CurrentGun = GJCharacter->InventoryComponent->EquipWeaponFromSlot(0);
 	}
+	else
+	{
+		GJCharacter->EquipWeapon(this); // 자동 장착
+	}
 
-	// 물리 시뮬레이션 완전히 끄기
+	// 물리 시뮬레이션 끄기
 	GunMesh->SetSimulatePhysics(false);
 	GunMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-	// 줍기 감지 충돌 제거
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	// `SetSimulatePhysics(false);`가 확실히 적용되었는지 0.05초 후 확인
@@ -204,20 +245,14 @@ void AGJBaseGun::Pickup(ACharacter* PlayerCharacter)
 
 		}, 0.05f, false);
 
-	// 플레이어가 총을 소유
+	// 플레이어 소유 설정
 	SetOwner(PlayerCharacter);
 	bPickupGun = true;
 
-	if (GJCharacter)
-	{
-		GJCharacter->CurrentGun = this;
-		UE_LOG(LogTemp, Warning, TEXT("Pickup: CurrentGun 설정 완료"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Pickup: No CurrentGun!!"));
-	}
+	// 로그 출력 (최종 상태 업데이트)
+	UE_LOG(LogTemp, Warning, TEXT("Pickup: 무기 장착 및 상태 업데이트 완료"));
 }
+
 
 void AGJBaseGun::ThrowAway()
 {
@@ -263,23 +298,6 @@ void AGJBaseGun::ThrowAway()
 	bPickupGun = false;
 
 	UE_LOG(LogTemp, Warning, TEXT("ThrowAway 완료 - 총이 바닥으로 떨어짐, 0.5초 후 다시 줍기 가능"));
-}
-
-void AGJBaseGun::EnablePickup()
-{
-	// 다시 충돌 활성화하여 주울 수 있도록 함
-	CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	CollisionComp->SetCollisionResponseToAllChannels(ECR_Overlap);
-
-
-
-	UE_LOG(LogTemp, Warning, TEXT("무기 줍기 가능"));
-	bCanPickup = true;
-
-
-
-
-
 }
 
 void AGJBaseGun::FinishReload()
