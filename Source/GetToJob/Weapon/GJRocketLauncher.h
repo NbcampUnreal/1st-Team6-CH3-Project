@@ -51,7 +51,6 @@ private:
 
 	UAnimMontage* ReloadMontage; // 재장전용 애니메이션
 
-	bool bIsReloading; // 재장전 여부 확인
 	FTimerHandle ReloadTimerHandle; // 재장전 타이머 핸들
 
 };
