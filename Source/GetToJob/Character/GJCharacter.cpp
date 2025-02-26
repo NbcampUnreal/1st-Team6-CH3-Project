@@ -13,6 +13,7 @@
 #include "Weapon/GJRocketLauncher.h"
 #include "UI/GJHUD.h"
 #include "Components/CapsuleComponent.h"
+#include "Character/GJHealingItem.h"
 //#include "Components/WidgetComponent.h"
 //#include "Components/TextBlock.h"
 //#include "Components/ProgressBar.h"
@@ -72,23 +73,77 @@ AGJCharacter::AGJCharacter()
     CurrentWeaponType = EWeaponType::None;
     
     PrimaryActorTick.bCanEverTick = true;
+
+    DebuffComponent = CreateDefaultSubobject<UGJDebuffComponent>(TEXT("DebuffComponent"));
+}
+
+// 캐릭터 이동속도 저장 및 유지하는 함수
+void AGJCharacter::SetSpeed(float NewSpeedMultiplier)
+{
+    float SpeedMultiplier = FMath::Clamp(NewSpeedMultiplier, 0.1f, 1.0f); // 속도가 너무 작아지지 않도록 제한
+
+    GetCharacterMovement()->MaxWalkSpeed = NormalSpeed * SpeedMultiplier;
+    SprintSpeed = NormalSpeed * SprintSpeedMultiplier * SpeedMultiplier;
+    GetCharacterMovement()->MaxWalkSpeedCrouched = CrouchSpeed * SpeedMultiplier;
+
+    UE_LOG(LogTemp, Warning, TEXT("Speed Updated -> Walk: %f | Sprint: %f"),
+        GetCharacterMovement()->MaxWalkSpeed, SprintSpeed);
+}
+
+// 디버프 적용 함수
+void AGJCharacter::ApplyDebuff(const FDebuffEffect& Debuff)
+{
+    if (DebuffComponent)
+    {
+        DebuffComponent->ApplyDebuff(Debuff);
+    }
+}
+
+void AGJCharacter::UseHealingItem()
+{
+    if (InventoryComponent)
+    {
+        InventoryComponent->UseHealingItem();
+    }
 }
 
 void AGJCharacter::Interact()
 {
-    if (InteractableWeapon && InventoryComponent)
+    //  우선 무기부터 줍기 (무기가 있을 경우)
+    if (IsValid(InteractableWeapon) && InventoryComponent)
     {
         UE_LOG(LogTemp, Warning, TEXT("상호작용 키로 무기 줍기 시도: %s"), *InteractableWeapon->GetName());
 
         // 인벤토리에 무기 추가
-        InteractableWeapon->Pickup(this);
+        AGJBaseGun* TempWeapon = InteractableWeapon; //  잠시 저장
+        InteractableWeapon = nullptr; // 미리 초기화 (안전성 확보)
 
-        // 인터랙션 완료 후 초기화
-        InteractableWeapon = nullptr;
+        if (TempWeapon)
+        {
+            TempWeapon->Pickup(this); // 무기 줍기
+        }
+
+        // 무기를 주웠다면 힐링 아이템 줍는 로직은 실행하지 않음
+        return;
+    }
+
+    //  무기가 없을 경우, 힐링 아이템 줍기
+    if (IsValid(InteractableHealingItem) && InventoryComponent)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("힐링 아이템 인벤토리에 추가"));
+
+        // 인벤토리에 추가 후 즉시 nullptr 설정
+        AGJHealingItem* TempHealingItem = InteractableHealingItem; //  잠시 저장
+        InteractableHealingItem = nullptr; //  미리 초기화
+
+        if (TempHealingItem)
+        {
+            TempHealingItem->Pickup(this);
+        }
     }
     else
     {
-        UE_LOG(LogTemp, Warning, TEXT("상호작용할 무기가 없습니다."));
+        UE_LOG(LogTemp, Warning, TEXT("상호작용할 힐링 아이템 없음"));
     }
 }
 
@@ -471,6 +526,17 @@ void AGJCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
                     ETriggerEvent::Triggered,
                     this,
                     &AGJCharacter::TriggerDeathTest
+                );
+            }
+
+            // 힐링액션
+            if (PlayerController->UseHealingItemAction)
+            {
+                EnhancedInput->BindAction(
+                    PlayerController->UseHealingItemAction,
+                    ETriggerEvent::Triggered,
+                    this,
+                    &AGJCharacter::UseHealingItem
                 );
             }
         }
