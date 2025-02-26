@@ -202,12 +202,48 @@ void AGJBaseGun::Pickup(ACharacter* PlayerCharacter)
 	GunMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	// 부착
-	AttachToComponent(
-		PlayerCharacter->GetMesh(),
-		FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-		GunSocketName
-	);
+	// `SetSimulatePhysics(false);`가 확실히 적용되었는지 0.05초 후 확인
+	FTimerHandle TimerHandle_CheckPhysics;
+	GetWorldTimerManager().SetTimer(TimerHandle_CheckPhysics, [this]()
+		{
+			if (GunMesh->IsSimulatingPhysics())
+			{
+				UE_LOG(LogTemp, Error, TEXT("GunMesh 물리 시뮬레이션이 꺼지지 않음!"));
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("GunMesh 물리 시뮬레이션이 정상적으로 꺼짐!"));
+			}
+		}, 0.05f, false);
+
+	// 0.05초 후 소켓에 부착 (물리 충돌 방지)
+	FTimerHandle TimerHandle_Attach;
+	GetWorldTimerManager().SetTimer(TimerHandle_Attach, [this, PlayerCharacter]()
+		{
+			if (!PlayerCharacter) return;
+
+			UE_LOG(LogTemp, Warning, TEXT("GunSocketName 확인: %s"), *GunSocketName.ToString());
+
+			// `AttachToComponent()` 실행 여부 확인
+			bool bAttachSuccess = GunMesh->AttachToComponent(
+				PlayerCharacter->GetMesh(),
+				FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+				GunSocketName
+			);
+
+			if (!bAttachSuccess)
+			{
+				UE_LOG(LogTemp, Error, TEXT("AttachToComponent 실패!"));
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Pickup: 총이 정상적으로 소켓에 부착됨!"));
+
+				// 부착 후 위치 갱신
+				GunMesh->SetRelativeLocationAndRotation(FVector::ZeroVector, FRotator::ZeroRotator);
+			}
+
+		}, 0.05f, false);
 
 	// 플레이어 소유 설정
 	SetOwner(PlayerCharacter);
