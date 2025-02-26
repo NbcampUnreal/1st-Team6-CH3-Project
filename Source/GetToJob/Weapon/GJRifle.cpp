@@ -77,7 +77,7 @@ void AGJRifle::Fire()
 		}
 
 		FVector TraceStart = MuzzleLocation;
-		FVector TraceEnd = TraceStart + (CameraRotation.Vector() * TraceRange);
+		FVector TraceEnd = CameraLocation + (CameraRotation.Vector() * TraceRange);
 
 		FHitResult HitResult;
 		FCollisionQueryParams Params;
