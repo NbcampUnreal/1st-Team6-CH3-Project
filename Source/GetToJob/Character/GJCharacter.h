@@ -2,9 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "NPC/AICharacterBase.h"
-#include "Weapon/GJRevolver.h"
-#include "Weapon/GJRifle.h"
-#include "Weapon/GjRocketLauncher.h"
 #include "GameFramework/Character.h"
 #include "Character/GJInventoryComponent.h"
 #include "GJCharacter.generated.h"
@@ -40,16 +37,6 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Gun")
 	AGJBaseGun* CurrentGun;
 
-	// 블루프린트 무기 클래스 참조
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon Blueprints")
-	TSubclassOf<AGJRevolver> BP_GJRevolver;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon Blueprints")
-	TSubclassOf<AGJRifle> BP_GJRifle;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon Blueprints")
-	TSubclassOf<AGJRocketLauncher> BP_GJRocketLauncher;
-
 	// 상호작용 함수
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void Interact();
@@ -61,6 +48,10 @@ public:
 	// 무기 장착
 	void EquipWeapon(AGJBaseGun* NewWeapon);
 
+	// 이전 무기 상태 저장
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	EWeaponType PreviousWeaponType;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	EWeaponType CurrentWeaponType;
 
@@ -71,6 +62,9 @@ public:
 
 	virtual void Tick(float Deltatime) override;
 	float LastSpeed = 0.0f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Interaction")
+	class AGJBaseGun* InteractableWeapon;
 
 protected:
 	virtual float TakeDamage(

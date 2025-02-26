@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "UI/GJHUD.h"
 #include "GJPlayerController.generated.h"
 
 class UInputMappingContext; // IMC ���� ���� ����
