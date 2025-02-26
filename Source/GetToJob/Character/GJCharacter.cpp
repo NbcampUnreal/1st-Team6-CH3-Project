@@ -109,32 +109,35 @@ void AGJCharacter::UseHealingItem()
 
 void AGJCharacter::Interact()
 {
-    //  우선 무기부터 줍기 (무기가 있을 경우)
+    // 1️ 무기 먼저 줍기
     if (IsValid(InteractableWeapon) && InventoryComponent)
     {
         UE_LOG(LogTemp, Warning, TEXT("상호작용 키로 무기 줍기 시도: %s"), *InteractableWeapon->GetName());
 
-        // 인벤토리에 무기 추가
-        AGJBaseGun* TempWeapon = InteractableWeapon; //  잠시 저장
-        InteractableWeapon = nullptr; // 미리 초기화 (안전성 확보)
+        AGJBaseGun* TempWeapon = InteractableWeapon; // 임시 저장
 
         if (TempWeapon)
         {
             TempWeapon->Pickup(this); // 무기 줍기
+            InventoryComponent->AddWeapon(TempWeapon); // 인벤토리에 추가
+            EquipWeapon(TempWeapon); // 줍자마자 장착
+
+            // 로그 추가해서 무기가 정상적으로 장착되는지 확인
+            UE_LOG(LogTemp, Warning, TEXT("Weapon Equipped: %s"), *TempWeapon->GetName());
         }
 
-        // 무기를 주웠다면 힐링 아이템 줍는 로직은 실행하지 않음
-        return;
+        // 여기에서 초기화 (너무 일찍 하지 않도록!)
+        InteractableWeapon = nullptr;
+        return; // 무기 줍는 경우, 힐링 아이템 줍기 로직은 실행하지 않음
     }
 
-    //  무기가 없을 경우, 힐링 아이템 줍기
+    // 2️ 힐링 아이템 줍기
     if (IsValid(InteractableHealingItem) && InventoryComponent)
     {
         UE_LOG(LogTemp, Warning, TEXT("힐링 아이템 인벤토리에 추가"));
 
-        // 인벤토리에 추가 후 즉시 nullptr 설정
-        AGJHealingItem* TempHealingItem = InteractableHealingItem; //  잠시 저장
-        InteractableHealingItem = nullptr; //  미리 초기화
+        AGJHealingItem* TempHealingItem = InteractableHealingItem; // 임시 저장
+        InteractableHealingItem = nullptr; // 초기화
 
         if (TempHealingItem)
         {
@@ -228,8 +231,12 @@ void AGJCharacter::EquipWeapon(AGJBaseGun* NewWeapon)
     CurrentGun->SetActorEnableCollision(true);
     CurrentGun->SetOwner(this);
 
-    // 무기 업데이트
+    // 무기 상태 업데이트
     UpdateWeaponState(CurrentGun);
+
+    // 로그 추가해서 장착된 무기가 무엇인지 확인
+    UE_LOG(LogTemp, Warning, TEXT("Equipped Weapon: %s"), *CurrentGun->GetName());
+    UE_LOG(LogTemp, Warning, TEXT("CurrentWeaponType: %d"), static_cast<int32>(CurrentWeaponType));
 }
 
 void AGJCharacter::UnequipCurrentWeapon()

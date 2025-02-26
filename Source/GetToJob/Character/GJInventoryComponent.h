@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Weapon/GJBaseGun.h"
+//#include "Character/GJCharacter.h"
 #include "Character/GJHealingItem.h"
 #include "GJInventoryComponent.generated.h"
 
