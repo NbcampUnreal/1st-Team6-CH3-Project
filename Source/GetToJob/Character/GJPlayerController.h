@@ -52,6 +52,8 @@ public:
 	UInputAction* WeaponSlot3Action;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* TestDeathAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* UseHealingItemAction;
 
 	AGJHUD* HUD;
 

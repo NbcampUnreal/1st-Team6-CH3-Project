@@ -4,6 +4,7 @@
 #include "NPC/AICharacterBase.h"
 #include "GameFramework/Character.h"
 #include "Character/GJInventoryComponent.h"
+#include "Character/GJDebuffComponent.h" 
 #include "GJCharacter.generated.h"
 
 class USpringArmComponent; // 스프링 암 관련 클래스 헤더
@@ -27,9 +28,38 @@ class GETTOJOB_API AGJCharacter : public AAICharacterBase
 public:
 	AGJCharacter();
 
+	void SetSpeed(float NewSpeedMultiplier);
+
+	// 이동 속도 관련 프로퍼티들
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	float NormalSpeed; // 기본 걷기 속도
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	float SprintSpeedMultiplier;  // "기본 속도" 대비 몇 배로 빠르게 달릴지 결정
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement")
+	float SprintSpeed; 	// 실제 스프린트 속도
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement")
+	float CrouchSpeed; // 앉은 상태 속도
+
+	// 디버프 컴포넌트 추가
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Debuff")
+	UGJDebuffComponent* DebuffComponent;
+
+	// 디버프 적용 함수
+	void ApplyDebuff(const FDebuffEffect& Debuff);
+
+	// 디버프 컴포넌트 Getter
+	UFUNCTION(BlueprintCallable, Category = "Debuff")
+	UGJDebuffComponent* GetDebuffComponent() const { return DebuffComponent; }
+
+	UPROPERTY(BlueprintReadWrite, Category = "Interaction")
+	AGJHealingItem* InteractableHealingItem;
+
+	void UseHealingItem();
+
 	// 스프링 암 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	USpringArmComponent* SpringArmComp;
+
 	// 카메라 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	UCameraComponent* CameraComp;
@@ -96,16 +126,6 @@ protected:
 
 	/*virtual void Tick(float DeltaTime) override;*/
 	virtual void BeginPlay() override;
-
-	// 이동 속도 관련 프로퍼티들
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float NormalSpeed; // 기본 걷기 속도
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float SprintSpeedMultiplier;  // "기본 속도" 대비 몇 배로 빠르게 달릴지 결정
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement")
-	float SprintSpeed; 	// 실제 스프린트 속도
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement")
-	float CrouchSpeed; // 앉은 상태 속도
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Look", meta = (ClampMin = "0.1", ClampMax = "5.0"))
 	float LookSensitivity; // 마우스 감도 조절을 위한 변수
