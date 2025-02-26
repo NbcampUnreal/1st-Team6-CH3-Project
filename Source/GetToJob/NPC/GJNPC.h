@@ -26,6 +26,10 @@ public:
 
 	void SetBehaviorTree(UBehaviorTree* ChooseTree);
 
+	bool GetNPCDead() const;
+
+	void SetNPCDead(bool IsDead);
+
 	int MeleeAttack_Implementation() override;
 
 	virtual void Tick(float DeltaTime) override;
@@ -35,6 +39,8 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	
+	bool IsNPCDead;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrviateAccess = "true")) // UPROPERTY �� ���� ������ BehaviorTree �ν��Ͻ� ����
 	UBehaviorTree* Tree;
 

@@ -4,6 +4,7 @@
 AGJNPC::AGJNPC()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	IsNPCDead = false;
 }
 
 UBehaviorTree* AGJNPC::GetBehaviorTree() const
@@ -36,6 +37,16 @@ void AGJNPC::SetBehaviorTree(UBehaviorTree* ChooseTree)
 			NPCAIController->RunBehaviorTree(ChooseTree);
 		}
 	}
+}
+
+bool AGJNPC::GetNPCDead() const
+{
+	return IsNPCDead;
+}
+
+void AGJNPC::SetNPCDead(bool IsDead)
+{
+	IsNPCDead = IsDead;
 }
 
 void AGJNPC::BeginPlay()
