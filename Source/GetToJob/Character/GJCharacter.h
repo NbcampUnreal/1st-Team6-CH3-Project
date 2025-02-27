@@ -11,13 +11,16 @@ class USpringArmComponent; // 스프링 암 관련 클래스 헤더
 class UCameraComponent; // 카메라 관련 클래스 전방 선언
 struct FInputActionValue; // Enhanced Input에서 액션 값을 받을 때 사용하는 구조체
 class AGJBaseGun;
+class AGJMiniGun; // 미니건 클래스 선언
+
 UENUM(BlueprintType)
 enum class EWeaponType : uint8
 {
 	None UMETA(DisplayName = "None"),
 	Revolver UMETA(DisplayName = "Revolver"),
 	Rifle UMETA(DisplayName = "Rifle"),
-	RocketLauncher UMETA(DisplayName = "Rocket Launcher")
+	RocketLauncher UMETA(DisplayName = "Rocket Launcher"),
+	MiniGun UMETA(DisplayName = "MiniGun")
 };
 
 UCLASS()
@@ -95,6 +98,17 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Interaction")
 	class AGJBaseGun* InteractableWeapon;
+
+	// 미니건 클래스
+	UPROPERTY(EditAnywhere, Category = "Weapons")
+	TSubclassOf<class AGJMiniGun> MiniGunClass; // 미니건 클래스를 에디터에서 설정 가능하게
+
+	// 현재 미니건 객체
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Ultimate")
+	AGJMiniGun* MiniGun;
+
+	// 궁극기 사용
+	void ActivateUltimateWeapon();
 
 protected:
 	virtual float TakeDamage(
@@ -174,6 +188,9 @@ protected:
 	void StartSit(const FInputActionValue& value);
 	UFUNCTION()
 	void StopSit(const FInputActionValue& value);
+
+	void StartAiming();
+	void StopAiming();
 
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void OnDeath();

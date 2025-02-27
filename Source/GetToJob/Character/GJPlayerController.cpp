@@ -19,6 +19,8 @@ AGJPlayerController::AGJPlayerController()
     WeaponSlot3Action(nullptr),
     TestDeathAction(nullptr),
     UseHealingItemAction(nullptr),
+    UltimateSkillAction(nullptr),
+    AimAction(nullptr),
     HUD(nullptr)
 {
 }

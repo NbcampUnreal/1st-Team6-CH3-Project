@@ -11,6 +11,8 @@
 #include "Weapon/GJRevolver.h"
 #include "Weapon/GJRifle.h"
 #include "Weapon/GJRocketLauncher.h"
+#include "Weapon/GJMiniGun.h"
+#include "Weapon/GJScope.h"
 #include "UI/GJHUD.h"
 #include "Components/CapsuleComponent.h"
 #include "Character/GJHealingItem.h"
@@ -76,6 +78,51 @@ AGJCharacter::AGJCharacter()
 
     DebuffComponent = CreateDefaultSubobject<UGJDebuffComponent>(TEXT("DebuffComponent"));
 }
+
+// 궁극기 발동 (T키)
+void AGJCharacter::ActivateUltimateWeapon()
+{
+    UE_LOG(LogTemp, Warning, TEXT("ActivateUltimateWeapon() Called!"));
+
+    if (MiniGun)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("MiniGun Found! Activating..."));
+        MiniGun->ActivateMiniGun();
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("MiniGun is NULL! Check if it's properly initialized."));
+    }
+}
+
+void AGJCharacter::BeginPlay()
+{
+    Super::BeginPlay();
+
+    if (MiniGunClass)
+    {
+        MiniGun = GetWorld()->SpawnActor<AGJMiniGun>(MiniGunClass);
+        if (MiniGun)
+        {
+            MiniGun->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, MiniGun->GunSocketName);
+            MiniGun->SetOwner(this);
+
+            MiniGun->GunMesh->SetVisibility(false);
+            MiniGun->GunMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+            UE_LOG(LogTemp, Warning, TEXT("MiniGun Initialized at Game Start"));
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("MiniGun Spawn FAILED!"));
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("MiniGunClass is NULL!"));
+    }
+}
+
 
 // 캐릭터 이동속도 저장 및 유지하는 함수
 void AGJCharacter::SetSpeed(float NewSpeedMultiplier)
@@ -278,7 +325,6 @@ void AGJCharacter::EquipWeaponFromInventory(int32 SlotIndex)
 
 void AGJCharacter::UpdateWeaponState(AGJBaseGun* NewWeapon)
 {
-    // 이전 무기 상태 저장
     PreviousWeaponType = CurrentWeaponType;
 
     if (!NewWeapon)
@@ -287,7 +333,6 @@ void AGJCharacter::UpdateWeaponState(AGJBaseGun* NewWeapon)
         return;
     }
 
-    // 무기 클래스에 따라 무기 타입 업데이트
     if (Cast<AGJRevolver>(NewWeapon))
     {
         CurrentWeaponType = EWeaponType::Revolver;
@@ -299,6 +344,10 @@ void AGJCharacter::UpdateWeaponState(AGJBaseGun* NewWeapon)
     else if (Cast<AGJRocketLauncher>(NewWeapon))
     {
         CurrentWeaponType = EWeaponType::RocketLauncher;
+    }
+    else if (Cast<AGJMiniGun>(NewWeapon)) 
+    {
+        CurrentWeaponType = EWeaponType::MiniGun;
     }
     else
     {
@@ -327,11 +376,6 @@ float AGJCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
         }
     }
     return ActualDamage;
-}
-
-void AGJCharacter::BeginPlay()
-{
-    Super::BeginPlay();
 }
 
 void AGJCharacter::Tick(float Deltatime)
@@ -546,6 +590,18 @@ void AGJCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
                     &AGJCharacter::UseHealingItem
                 );
             }
+
+            // T 키 - 궁극기 발동
+            EnhancedInput->BindAction(
+                PlayerController->UltimateSkillAction,
+                ETriggerEvent::Triggered,
+                this,
+                &AGJCharacter::ActivateUltimateWeapon
+            );
+            // 우클릭(조준) - 줌인
+            EnhancedInput->BindAction(PlayerController->AimAction, ETriggerEvent::Triggered, this, &AGJCharacter::StartAiming);
+            // 우클릭 해제 - 줌아웃
+            EnhancedInput->BindAction(PlayerController->AimAction, ETriggerEvent::Completed, this, &AGJCharacter::StopAiming);
         }
     }
 }
@@ -662,6 +718,24 @@ void AGJCharacter::StopSit(const FInputActionValue& value)
         // 앉기에서 일어났을 때 점프 가능하게 재설정
         bCanJump = true;
     }
+}
+
+void AGJCharacter::StartAiming()
+{
+//    if (CurrentGun->bHasScope)
+//    {
+//        Scope->EnableScopeView();
+//        //bIsAiming = true;  // 상태 저장 (애니메이션 및 UI 처리 가능)
+//    }
+}
+
+void AGJCharacter::StopAiming()
+{
+//    if (CurrentGun && CurrentGun->Scope)
+//    {
+//        CurrentGun->Scope->DisableScopeView();
+//        //bIsAiming = false;
+//    }
 }
 
 void AGJCharacter::OnDeath()

@@ -29,6 +29,10 @@ class GETTOJOB_API AGJBaseGun : public AActor, public IGJGunInterface
 public:	
 	AGJBaseGun();
 
+	// 부착물 관련 변수
+	bool bIsSilenced;
+	bool bHasScope;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USphereComponent* CollisionComp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
@@ -151,9 +155,6 @@ protected:
 	UPROPERTY()
 	TArray<AGJBaseGunAttachment*> Attachments;
 
-	// 부착물 관련 변수
-	bool bIsSilenced;
-	bool bHasScope;
 
 
 
