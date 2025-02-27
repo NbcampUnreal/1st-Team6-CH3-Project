@@ -9,8 +9,7 @@
 
 AAICharacterBase::AAICharacterBase():
 	Health{ 100.f },
-	RightFistCollisionBox{ CreateDefaultSubobject<UBoxComponent>(TEXT("RightFirstCollisionBox")) },
-	Attack{10.f}
+	RightFistCollisionBox{ CreateDefaultSubobject<UBoxComponent>(TEXT("RightFirstCollisionBox")) }
 {
 	PrimaryActorTick.bCanEverTick = true;
 	bCanAttack = true;
@@ -43,10 +42,13 @@ float AAICharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 			NPC->GetMesh()->SetSimulatePhysics(true);
 			NPC->GetCapsuleComponent()->SetCollisionProfileName(TEXT("NoCollision"));
 
+			FTimerHandle DestroyTimerHandle;
+			GetWorldTimerManager().SetTimer(DestroyTimerHandle, this, &AAICharacterBase::DestroyActor, 5.f, false);
 		}
 	}
-	if (auto const NPC = Cast<AGJBossNPC>(this))
+	if (auto const Boss = Cast<AGJBossNPC>(this))
 	{
+		Health = FMath::Clamp(Health - DamageAmount, 0.0f, MaxHealth);
 		if (Health <= 0)
 		{
 			if (RightFistCollisionBox)
@@ -54,10 +56,12 @@ float AAICharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 				RightFistCollisionBox->SetCollisionProfileName("NoCollision");
 				RightFistCollisionBox->SetNotifyRigidBodyCollision(true);
 			}
-			NPC->GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
-			NPC->GetMesh()->SetSimulatePhysics(true);
-			NPC->GetCapsuleComponent()->SetCollisionProfileName(TEXT("NoCollision"));
+			Boss->GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+			Boss->GetMesh()->SetSimulatePhysics(true);
+			Boss->GetCapsuleComponent()->SetCollisionProfileName(TEXT("NoCollision"));
 
+			FTimerHandle DestroyTimerHandle;
+			GetWorldTimerManager().SetTimer(DestroyTimerHandle, this, &AAICharacterBase::DestroyActor, 5.f, false);
 		}
 	}
 	return ActualDamage;
@@ -73,16 +77,22 @@ void AAICharacterBase::OnAttackOverlapBegin(UPrimitiveComponent* const Overlappe
 	}
 	if (auto const Player = Cast<AGJCharacter>(OtherActor))
 	{
-		
 		UGameplayStatics::ApplyDamage(
 			Player,
-			Attack,
+			GetAttack(),
 			nullptr,
 			this,
 			UDamageType::StaticClass()
 		);
 		UE_LOG(LogTemp, Error, TEXT("Hitted"));
-		StartAttackCooldown();
+		if (auto const Boss = Cast<AGJBossNPC>(this))
+		{
+			StartAttackCooldown(1.f);
+		}
+		if (auto const NPC = Cast<AGJNPC>(this))
+		{
+			StartAttackCooldown(0.5f);
+		}
 	}
 }
 
@@ -90,10 +100,15 @@ void AAICharacterBase::OnAttackOverlapEnd(UPrimitiveComponent* const OverlappedC
 {
 }
 
-void AAICharacterBase::StartAttackCooldown()
+void AAICharacterBase::DestroyActor()
+{
+	Destroy();
+}
+
+void AAICharacterBase::StartAttackCooldown(float Time)
 {
 	bCanAttack = false;
-	GetWorldTimerManager().SetTimer(AttackCooldownTimer, this, &AAICharacterBase::ResetAttackCooldown, 0.5f);
+	GetWorldTimerManager().SetTimer(AttackCooldownTimer, this, &AAICharacterBase::ResetAttackCooldown, Time);
 }
 
 void AAICharacterBase::ResetAttackCooldown()
@@ -128,12 +143,12 @@ float AAICharacterBase::GetMaxHealth() const
 	return MaxHealth;
 }
 
-void AAICharacterBase::SetHealth(float const NewHealth)
+void AAICharacterBase::SetHealth(float NewHealth)
 {
 	Health = NewHealth;
 }
 
-void AAICharacterBase::SetAttack(float const NewAttack)
+void AAICharacterBase::SetAttack(float NewAttack)
 {
 	Attack = NewAttack;
 }

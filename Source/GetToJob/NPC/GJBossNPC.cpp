@@ -20,6 +20,9 @@ AGJBossNPC::AGJBossNPC() :
 	{
 		HeadCollisionSphere->SetupAttachment(GetMesh(), "head_socket");
 	}
+	IsFist = false;
+	IsRight = false;
+	IsLeft = false;
 }
 
 void AGJBossNPC::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -75,30 +78,33 @@ void AGJBossNPC::SetBehaviorTree(UBehaviorTree* ChooseTree)
 	}
 }
 
-void AGJBossNPC::AttackStart() const
+void AGJBossNPC::AttackStart() 
 {
 	if (GetIsFist()) {
 		Super::AttackStart();
+		SetAttack(WeakDamage);
 	}
 	if (RightFootCollisionBox)
 	{
-		if (!GetIsFist())
+		if (GetIsRight())
 		{
 			RightFootCollisionBox->SetCollisionProfileName("Fist");
 			RightFootCollisionBox->SetNotifyRigidBodyCollision(true);
+			SetAttack(StrongDamage);
 		}
 	}
 	if (LeftFootCollisionBox)
 	{
-		if (!GetIsFist())
+		if (GetIsLeft())
 		{
 			LeftFootCollisionBox->SetCollisionProfileName("Fist");
 			LeftFootCollisionBox->SetNotifyRigidBodyCollision(true);
+			SetAttack(SpecialDamage);
 		}
 	}
 }
 
-void AGJBossNPC::AttackEnd() const
+void AGJBossNPC::AttackEnd() 
 {
 	Super::AttackEnd();
 	if (RightFootCollisionBox)
@@ -108,11 +114,8 @@ void AGJBossNPC::AttackEnd() const
 	}
 	if (LeftFootCollisionBox)
 	{
-		if (!GetIsFist())
-		{
-			LeftFootCollisionBox->SetCollisionProfileName("NoCollision");
-			LeftFootCollisionBox->SetNotifyRigidBodyCollision(false);
-		}
+		LeftFootCollisionBox->SetCollisionProfileName("NoCollision");
+		LeftFootCollisionBox->SetNotifyRigidBodyCollision(false);
 	}
 }
 
@@ -121,9 +124,29 @@ bool AGJBossNPC::GetIsFist() const
 	return IsFist;
 }
 
+bool AGJBossNPC::GetIsRight() const
+{
+	return IsRight;
+}
+
+bool AGJBossNPC::GetIsLeft() const
+{
+	return IsLeft;
+}
+
 void AGJBossNPC::SetIsFist(bool IsItFist)
 {
 	IsFist = IsItFist;
+}
+
+void AGJBossNPC::SetIsRight(bool IsItRight)
+{
+	IsRight = IsItRight;
+}
+
+void AGJBossNPC::SetIsLeft(bool IsItLeft)
+{
+	IsLeft = IsItLeft;
 }
 
 int AGJBossNPC::WeakAttack_Implementation()
