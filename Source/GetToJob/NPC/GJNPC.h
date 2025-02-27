@@ -41,6 +41,9 @@ protected:
 	
 	bool IsNPCDead;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Collision, meta = (AllowPrivateAccess = "true"))
+	class USphereComponent* HeadCollisionSphere;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrviateAccess = "true")) // UPROPERTY �� ���� ������ BehaviorTree �ν��Ͻ� ����
 	UBehaviorTree* Tree;
 
