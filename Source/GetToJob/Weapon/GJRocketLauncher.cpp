@@ -12,6 +12,7 @@
 AGJRocketLauncher::AGJRocketLauncher()
 {
 	FireSound = nullptr;
+	NoiseLevel = 1.0f;
 	FireRate = 20.0f;
 	CoolDownDelay = 1 / (FireRate / 60);
 	InitialSpeed = 20000.0f;
@@ -41,10 +42,12 @@ void AGJRocketLauncher::Fire()
 	UE_LOG(LogTemp, Warning, TEXT("CurrentAmmo: %d"), CurrentAmmo);
 	if (FireSound)
 	{
+		float AdjustVolume = 1.0f * NoiseLevel;
 		UGameplayStatics::PlaySoundAtLocation(
 			GetWorld(),
 			FireSound,
-			GetActorLocation()
+			GetActorLocation(),
+			AdjustVolume
 		);
 	}
 

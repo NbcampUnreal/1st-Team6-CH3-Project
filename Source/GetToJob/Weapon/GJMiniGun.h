@@ -27,9 +27,8 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")
 	USoundBase* FireSound;
-
-
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ultra")
+	bool bUltraIsReady;
 
 
 	UFUNCTION()

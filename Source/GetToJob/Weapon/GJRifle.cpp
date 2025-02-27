@@ -16,6 +16,7 @@ AGJRifle::AGJRifle()
 
 
 	FireSound = nullptr;
+	NoiseLevel = 1.0f;
 	FireRate = 600.0f;
 	CoolDownDelay = 1 / (FireRate / 60);
 	TraceRange = 2000.0f;
@@ -48,10 +49,12 @@ void AGJRifle::Fire()
 	// 총 소리 재생
 	if (FireSound)
 	{
+		float AdjustVolume = 1.0f * NoiseLevel;
 		UGameplayStatics::PlaySoundAtLocation(
 			GetWorld(),
 			FireSound,
-			GetActorLocation()
+			GetActorLocation(),
+			AdjustVolume
 		);
 	}
 	//캐릭터의 컨트롤러에서 시점 정보를 가져오는 함수 
@@ -73,6 +76,7 @@ void AGJRifle::Fire()
 		if (GJCharacter && GJCharacter->GetMesh())
 		{
 			MuzzleLocation = GJCharacter->GetMesh()->GetSocketLocation(TEXT("Revolver"));
+			MuzzleLocation = GunMesh->GetSocketLocation(MuzzleSocketName);
 		}
 		else
 		{
