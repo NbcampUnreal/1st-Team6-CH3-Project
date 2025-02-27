@@ -20,6 +20,11 @@ public:
 	UPROPERTY()
 	USphereComponent* CollisionComp;
 
+	// Attachment를 부착할 소켓의 이름
+	UPROPERTY(EditDefaultsOnly, Category = "Attachment")
+	FName AttachmentSocketName = TEXT("AttachmentSocket");
+
+
 
 	UFUNCTION()
 	virtual void AttachToGun(class AGJBaseGun* Gun) override;

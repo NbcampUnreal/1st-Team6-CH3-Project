@@ -17,8 +17,9 @@ AGJRocketLauncher::AGJRocketLauncher()
 	InitialSpeed = 20000.0f;
 	bCanFire = true;
 	bIsReloading = false;
-	MaxAmmo = 5;
-	CurrentAmmo = MaxAmmo;
+	MaxAmmo = 15;
+	MagazineCapacity = 5;
+	CurrentAmmo = MagazineCapacity;
 	ReloadTime = 4.0f;
 	bPickupRocketLauncher= false;
 	bPickRocketLauncher = false;
@@ -133,11 +134,6 @@ void AGJRocketLauncher::EnableFire()
 	bCanFire = true;
 }
 
-void AGJRocketLauncher::FinishReload()
-{
-	CurrentAmmo = MaxAmmo;
-	bIsReloading = false;
-}
 
 void AGJRocketLauncher::Pickup(ACharacter* PlayerCharacter)
 {
@@ -157,7 +153,5 @@ void AGJRocketLauncher::BeginPlay()
 {
 	Super::BeginPlay();
 
-	MaxAmmo = 5;
-	CurrentAmmo = MaxAmmo;
 }
 

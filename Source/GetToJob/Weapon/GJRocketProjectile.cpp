@@ -12,6 +12,7 @@
 #include "GameFramework/Character.h"
 #include "Character/GJCharacter.h"
 #include "NPC/GJNPC.h"
+#include "Weapon/GJMiniGun.h"
 
 // Sets default values
 AGJRocketProjectile::AGJRocketProjectile()
@@ -143,15 +144,20 @@ void AGJRocketProjectile::AutoExplode()
 		{
 			FVector ImpactDirection = (Actor->GetActorLocation() - GetActorLocation()).GetSafeNormal();
 			ApplyKnockback(Actor, -ImpactDirection);
-			/*AGJNPC* HitEnemy = Cast<AGJNPC>(Actor);
-			if (HitEnemy && HitEnemy->bIsDead)
+			AGJNPC* HitEnemy = Cast<AGJNPC>(Actor);
+			if (HitEnemy && HitEnemy->GetNPCDead())
 			{
+				AGJCharacter* GJCharacter = Cast<AGJCharacter>(GetInstigator());
 				UE_LOG(LogTemp, Warning, TEXT("NPC is Dead! Increasing MiniGun Gauge!"));
 				if (GJCharacter && GJCharacter->MiniGun)
 				{
 					GJCharacter->MiniGun->IncreaseGauge(20.0f);
 				}
-			}*/
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("No Character or No Minigun"));
+				}
+			}
 		}
 		else
 		{
