@@ -33,6 +33,10 @@ public:
 	bool bIsSilenced;
 	bool bHasScope;
 
+	// 총에 부착할 부착물
+	UPROPERTY()
+	TArray<AGJBaseGunAttachment*> Attachments;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USphereComponent* CollisionComp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
@@ -151,9 +155,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")
 	TSubclassOf<class AActor> ProjectileClass;
 
-	// 총에 부착할 부착물
-	UPROPERTY()
-	TArray<AGJBaseGunAttachment*> Attachments;
 
 
 
