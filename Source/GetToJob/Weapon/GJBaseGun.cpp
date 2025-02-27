@@ -370,6 +370,7 @@ void AGJBaseGun::RemoveAttachment(AGJBaseGunAttachment* Attachment)
 	// 부착물 제거
 	Attachments.Remove(Attachment);
 	Attachment->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	Attachment->DetachFromGun();
 
 	// 만약 제거한 부착물이 스코프였다면, 스코프 상태 업데이트
 	if (AGJScope* GJScope = Cast<AGJScope>(Attachment))
@@ -397,14 +398,13 @@ void AGJBaseGun::SwapAttachmentsWithGun(AGJBaseGun* OldWeapon, AGJBaseGun* NewWe
 	{
 		if (Attachment)
 		{
-			Attachment->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+			RemoveAttachment(Attachment);
 			Attachment->SetActorHiddenInGame(true); // 숨김
 			Attachment->SetActorEnableCollision(false); // 충돌 비활성화
 		}
 	}
 
-	// 기존 무기에서 부착물 리스트 초기화
-	OldWeapon->Attachments.Empty();
+	
 
 	// 새로운 무기에 부착물 장착
 	for (AGJBaseGunAttachment* Attachment : OldAttachments)
@@ -427,6 +427,8 @@ void AGJBaseGun::SwapAttachmentsWithGun(AGJBaseGun* OldWeapon, AGJBaseGun* NewWe
 			Attachment->AttachToGun(NewWeapon);
 		}
 	}
+	// 기존 무기에서 부착물 리스트 초기화
+	OldWeapon->Attachments.Empty();
 
 	UE_LOG(LogTemp, Warning, TEXT("Attachments swapped from %s to %s"), *OldWeapon->GetName(), *NewWeapon->GetName());
 }
@@ -444,6 +446,11 @@ int32 AGJBaseGun::GetCurrentAmmo() const
 int32 AGJBaseGun::GetMaxAmmo() const
 {
 	return MagazineCapacity;
+}
+
+void AGJBaseGun::SetDamage(float NewDamage)
+{
+	Damage = NewDamage;
 }
 
 void AGJBaseGun::BeginPlay()

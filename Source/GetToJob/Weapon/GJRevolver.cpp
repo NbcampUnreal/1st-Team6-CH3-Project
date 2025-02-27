@@ -16,6 +16,7 @@ AGJRevolver::AGJRevolver()
 
 
 	FireSound = nullptr;
+	NoiseLevel = 1.0f;
 	FireRate = 100.0f;
 	CoolDownDelay = 1 / (FireRate / 60);
 	TraceRange = 2000.0f;
@@ -54,10 +55,12 @@ void AGJRevolver::Fire()
 	// 총 소리 재생
 	if (FireSound)
 	{
+		float AdjustVolume = 1.0f * NoiseLevel;
 		UGameplayStatics::PlaySoundAtLocation(
 			GetWorld(),
 			FireSound,
-			GetActorLocation()
+			GetActorLocation(),
+			AdjustVolume
 		);
 	}
 	//캐릭터의 컨트롤러에서 시점 정보를 가져오는 함수 

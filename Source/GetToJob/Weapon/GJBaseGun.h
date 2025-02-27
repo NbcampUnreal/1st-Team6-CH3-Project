@@ -57,6 +57,8 @@ public:
 	float ReloadTime;
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")
 	USoundBase* ReloadSound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	float NoiseLevel = 1.0f;
 
 	// 총기 타입
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
@@ -125,6 +127,7 @@ public:
 	virtual float GetDamage() override;
 	virtual int32 GetCurrentAmmo() const override;
 	virtual int32 GetMaxAmmo() const override;
+	virtual void SetDamage(float NewDamage);
 
 	virtual void BeginPlay() override;
 
@@ -132,6 +135,7 @@ public:
 
 	void ApplyRecoil();
 	void ResetRecoil();
+	
 
 protected:
 	// 무기의 스탯과 관련된 변수

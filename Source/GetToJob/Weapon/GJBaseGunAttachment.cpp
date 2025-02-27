@@ -20,6 +20,9 @@ AGJBaseGunAttachment::AGJBaseGunAttachment()
 	CollisionComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 	CollisionComp->SetupAttachment(RootComp);
 
+	SkeletalMeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("StaticMesh"));
+	SkeletalMeshComp->SetupAttachment(CollisionComp);
+
 	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AGJBaseGunAttachment::OnOverlapBegin);
 }
 
@@ -39,7 +42,6 @@ void AGJBaseGunAttachment::AttachToGun(AGJBaseGun* Gun)
 
 void AGJBaseGunAttachment::DetachFromGun()
 {
-	DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	AttachedGun = nullptr;
 }
 

@@ -7,10 +7,6 @@
 
 AGJScope::AGJScope()
 {
-	SkeletalMeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("StaticMesh"));
-	SkeletalMeshComp->SetupAttachment(RootComponent);
-
-
 	ZoomFOV = 30.0f; // 조준 시 FOV 값
 
 	CameraRelativeX = 40.0f; // 조준 시 카메라 X위치

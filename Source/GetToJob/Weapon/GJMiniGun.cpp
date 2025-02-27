@@ -17,6 +17,7 @@ AGJMiniGun::AGJMiniGun()
 	MaxAmmo = INT32_MAX;
 	MagazineCapacity = INT32_MAX;
 	CurrentAmmo = MagazineCapacity;
+	NoiseLevel = 1.0f;
 	FireSound = nullptr;
 	TraceRange = 6000.0f;
 	bCanFire = true;
@@ -33,6 +34,7 @@ AGJMiniGun::AGJMiniGun()
 	// 주울 일 없으니까 Collision은 없앤다.
 	GunMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	bUltraIsReady = false;
 }
 
 void AGJMiniGun::ActivateMiniGun()
@@ -56,6 +58,8 @@ void AGJMiniGun::ActivateMiniGun()
 	GJCharacter->CurrentGun = this;
 	bPickupMiniGun = true;
 
+	GJCharacter->CurrentWeaponType = EWeaponType::MiniGun;
+
 	UE_LOG(LogTemp, Warning, TEXT("MiniGun Activated!"));
 
 	// 제한 시간이 지나면 미니건 비활성화
@@ -72,10 +76,12 @@ void AGJMiniGun::DeactivateMiniGun()
 
 	// 기존 무기 다시 보이게 하기 (큇슬롯 로직 구현 시 구현하자)
 	GJCharacter->CurrentGun = nullptr; // 추후 수정
+	GJCharacter->CurrentWeaponType = EWeaponType::None;
 	UE_LOG(LogTemp, Warning, TEXT("MiniGun Deactivated!!"));
 	bPickupMiniGun = false;
 
 	ResetGauge();
+	bUltraIsReady = false;
 }
 
 void AGJMiniGun::IncreaseGauge(float Amount)
@@ -84,7 +90,7 @@ void AGJMiniGun::IncreaseGauge(float Amount)
 	if (CurrentGauge >= MaxGauge)
 	{
 		CurrentGauge = MaxGauge;
-		ActivateMiniGun();
+		bUltraIsReady = true;
 	}
 }
 
@@ -104,10 +110,12 @@ void AGJMiniGun::Fire()
 	// 총 소리 재생
 	if (FireSound)
 	{
+		float AdjustVolume = 1.0f * NoiseLevel;
 		UGameplayStatics::PlaySoundAtLocation(
 			GetWorld(),
 			FireSound,
-			GetActorLocation()
+			GetActorLocation(),
+			AdjustVolume
 		);
 	}
 	//캐릭터의 컨트롤러에서 시점 정보를 가져오는 함수 
