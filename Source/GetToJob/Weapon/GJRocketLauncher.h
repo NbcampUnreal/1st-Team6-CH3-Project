@@ -21,7 +21,6 @@ public:
 	virtual void Fire() override;
 	virtual void Reload() override;
 	void EnableFire();
-	void FinishReload();
 
 
 

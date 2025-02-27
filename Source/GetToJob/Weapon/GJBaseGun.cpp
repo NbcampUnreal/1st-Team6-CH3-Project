@@ -42,8 +42,9 @@ AGJBaseGun::AGJBaseGun()
 	Accuracy = 100.0f;
 	AmmoVelocity = 100.0f;
 	FireRate = 200.0f;
-	MaxAmmo = 30;
-	CurrentAmmo = MaxAmmo;
+	MaxAmmo = 90;
+	MagazineCapacity = 30;
+	CurrentAmmo = MagazineCapacity;
 
 
 	bIsSilenced = false;
@@ -53,7 +54,7 @@ AGJBaseGun::AGJBaseGun()
 	bPickupGun = false;
 	bCanPickup = true;
 	bPickupMiniGun = false;
-	MagazineCount = 3;
+	MagazineCount = 100;
 }
 
 void AGJBaseGun::OnBeginOverlap(
@@ -119,8 +120,23 @@ void AGJBaseGun::Fire()
 void AGJBaseGun::Reload()
 {
 	// 재장전을 할 필요가 없을 때
-	if (bIsReloading || MagazineCount <= 0)
+	/*if (bIsReloading || MagazineCount <= 0 || MaxAmmo <= 0)
 	{
+		return;
+	}*/
+	if (bIsReloading)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("bIsReloading!"));
+		return;
+	}
+	if (MagazineCount <=0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("MagazineCount!"));
+		return;
+	}
+	if (MaxAmmo <= 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("MaxAmmo!"));
 		return;
 	}
 
@@ -302,7 +318,10 @@ void AGJBaseGun::ThrowAway()
 
 void AGJBaseGun::FinishReload()
 {
-	CurrentAmmo = MaxAmmo;
+	int32 TempMax = MaxAmmo;
+	MaxAmmo = FMath::Max(0, MaxAmmo - (MagazineCapacity - CurrentAmmo));
+	UE_LOG(LogTemp, Warning, TEXT("Reload Finish!! MaxAmmo is %d | Using %d Ammo!!"), MaxAmmo, (MagazineCapacity - CurrentAmmo));
+	CurrentAmmo = FMath::Min(MagazineCapacity, TempMax);
 	bIsReloading = false;
 }
 
@@ -312,43 +331,104 @@ void AGJBaseGun::EquipAttachment(AGJBaseGunAttachment* Attachment)
 	{
 		return;
 	}
-	RemoveAttachment(); // 기존 부착물이 있다면 제거
 
-	CurrentAttachment = Attachment;
-	CurrentAttachment->AttachToGun(this);
+	// 부착물을 중복 장착 방지
+	if (Attachments.Contains(Attachment))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("This attachment is already equipped!"));
+		return;
+	}
 
-	// 부착물을 부착
-	CurrentAttachment->AttachToComponent(
+	// 부착물 부착
+	Attachment->AttachToComponent(
 		GunMesh,
 		FAttachmentTransformRules::SnapToTargetIncludingScale,
-		AttachmentSocketName
+		Attachment->AttachmentSocketName
 	);
 
+	// 배열에 추가
+	Attachments.Add(Attachment);
+	Attachment->AttachToGun(this);
+
+	// 장착한 부착물이 스코프인지 확인
 	if (AGJScope* GJScope = Cast<AGJScope>(Attachment))
 	{
 		bHasScope = true;
-		GJScope->EnableScopeView();
+	//	GJScope->EnableScopeView();
 	}
 
-
+	UE_LOG(LogTemp, Warning, TEXT("Attachment Equipped: %s"), *Attachment->GetName());
 }
 
-void AGJBaseGun::RemoveAttachment()
+void AGJBaseGun::RemoveAttachment(AGJBaseGunAttachment* Attachment)
 {
-	if (!CurrentAttachment) return;
-
-	if (AGJScope* Scope = Cast<AGJScope>(CurrentAttachment))
+	if (!Attachment || !Attachments.Contains(Attachment))
 	{
-		bHasScope = false;
+		return;
 	}
 
-	// 부착물에서 메시를 떼기
-	CurrentAttachment->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	// 부착물 제거
+	Attachments.Remove(Attachment);
+	Attachment->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 
-	CurrentAttachment->DetachFromGun();
-	CurrentAttachment = nullptr;
-	
-	
+	// 만약 제거한 부착물이 스코프였다면, 스코프 상태 업데이트
+	if (AGJScope* GJScope = Cast<AGJScope>(Attachment))
+	{
+		bHasScope = false;
+	//	GJScope->DisableScopeView();
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Attachment Removed: %s"), *Attachment->GetName());
+}
+
+void AGJBaseGun::SwapAttachmentsWithGun(AGJBaseGun* OldWeapon, AGJBaseGun* NewWeapon)
+{
+	if (!OldWeapon || !NewWeapon)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SwapAttachments: Invalid weapon reference!"));
+		return;
+	}
+
+	// 기존 무기의 부착물을 가져옴
+	TArray<AGJBaseGunAttachment*> OldAttachments = OldWeapon->Attachments;
+
+	// 기존 무기의 부착물 Detach & 숨기기
+	for (AGJBaseGunAttachment* Attachment : OldAttachments)
+	{
+		if (Attachment)
+		{
+			Attachment->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+			Attachment->SetActorHiddenInGame(true); // 숨김
+			Attachment->SetActorEnableCollision(false); // 충돌 비활성화
+		}
+	}
+
+	// 기존 무기에서 부착물 리스트 초기화
+	OldWeapon->Attachments.Empty();
+
+	// 새로운 무기에 부착물 장착
+	for (AGJBaseGunAttachment* Attachment : OldAttachments)
+	{
+		if (Attachment && NewWeapon)
+		{
+			// 새로운 무기에 부착
+			Attachment->AttachToComponent(
+				NewWeapon->GunMesh,
+				FAttachmentTransformRules::SnapToTargetIncludingScale,
+				Attachment->AttachmentSocketName
+			);
+
+			// 부착물 보이게 하기
+			Attachment->SetActorHiddenInGame(false);
+			Attachment->SetActorEnableCollision(true);
+
+			// 새로운 무기의 부착물 리스트에 추가
+			NewWeapon->Attachments.Add(Attachment);
+			Attachment->AttachToGun(NewWeapon);
+		}
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Attachments swapped from %s to %s"), *OldWeapon->GetName(), *NewWeapon->GetName());
 }
 
 float AGJBaseGun::GetDamage()
@@ -363,7 +443,7 @@ int32 AGJBaseGun::GetCurrentAmmo() const
 
 int32 AGJBaseGun::GetMaxAmmo() const
 {
-	return MaxAmmo;
+	return MagazineCapacity;
 }
 
 void AGJBaseGun::BeginPlay()

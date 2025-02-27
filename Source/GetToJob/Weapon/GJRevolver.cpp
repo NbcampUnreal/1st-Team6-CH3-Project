@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystem.h"
 #include "NPC/GJNPC.h"
+#include "Weapon/GJMiniGun.h"
 #include "Particles/ParticleSystemComponent.h"
 
 AGJRevolver::AGJRevolver()
@@ -20,8 +21,9 @@ AGJRevolver::AGJRevolver()
 	TraceRange = 2000.0f;
 	bCanFire = true;
 	bIsReloading = false;
-	MaxAmmo = 10;
-	CurrentAmmo = MaxAmmo;
+	MaxAmmo = INT32_MAX;
+	MagazineCapacity = 10;
+	CurrentAmmo = MagazineCapacity;
 	ReloadTime = 2.0f;
 	bPickRevolver = false;
 	MagazineCount = INT32_MAX;
@@ -35,7 +37,9 @@ AGJRevolver::AGJRevolver()
 
 void AGJRevolver::Fire()
 {
-	
+	UE_LOG(LogTemp, Warning, TEXT("Current: %d, Magazine: %d, Max: %d Ammo"), CurrentAmmo, MagazineCapacity, MaxAmmo);
+
+
 	// 재장전 중이거나, 탄이 없을 경우 발사 불가
 	if (!bCanFire || bIsReloading || CurrentAmmo <= 0)
 	{
@@ -114,20 +118,20 @@ void AGJRevolver::Fire()
 					nullptr
 				);
 				//// 적 처치 시 게이지 상승 로직
-				//if (HitActor->ActorHasTag(FName("NPC")))
-				//{
-				//	UE_LOG(LogTemp, Warning, TEXT("Hit NPC!"));
+				if (HitActor->ActorHasTag(FName("NPC")))
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Hit NPC!"));
 
-				//	AGJNPC* HitEnemy = Cast<AGJNPC>(HitActor);
-				//	if (HitEnemy && HitEnemy->bIsDead)
-				//	{
-				//		UE_LOG(LogTemp, Warning, TEXT("NPC is Dead! Increasing MiniGun Gauge!"));
-				//		if (GJCharacter && GJCharacter->MiniGun)
-				//		{
-				//			GJCharacter->MiniGun->IncreaseGauge(20.0f);
-				//		}
-				//	}
-				//}
+					AGJNPC* HitEnemy = Cast<AGJNPC>(HitActor);
+					if (HitEnemy && HitEnemy->GetNPCDead())
+					{
+						UE_LOG(LogTemp, Warning, TEXT("NPC is Dead! Increasing MiniGun Gauge!"));
+						if (GJCharacter && GJCharacter->MiniGun)
+						{
+							GJCharacter->MiniGun->IncreaseGauge(20.0f);
+						}
+					}
+				}
 
 				if (HitActor->ActorHasTag(FName("NPC")))
 				{
@@ -194,11 +198,6 @@ void AGJRevolver::EnableFire()
 	bCanFire = true;
 }
 
-void AGJRevolver::FinishReload()
-{
-	CurrentAmmo = MaxAmmo;
-	bIsReloading = false;
-}
 
 void AGJRevolver::BeginPlay()
 {

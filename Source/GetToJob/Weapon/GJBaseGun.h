@@ -33,8 +33,6 @@ public:
 	USphereComponent* CollisionComp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	USkeletalMeshComponent* GunMesh;
-	UPROPERTY(EditDefaultsOnly, Category = "Attachment")
-	FName AttachmentSocketName = TEXT("AttachmentSocket");
 	UPROPERTY(EditDefaultsOnly, Category = "Socket | Gun")
 	FName GunSocketName = TEXT("AttachmentSocket");
 
@@ -104,14 +102,17 @@ public:
 	
 	virtual void Pickup(ACharacter* PlayerCharacter) override;
 	virtual void ThrowAway() override;
-	
+	virtual void FinishReload() override;
+
 	void EnablePickup();
-	void FinishReload();
 	
+	// 부착물 관련 함수
 	UFUNCTION(BlueprintCallable, Category = "Weapon Attachment")
 	void EquipAttachment(AGJBaseGunAttachment* Attachment);
 	UFUNCTION(BlueprintCallable, Category = "Weapon Attachment")
-	void RemoveAttachment();
+	void RemoveAttachment(AGJBaseGunAttachment* Attachment);
+	UFUNCTION()
+	void SwapAttachmentsWithGun(AGJBaseGun* OldWeapon, AGJBaseGun* NewWeapon);
 
 	virtual float GetDamage() override;
 	virtual int32 GetCurrentAmmo() const override;
@@ -140,13 +141,15 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
 	int32 MaxAmmo;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
+	int32 MagazineCapacity;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
 	int32 CurrentAmmo;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")
 	TSubclassOf<class AActor> ProjectileClass;
 
 	// 총에 부착할 부착물
 	UPROPERTY()
-	AGJBaseGunAttachment* CurrentAttachment;
+	TArray<AGJBaseGunAttachment*> Attachments;
 
 	// 부착물 관련 변수
 	bool bIsSilenced;

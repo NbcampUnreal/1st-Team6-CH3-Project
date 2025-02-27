@@ -16,6 +16,7 @@ AGJScope::AGJScope()
 	CameraRelativeX = 40.0f; // 조준 시 카메라 X위치
 	CameraRelativeY = 0.0f; // 조준 시 카메라 Y위치
 	CameraRelativeZ = 70.0f; // 조준 시 카메라 Z위치
+	AttachmentSocketName = TEXT("Scope");
 }
 
 // 줌인
