@@ -43,6 +43,8 @@ public:
 	USkeletalMeshComponent* GunMesh;
 	UPROPERTY(EditDefaultsOnly, Category = "Socket | Gun")
 	FName GunSocketName = TEXT("AttachmentSocket");
+	UPROPERTY(EditDefaultsOnly, Category = "Socket | Gun")
+	FName MuzzleSocketName = TEXT("MuzzleSocket");
 
 	// Reload 관련 변수
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Reload")

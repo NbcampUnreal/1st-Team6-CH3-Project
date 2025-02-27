@@ -76,6 +76,7 @@ void AGJRifle::Fire()
 		if (GJCharacter && GJCharacter->GetMesh())
 		{
 			MuzzleLocation = GJCharacter->GetMesh()->GetSocketLocation(TEXT("Revolver"));
+			MuzzleLocation = GunMesh->GetSocketLocation(MuzzleSocketName);
 		}
 		else
 		{

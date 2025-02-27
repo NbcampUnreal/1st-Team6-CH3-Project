@@ -55,6 +55,7 @@ AGJBaseGun::AGJBaseGun()
 	bCanPickup = true;
 	bPickupMiniGun = false;
 	MagazineCount = 100;
+	MuzzleSocketName = TEXT("Muzzle");
 }
 
 void AGJBaseGun::OnBeginOverlap(
