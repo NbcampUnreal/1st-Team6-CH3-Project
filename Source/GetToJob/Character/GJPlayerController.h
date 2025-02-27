@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "UI/GJHUD.h"
 #include "GJPlayerController.generated.h"
 
 class UInputMappingContext; // IMC ���� ���� ����
@@ -51,6 +52,13 @@ public:
 	UInputAction* WeaponSlot3Action;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* TestDeathAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* UseHealingItemAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* UltimateSkillAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* AimAction;
 
 	AGJHUD* HUD;
 

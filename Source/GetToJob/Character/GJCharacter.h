@@ -2,24 +2,25 @@
 
 #include "CoreMinimal.h"
 #include "NPC/AICharacterBase.h"
-#include "Weapon/GJRevolver.h"
-#include "Weapon/GJRifle.h"
-#include "Weapon/GjRocketLauncher.h"
 #include "GameFramework/Character.h"
 #include "Character/GJInventoryComponent.h"
+#include "Character/GJDebuffComponent.h" 
 #include "GJCharacter.generated.h"
 
 class USpringArmComponent; // 스프링 암 관련 클래스 헤더
 class UCameraComponent; // 카메라 관련 클래스 전방 선언
 struct FInputActionValue; // Enhanced Input에서 액션 값을 받을 때 사용하는 구조체
 class AGJBaseGun;
+class AGJMiniGun; // 미니건 클래스 선언
+
 UENUM(BlueprintType)
 enum class EWeaponType : uint8
 {
 	None UMETA(DisplayName = "None"),
 	Revolver UMETA(DisplayName = "Revolver"),
 	Rifle UMETA(DisplayName = "Rifle"),
-	RocketLauncher UMETA(DisplayName = "Rocket Launcher")
+	RocketLauncher UMETA(DisplayName = "Rocket Launcher"),
+	MiniGun UMETA(DisplayName = "MiniGun")
 };
 
 UCLASS()
@@ -30,25 +31,44 @@ class GETTOJOB_API AGJCharacter : public AAICharacterBase
 public:
 	AGJCharacter();
 
+	void SetSpeed(float NewSpeedMultiplier);
+
+	// 이동 속도 관련 프로퍼티들
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	float NormalSpeed; // 기본 걷기 속도
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	float SprintSpeedMultiplier;  // "기본 속도" 대비 몇 배로 빠르게 달릴지 결정
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement")
+	float SprintSpeed; 	// 실제 스프린트 속도
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement")
+	float CrouchSpeed; // 앉은 상태 속도
+
+	// 디버프 컴포넌트 추가
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Debuff")
+	UGJDebuffComponent* DebuffComponent;
+
+	// 디버프 적용 함수
+	void ApplyDebuff(const FDebuffEffect& Debuff);
+
+	// 디버프 컴포넌트 Getter
+	UFUNCTION(BlueprintCallable, Category = "Debuff")
+	UGJDebuffComponent* GetDebuffComponent() const { return DebuffComponent; }
+
+	UPROPERTY(BlueprintReadWrite, Category = "Interaction")
+	AGJHealingItem* InteractableHealingItem;
+
+	void UseHealingItem();
+
 	// 스프링 암 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	USpringArmComponent* SpringArmComp;
+
 	// 카메라 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	UCameraComponent* CameraComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Gun")
 	AGJBaseGun* CurrentGun;
-
-	// 블루프린트 무기 클래스 참조
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon Blueprints")
-	TSubclassOf<AGJRevolver> BP_GJRevolver;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon Blueprints")
-	TSubclassOf<AGJRifle> BP_GJRifle;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon Blueprints")
-	TSubclassOf<AGJRocketLauncher> BP_GJRocketLauncher;
 
 	// 상호작용 함수
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
@@ -61,6 +81,10 @@ public:
 	// 무기 장착
 	void EquipWeapon(AGJBaseGun* NewWeapon);
 
+	// 이전 무기 상태 저장
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	EWeaponType PreviousWeaponType;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	EWeaponType CurrentWeaponType;
 
@@ -71,6 +95,20 @@ public:
 
 	virtual void Tick(float Deltatime) override;
 	float LastSpeed = 0.0f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Interaction")
+	class AGJBaseGun* InteractableWeapon;
+
+	// 미니건 클래스
+	UPROPERTY(EditAnywhere, Category = "Weapons")
+	TSubclassOf<class AGJMiniGun> MiniGunClass; // 미니건 클래스를 에디터에서 설정 가능하게
+
+	// 현재 미니건 객체
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Ultimate")
+	AGJMiniGun* MiniGun;
+
+	// 궁극기 사용
+	void ActivateUltimateWeapon();
 
 protected:
 	virtual float TakeDamage(
@@ -102,16 +140,6 @@ protected:
 
 	/*virtual void Tick(float DeltaTime) override;*/
 	virtual void BeginPlay() override;
-
-	// 이동 속도 관련 프로퍼티들
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float NormalSpeed; // 기본 걷기 속도
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float SprintSpeedMultiplier;  // "기본 속도" 대비 몇 배로 빠르게 달릴지 결정
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement")
-	float SprintSpeed; 	// 실제 스프린트 속도
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement")
-	float CrouchSpeed; // 앉은 상태 속도
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Look", meta = (ClampMin = "0.1", ClampMax = "5.0"))
 	float LookSensitivity; // 마우스 감도 조절을 위한 변수
@@ -160,6 +188,9 @@ protected:
 	void StartSit(const FInputActionValue& value);
 	UFUNCTION()
 	void StopSit(const FInputActionValue& value);
+
+	void StartAiming();
+	void StopAiming();
 
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void OnDeath();

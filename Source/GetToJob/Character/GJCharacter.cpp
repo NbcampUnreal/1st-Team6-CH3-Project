@@ -11,8 +11,11 @@
 #include "Weapon/GJRevolver.h"
 #include "Weapon/GJRifle.h"
 #include "Weapon/GJRocketLauncher.h"
+#include "Weapon/GJMiniGun.h"
+#include "Weapon/GJScope.h"
 #include "UI/GJHUD.h"
 #include "Components/CapsuleComponent.h"
+#include "Character/GJHealingItem.h"
 //#include "Components/WidgetComponent.h"
 //#include "Components/TextBlock.h"
 //#include "Components/ProgressBar.h"
@@ -72,14 +75,126 @@ AGJCharacter::AGJCharacter()
     CurrentWeaponType = EWeaponType::None;
     
     PrimaryActorTick.bCanEverTick = true;
+
+    DebuffComponent = CreateDefaultSubobject<UGJDebuffComponent>(TEXT("DebuffComponent"));
+}
+
+// 궁극기 발동 (T키)
+void AGJCharacter::ActivateUltimateWeapon()
+{
+    UE_LOG(LogTemp, Warning, TEXT("ActivateUltimateWeapon() Called!"));
+
+    if (MiniGun)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("MiniGun Found! Activating..."));
+        MiniGun->ActivateMiniGun();
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("MiniGun is NULL! Check if it's properly initialized."));
+    }
+}
+
+void AGJCharacter::BeginPlay()
+{
+    Super::BeginPlay();
+
+    if (MiniGunClass)
+    {
+        MiniGun = GetWorld()->SpawnActor<AGJMiniGun>(MiniGunClass);
+        if (MiniGun)
+        {
+            MiniGun->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, MiniGun->GunSocketName);
+            MiniGun->SetOwner(this);
+
+            MiniGun->GunMesh->SetVisibility(false);
+            MiniGun->GunMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+            UE_LOG(LogTemp, Warning, TEXT("MiniGun Initialized at Game Start"));
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("MiniGun Spawn FAILED!"));
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("MiniGunClass is NULL!"));
+    }
+}
+
+
+// 캐릭터 이동속도 저장 및 유지하는 함수
+void AGJCharacter::SetSpeed(float NewSpeedMultiplier)
+{
+    float SpeedMultiplier = FMath::Clamp(NewSpeedMultiplier, 0.1f, 1.0f); // 속도가 너무 작아지지 않도록 제한
+
+    GetCharacterMovement()->MaxWalkSpeed = NormalSpeed * SpeedMultiplier;
+    SprintSpeed = NormalSpeed * SprintSpeedMultiplier * SpeedMultiplier;
+    GetCharacterMovement()->MaxWalkSpeedCrouched = CrouchSpeed * SpeedMultiplier;
+
+    UE_LOG(LogTemp, Warning, TEXT("Speed Updated -> Walk: %f | Sprint: %f"),
+        GetCharacterMovement()->MaxWalkSpeed, SprintSpeed);
+}
+
+// 디버프 적용 함수
+void AGJCharacter::ApplyDebuff(const FDebuffEffect& Debuff)
+{
+    if (DebuffComponent)
+    {
+        DebuffComponent->ApplyDebuff(Debuff);
+    }
+}
+
+void AGJCharacter::UseHealingItem()
+{
+    if (InventoryComponent)
+    {
+        InventoryComponent->UseHealingItem();
+    }
 }
 
 void AGJCharacter::Interact()
 {
-    // 간단한 로그 출력
-    UE_LOG(LogTemp, Log, TEXT("Interact Key Pressed"));
+    // 1️ 무기 먼저 줍기
+    if (IsValid(InteractableWeapon) && InventoryComponent)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("상호작용 키로 무기 줍기 시도: %s"), *InteractableWeapon->GetName());
 
-    // 추후 오브젝트 상호작용 로직 구현 가능
+        AGJBaseGun* TempWeapon = InteractableWeapon; // 임시 저장
+
+        if (TempWeapon)
+        {
+            TempWeapon->Pickup(this); // 무기 줍기
+            InventoryComponent->AddWeapon(TempWeapon); // 인벤토리에 추가
+            EquipWeapon(TempWeapon); // 줍자마자 장착
+
+            // 로그 추가해서 무기가 정상적으로 장착되는지 확인
+            UE_LOG(LogTemp, Warning, TEXT("Weapon Equipped: %s"), *TempWeapon->GetName());
+        }
+
+        // 여기에서 초기화 (너무 일찍 하지 않도록!)
+        InteractableWeapon = nullptr;
+        return; // 무기 줍는 경우, 힐링 아이템 줍기 로직은 실행하지 않음
+    }
+
+    // 2️ 힐링 아이템 줍기
+    if (IsValid(InteractableHealingItem) && InventoryComponent)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("힐링 아이템 인벤토리에 추가"));
+
+        AGJHealingItem* TempHealingItem = InteractableHealingItem; // 임시 저장
+        InteractableHealingItem = nullptr; // 초기화
+
+        if (TempHealingItem)
+        {
+            TempHealingItem->Pickup(this);
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("상호작용할 힐링 아이템 없음"));
+    }
 }
 
 void AGJCharacter::FireWeapon()
@@ -110,7 +225,24 @@ void AGJCharacter::DropWeapon()
     if (CurrentGun)
     {
         UE_LOG(LogTemp, Warning, TEXT("Weapon Dropped!"));
+
+        // 인벤토리에서 무기 제거
+        if (InventoryComponent)
+        {
+            InventoryComponent->RemoveWeapon(CurrentGun);
+        }
+
+        // 무기 비활성화 및 던지기 처리
         CurrentGun->ThrowAway();
+
+        // 무기 애니메이션 상태 초기화
+        CurrentWeaponType = EWeaponType::None;
+
+        // 현재 무기 제거
+        CurrentGun = nullptr;
+
+        // 애니메이션 상태 업데이트 로그
+        UE_LOG(LogTemp, Log, TEXT("Weapon successfully dropped and removed from inventory. Weapon state set to NoWeapon."));
     }
 }
 
@@ -119,6 +251,12 @@ void AGJCharacter::EquipWeapon(AGJBaseGun* NewWeapon)
     if (!NewWeapon)
     {
         UE_LOG(LogTemp, Error, TEXT("EquipWeapon Failed: Weapon is nullptr!"));
+        return;
+    }
+
+    if (CurrentGun == NewWeapon)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Weapon is already equipped."));
         return;
     }
 
@@ -140,8 +278,12 @@ void AGJCharacter::EquipWeapon(AGJBaseGun* NewWeapon)
     CurrentGun->SetActorEnableCollision(true);
     CurrentGun->SetOwner(this);
 
-    // 무기 업데이트
+    // 무기 상태 업데이트
     UpdateWeaponState(CurrentGun);
+
+    // 로그 추가해서 장착된 무기가 무엇인지 확인
+    UE_LOG(LogTemp, Warning, TEXT("Equipped Weapon: %s"), *CurrentGun->GetName());
+    UE_LOG(LogTemp, Warning, TEXT("CurrentWeaponType: %d"), static_cast<int32>(CurrentWeaponType));
 }
 
 void AGJCharacter::UnequipCurrentWeapon()
@@ -156,21 +298,42 @@ void AGJCharacter::UnequipCurrentWeapon()
 
 void AGJCharacter::EquipWeaponFromInventory(int32 SlotIndex)
 {
-    if (InventoryComponent)
+    // 인벤토리 및 슬롯 유효성 검사
+    if (InventoryComponent && InventoryComponent->WeaponSlots.IsValidIndex(SlotIndex))
     {
-        InventoryComponent->EquipWeaponFromSlot(SlotIndex);
+        // 슬롯에 무기가 실제로 존재하는 경우
+        if (InventoryComponent->WeaponSlots[SlotIndex])
+        {
+            InventoryComponent->EquipWeaponFromSlot(SlotIndex);
+            CurrentGun->SwapAttachmentsWithGun(CurrentGun, InventoryComponent->EquipWeaponFromSlot(SlotIndex));
+            UE_LOG(LogTemp, Log, TEXT("Equipped weapon from slot %d."), SlotIndex);
+        }
+        else
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Slot %d is valid but empty."), SlotIndex);
+        }
+    }
+    else
+    {
+        // 슬롯 유효성 검사에서 실패한 경우
+        UE_LOG(LogTemp, Warning, TEXT("Invalid Slot: %d. Total slots available: %d"),
+            SlotIndex, InventoryComponent->WeaponSlots.Num());
+
+        // 무기 장착 시도 방지
+        return;
     }
 }
 
 void AGJCharacter::UpdateWeaponState(AGJBaseGun* NewWeapon)
 {
+    PreviousWeaponType = CurrentWeaponType;
+
     if (!NewWeapon)
     {
         CurrentWeaponType = EWeaponType::None;
         return;
     }
 
-    // 무기 클래스에 따라 무기 타입 업데이트
     if (Cast<AGJRevolver>(NewWeapon))
     {
         CurrentWeaponType = EWeaponType::Revolver;
@@ -183,12 +346,18 @@ void AGJCharacter::UpdateWeaponState(AGJBaseGun* NewWeapon)
     {
         CurrentWeaponType = EWeaponType::RocketLauncher;
     }
+    else if (Cast<AGJMiniGun>(NewWeapon)) 
+    {
+        CurrentWeaponType = EWeaponType::MiniGun;
+    }
     else
     {
         CurrentWeaponType = EWeaponType::None;
     }
 
-    UE_LOG(LogTemp, Log, TEXT("Weapon type updated: %d"), static_cast<uint8>(CurrentWeaponType));
+    UE_LOG(LogTemp, Log, TEXT("Weapon type updated: %d -> %d"),
+        static_cast<uint8>(PreviousWeaponType),
+        static_cast<uint8>(CurrentWeaponType));
 }
 
 float AGJCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamgeCauser)
@@ -208,11 +377,6 @@ float AGJCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
         }
     }
     return ActualDamage;
-}
-
-void AGJCharacter::BeginPlay()
-{
-    Super::BeginPlay();
 }
 
 void AGJCharacter::Tick(float Deltatime)
@@ -416,6 +580,29 @@ void AGJCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
                     &AGJCharacter::TriggerDeathTest
                 );
             }
+
+            // 힐링액션
+            if (PlayerController->UseHealingItemAction)
+            {
+                EnhancedInput->BindAction(
+                    PlayerController->UseHealingItemAction,
+                    ETriggerEvent::Triggered,
+                    this,
+                    &AGJCharacter::UseHealingItem
+                );
+            }
+
+            // T 키 - 궁극기 발동
+            EnhancedInput->BindAction(
+                PlayerController->UltimateSkillAction,
+                ETriggerEvent::Triggered,
+                this,
+                &AGJCharacter::ActivateUltimateWeapon
+            );
+            // 우클릭(조준) - 줌인
+            EnhancedInput->BindAction(PlayerController->AimAction, ETriggerEvent::Triggered, this, &AGJCharacter::StartAiming);
+            // 우클릭 해제 - 줌아웃
+            EnhancedInput->BindAction(PlayerController->AimAction, ETriggerEvent::Completed, this, &AGJCharacter::StopAiming);
         }
     }
 }
@@ -531,6 +718,84 @@ void AGJCharacter::StopSit(const FInputActionValue& value)
 
         // 앉기에서 일어났을 때 점프 가능하게 재설정
         bCanJump = true;
+    }
+}
+
+void AGJCharacter::StartAiming()
+{
+    // CurrentGun이 nullptr인지 먼저 확인
+    if (!CurrentGun)
+    {
+        UE_LOG(LogTemp, Error, TEXT("StartAiming Failed: CurrentGun is NULL!"));
+        return;
+    }
+
+    // CurrentGun->Attachments가 유효한지 확인
+    if (CurrentGun->Attachments.Num() == 0)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("StartAiming Skipped: No attachments found on current weapon."));
+        return;
+    }
+
+    // bHasScope가 true인지 확인
+    if (!CurrentGun->bHasScope)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("StartAiming Skipped: CurrentGun does not have a scope!"));
+        return;
+    }
+
+    for (AGJBaseGunAttachment* Attachment : CurrentGun->Attachments)
+    {
+        if (!Attachment)
+        {
+            UE_LOG(LogTemp, Error, TEXT("StartAiming Failed: Null attachment found in weapon attachments!"));
+            continue;
+        }
+
+        if (AGJScope* Scope = Cast<AGJScope>(Attachment))
+        {
+            Scope->EnableScopeView();
+            UE_LOG(LogTemp, Log, TEXT("StartAiming: Scope activated successfully."));
+        }
+    }
+}
+
+void AGJCharacter::StopAiming()
+{
+    // CurrentGun이 nullptr인지 먼저 확인
+    if (!CurrentGun)
+    {
+        UE_LOG(LogTemp, Error, TEXT("StopAiming Failed: CurrentGun is NULL!"));
+        return;
+    }
+
+    // CurrentGun->Attachments가 유효한지 확인
+    if (CurrentGun->Attachments.Num() == 0)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("StopAiming Skipped: No attachments found on current weapon."));
+        return;
+    }
+
+    // bHasScope가 true인지 확인
+    if (!CurrentGun->bHasScope)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("StopAiming Skipped: CurrentGun does not have a scope!"));
+        return;
+    }
+
+    for (AGJBaseGunAttachment* Attachment : CurrentGun->Attachments)
+    {
+        if (!Attachment)
+        {
+            UE_LOG(LogTemp, Error, TEXT("StopAiming Failed: Null attachment found in weapon attachments!"));
+            continue;
+        }
+
+        if (AGJScope* Scope = Cast<AGJScope>(Attachment))
+        {
+            Scope->DisableScopeView();
+            UE_LOG(LogTemp, Log, TEXT("StopAiming: Scope deactivated successfully."));
+        }
     }
 }
 

@@ -7,6 +7,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "NPC/GJNPC.h"
+#include "Weapon/GJMiniGun.h"
 
 AGJRifle::AGJRifle()
 {
@@ -19,8 +21,10 @@ AGJRifle::AGJRifle()
 	TraceRange = 2000.0f;
 	bCanFire = true;
 	bIsReloading = false;
-	MaxAmmo = 30;
-	CurrentAmmo = MaxAmmo;
+	MaxAmmo = 90;
+	MagazineCapacity = 30;
+	CurrentAmmo = MagazineCapacity;
+	MagazineCount = 100;
 	ReloadTime = 3.0f;
 	bPickupRifle= false;
 	bPickRifle = false;
@@ -77,7 +81,7 @@ void AGJRifle::Fire()
 		}
 
 		FVector TraceStart = MuzzleLocation;
-		FVector TraceEnd = TraceStart + (CameraRotation.Vector() * TraceRange);
+		FVector TraceEnd = CameraLocation + (CameraRotation.Vector() * TraceRange);
 
 		FHitResult HitResult;
 		FCollisionQueryParams Params;
@@ -106,6 +110,23 @@ void AGJRifle::Fire()
 					this,
 					nullptr
 				);
+
+				//// 적 처치 시 게이지 상승 로직
+				if (HitActor->ActorHasTag(FName("NPC")))
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Hit NPC!"));
+
+					AGJNPC* HitEnemy = Cast<AGJNPC>(HitActor);
+					if (HitEnemy && HitEnemy->GetNPCDead())
+					{
+						UE_LOG(LogTemp, Warning, TEXT("NPC is Dead! Increasing MiniGun Gauge!"));
+						if (GJCharacter && GJCharacter->MiniGun)
+						{
+							GJCharacter->MiniGun->IncreaseGauge(20.0f);
+						}
+					}
+				}
+
 
 				if (HitActor->ActorHasTag(FName("NPC")))
 				{
@@ -169,11 +190,6 @@ void AGJRifle::EnableFire()
 	bCanFire = true;
 }
 
-void AGJRifle::FinishReload()
-{
-	bIsReloading = false;
-	CurrentAmmo = MaxAmmo;
-}
 
 void AGJRifle::BeginPlay()
 {

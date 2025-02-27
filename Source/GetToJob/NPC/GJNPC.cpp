@@ -1,15 +1,21 @@
 #include "NPC/GJNPC.h"
 #include "NPC/GJ_AIController.h"
+#include "Components/SphereComponent.h"
 
-AGJNPC::AGJNPC()
+AGJNPC::AGJNPC() :
+	HeadCollisionSphere{ CreateDefaultSubobject<USphereComponent>(TEXT("HeadCollisionSphere")) }
 {
 	PrimaryActorTick.bCanEverTick = true;
 	IsNPCDead = false;
+	if (HeadCollisionSphere)
+	{
+		HeadCollisionSphere->SetupAttachment(GetMesh(), "head_socket");
+	}
 }
 
 UBehaviorTree* AGJNPC::GetBehaviorTree() const
 {
-	return Tree; // Tree ��ȯ �Լ�
+	return Tree; // Tree
 }
 
 APatrolPath* AGJNPC::GetPatrolParth() const
@@ -29,7 +35,7 @@ void AGJNPC::SetPatrolPath(APatrolPath* Path)
 
 void AGJNPC::SetBehaviorTree(UBehaviorTree* ChooseTree)
 {
-	if (AIControllerClass) // AIController�� �����ϴ� ��쿡�� ����
+	if (AIControllerClass) // AIController
 	{
 		AAIController* NPCAIController = Cast<AGJ_AIController>(GetController());
 		if (NPCAIController)

@@ -29,12 +29,18 @@ class GETTOJOB_API AGJBaseGun : public AActor, public IGJGunInterface
 public:	
 	AGJBaseGun();
 
+	// 부착물 관련 변수
+	bool bIsSilenced;
+	bool bHasScope;
+
+	// 총에 부착할 부착물
+	UPROPERTY()
+	TArray<AGJBaseGunAttachment*> Attachments;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USphereComponent* CollisionComp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	USkeletalMeshComponent* GunMesh;
-	UPROPERTY(EditDefaultsOnly, Category = "Attachment")
-	FName AttachmentSocketName = TEXT("AttachmentSocket");
 	UPROPERTY(EditDefaultsOnly, Category = "Socket | Gun")
 	FName GunSocketName = TEXT("AttachmentSocket");
 
@@ -89,6 +95,12 @@ public:
 		const FHitResult& SweepResult
 	);
 
+	UFUNCTION()
+	void OnEndOverlap(UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex);
+
 	UFUNCTION(BlueprintCallable, Category = "Weapon Combat")
 	virtual void Fire() override;
 	UFUNCTION(BlueprintCallable, Category = "Weapon Combat")
@@ -98,14 +110,17 @@ public:
 	
 	virtual void Pickup(ACharacter* PlayerCharacter) override;
 	virtual void ThrowAway() override;
-	
+	virtual void FinishReload() override;
+
 	void EnablePickup();
-	void FinishReload();
 	
+	// 부착물 관련 함수
 	UFUNCTION(BlueprintCallable, Category = "Weapon Attachment")
 	void EquipAttachment(AGJBaseGunAttachment* Attachment);
 	UFUNCTION(BlueprintCallable, Category = "Weapon Attachment")
-	void RemoveAttachment();
+	void RemoveAttachment(AGJBaseGunAttachment* Attachment);
+	UFUNCTION()
+	void SwapAttachmentsWithGun(AGJBaseGun* OldWeapon, AGJBaseGun* NewWeapon);
 
 	virtual float GetDamage() override;
 	virtual int32 GetCurrentAmmo() const override;
@@ -134,17 +149,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
 	int32 MaxAmmo;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
+	int32 MagazineCapacity;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
 	int32 CurrentAmmo;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")
 	TSubclassOf<class AActor> ProjectileClass;
 
-	// 총에 부착할 부착물
-	UPROPERTY()
-	AGJBaseGunAttachment* CurrentAttachment;
 
-	// 부착물 관련 변수
-	bool bIsSilenced;
-	bool bHasScope;
 
 
 

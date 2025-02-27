@@ -1,5 +1,6 @@
 #include "NPC/BTTask_ChasePlayer.h"
 #include "GJ_AIController.h"
+#include "NPC/GJBossAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 
@@ -23,6 +24,16 @@ EBTNodeResult::Type UBTTask_ChasePlayer::ExecuteTask(UBehaviorTreeComponent& Own
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		return EBTNodeResult::Succeeded;
 	}
+	if (auto* const cont = Cast<AGJBossAIController>(OwnerComp.GetAIOwner()))
+	{
+		auto const PlayerLocation = OwnerComp.GetBlackboardComponent()->GetValueAsVector(GetSelectedBlackboardKey());
 
+		// move to the Player's Location
+		UAIBlueprintHelperLibrary::SimpleMoveToLocation(cont, PlayerLocation);
+
+		//finish with Success
+		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+		return EBTNodeResult::Succeeded;
+	}
 	return EBTNodeResult::Failed;
 }

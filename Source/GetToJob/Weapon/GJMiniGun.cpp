@@ -15,7 +15,8 @@ AGJMiniGun::AGJMiniGun()
 	FireRate = 1000.0f;
 	CoolDownDelay = 1 / (FireRate / 60);
 	MaxAmmo = INT32_MAX;
-	CurrentAmmo = MaxAmmo;
+	MagazineCapacity = INT32_MAX;
+	CurrentAmmo = MagazineCapacity;
 	FireSound = nullptr;
 	TraceRange = 6000.0f;
 	bCanFire = true;
@@ -132,7 +133,7 @@ void AGJMiniGun::Fire()
 		}
 
 		FVector TraceStart = MuzzleLocation;
-		FVector TraceEnd = TraceStart + (CameraRotation.Vector() * TraceRange);
+		FVector TraceEnd = CameraLocation + (CameraRotation.Vector() * TraceRange);
 
 		FHitResult HitResult;
 		FCollisionQueryParams Params;
@@ -229,7 +230,7 @@ void AGJMiniGun::BeginPlay()
 {
 	Super::BeginPlay();
 
-	FTimerHandle GaugeHandle;
+	/*FTimerHandle GaugeHandle;
 	GetWorld()->GetTimerManager().SetTimer(
 		GaugeHandle,
 		[this]()
@@ -244,7 +245,7 @@ void AGJMiniGun::BeginPlay()
 		},
 		5.0f,
 		false
-	);
+	);*/
 }
 
 void AGJMiniGun::StartDeactivationTimer()

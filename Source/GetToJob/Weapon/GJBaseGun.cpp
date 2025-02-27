@@ -32,7 +32,8 @@ AGJBaseGun::AGJBaseGun()
 
 	// 오버랩 이벤트를 바인딩 (일단 접촉 시 이벤트가 발생하는 것을 초기 설정으로)
 	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AGJBaseGun::OnBeginOverlap);
-
+	// 충돌 종료 이벤트 바인딩 (무기 범위를 벗어나면 호출됨)
+	CollisionComp->OnComponentEndOverlap.AddDynamic(this, &AGJBaseGun::OnEndOverlap);
 
 
 
@@ -41,8 +42,9 @@ AGJBaseGun::AGJBaseGun()
 	Accuracy = 100.0f;
 	AmmoVelocity = 100.0f;
 	FireRate = 200.0f;
-	MaxAmmo = 30;
-	CurrentAmmo = MaxAmmo;
+	MaxAmmo = 90;
+	MagazineCapacity = 30;
+	CurrentAmmo = MagazineCapacity;
 
 
 	bIsSilenced = false;
@@ -52,7 +54,7 @@ AGJBaseGun::AGJBaseGun()
 	bPickupGun = false;
 	bCanPickup = true;
 	bPickupMiniGun = false;
-	MagazineCount = 3;
+	MagazineCount = 100;
 }
 
 void AGJBaseGun::OnBeginOverlap(
@@ -68,15 +70,42 @@ void AGJBaseGun::OnBeginOverlap(
 		AGJCharacter* GJCharacter = Cast<AGJCharacter>(OtherActor);
 		if (GJCharacter)
 		{
-
-
-			Pickup(GJCharacter);
+			// 상호작용 가능한 무기 설정 (자동 줍기 제거)
+			GJCharacter->InteractableWeapon = this;
+			UE_LOG(LogTemp, Warning, TEXT("무기를 주울 준비 완료: %s"), *GetName());
 		}
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("No Pickup!!"));
 		}
 	}
+}
+
+void AGJBaseGun::OnEndOverlap(UPrimitiveComponent* OverlappedComponent,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex)
+{
+	if (OtherActor && OtherActor->ActorHasTag("Player"))
+	{
+		AGJCharacter* GJCharacter = Cast<AGJCharacter>(OtherActor);
+		if (GJCharacter && GJCharacter->InteractableWeapon == this)
+		{
+			// 플레이어가 더 이상 이 무기와 상호작용할 수 없음
+			GJCharacter->InteractableWeapon = nullptr;
+			UE_LOG(LogTemp, Warning, TEXT("무기 상호작용 범위를 벗어남: %s"), *GetName());
+		}
+	}
+}
+
+void AGJBaseGun::EnablePickup()
+{
+	// 다시 충돌 활성화하여 주울 수 있도록 함
+	CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	CollisionComp->SetCollisionResponseToAllChannels(ECR_Overlap);
+
+	UE_LOG(LogTemp, Warning, TEXT("무기 줍기 가능"));
+	bCanPickup = true;
 }
 
 void AGJBaseGun::Fire()
@@ -91,8 +120,23 @@ void AGJBaseGun::Fire()
 void AGJBaseGun::Reload()
 {
 	// 재장전을 할 필요가 없을 때
-	if (bIsReloading || MagazineCount <= 0)
+	/*if (bIsReloading || MagazineCount <= 0 || MaxAmmo <= 0)
 	{
+		return;
+	}*/
+	if (bIsReloading)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("bIsReloading!"));
+		return;
+	}
+	if (MagazineCount <=0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("MagazineCount!"));
+		return;
+	}
+	if (MaxAmmo <= 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("MaxAmmo!"));
 		return;
 	}
 
@@ -145,20 +189,33 @@ void AGJBaseGun::Pickup(ACharacter* PlayerCharacter)
 			return;
 		}
 
+		// 기존 무기 비활성화 (겹쳐 보이는 현상 방지)
+		if (GJCharacter->CurrentGun)
+		{
+			GJCharacter->CurrentGun->SetActorHiddenInGame(true);
+			GJCharacter->CurrentGun->SetActorEnableCollision(false);
+		}
+
+		// 인벤토리에 무기 추가
 		GJCharacter->InventoryComponent->AddWeapon(this);
+
+		// 이전 무기 상태 업데이트
+		GJCharacter->PreviousWeaponType = GJCharacter->CurrentWeaponType;
 	}
 
-	// 무기가 장착되지 않았다면 자동 장착
+	// 자동 장착 로직
 	if (!GJCharacter->CurrentGun)
 	{
 		GJCharacter->CurrentGun = GJCharacter->InventoryComponent->EquipWeaponFromSlot(0);
 	}
+	else
+	{
+		GJCharacter->EquipWeapon(this); // 자동 장착
+	}
 
-	// 물리 시뮬레이션 완전히 끄기
+	// 물리 시뮬레이션 끄기
 	GunMesh->SetSimulatePhysics(false);
 	GunMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-	// 줍기 감지 충돌 제거
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	// `SetSimulatePhysics(false);`가 확실히 적용되었는지 0.05초 후 확인
@@ -204,20 +261,14 @@ void AGJBaseGun::Pickup(ACharacter* PlayerCharacter)
 
 		}, 0.05f, false);
 
-	// 플레이어가 총을 소유
+	// 플레이어 소유 설정
 	SetOwner(PlayerCharacter);
 	bPickupGun = true;
 
-	if (GJCharacter)
-	{
-		GJCharacter->CurrentGun = this;
-		UE_LOG(LogTemp, Warning, TEXT("Pickup: CurrentGun 설정 완료"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Pickup: No CurrentGun!!"));
-	}
+	// 로그 출력 (최종 상태 업데이트)
+	UE_LOG(LogTemp, Warning, TEXT("Pickup: 무기 장착 및 상태 업데이트 완료"));
 }
+
 
 void AGJBaseGun::ThrowAway()
 {
@@ -265,26 +316,12 @@ void AGJBaseGun::ThrowAway()
 	UE_LOG(LogTemp, Warning, TEXT("ThrowAway 완료 - 총이 바닥으로 떨어짐, 0.5초 후 다시 줍기 가능"));
 }
 
-void AGJBaseGun::EnablePickup()
-{
-	// 다시 충돌 활성화하여 주울 수 있도록 함
-	CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	CollisionComp->SetCollisionResponseToAllChannels(ECR_Overlap);
-
-
-
-	UE_LOG(LogTemp, Warning, TEXT("무기 줍기 가능"));
-	bCanPickup = true;
-
-
-
-
-
-}
-
 void AGJBaseGun::FinishReload()
 {
-	CurrentAmmo = MaxAmmo;
+	int32 TempMax = MaxAmmo;
+	MaxAmmo = FMath::Max(0, MaxAmmo - (MagazineCapacity - CurrentAmmo));
+	UE_LOG(LogTemp, Warning, TEXT("Reload Finish!! MaxAmmo is %d | Using %d Ammo!!"), MaxAmmo, (MagazineCapacity - CurrentAmmo));
+	CurrentAmmo = FMath::Min(MagazineCapacity, TempMax);
 	bIsReloading = false;
 }
 
@@ -294,43 +331,104 @@ void AGJBaseGun::EquipAttachment(AGJBaseGunAttachment* Attachment)
 	{
 		return;
 	}
-	RemoveAttachment(); // 기존 부착물이 있다면 제거
 
-	CurrentAttachment = Attachment;
-	CurrentAttachment->AttachToGun(this);
+	// 부착물을 중복 장착 방지
+	if (Attachments.Contains(Attachment))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("This attachment is already equipped!"));
+		return;
+	}
 
-	// 부착물을 부착
-	CurrentAttachment->AttachToComponent(
+	// 부착물 부착
+	Attachment->AttachToComponent(
 		GunMesh,
 		FAttachmentTransformRules::SnapToTargetIncludingScale,
-		AttachmentSocketName
+		Attachment->AttachmentSocketName
 	);
 
+	// 배열에 추가
+	Attachments.Add(Attachment);
+	Attachment->AttachToGun(this);
+
+	// 장착한 부착물이 스코프인지 확인
 	if (AGJScope* GJScope = Cast<AGJScope>(Attachment))
 	{
 		bHasScope = true;
-		GJScope->EnableScopeView();
+	//	GJScope->EnableScopeView();
 	}
 
-
+	UE_LOG(LogTemp, Warning, TEXT("Attachment Equipped: %s"), *Attachment->GetName());
 }
 
-void AGJBaseGun::RemoveAttachment()
+void AGJBaseGun::RemoveAttachment(AGJBaseGunAttachment* Attachment)
 {
-	if (!CurrentAttachment) return;
-
-	if (AGJScope* Scope = Cast<AGJScope>(CurrentAttachment))
+	if (!Attachment || !Attachments.Contains(Attachment))
 	{
-		bHasScope = false;
+		return;
 	}
 
-	// 부착물에서 메시를 떼기
-	CurrentAttachment->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	// 부착물 제거
+	Attachments.Remove(Attachment);
+	Attachment->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 
-	CurrentAttachment->DetachFromGun();
-	CurrentAttachment = nullptr;
-	
-	
+	// 만약 제거한 부착물이 스코프였다면, 스코프 상태 업데이트
+	if (AGJScope* GJScope = Cast<AGJScope>(Attachment))
+	{
+		bHasScope = false;
+	//	GJScope->DisableScopeView();
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Attachment Removed: %s"), *Attachment->GetName());
+}
+
+void AGJBaseGun::SwapAttachmentsWithGun(AGJBaseGun* OldWeapon, AGJBaseGun* NewWeapon)
+{
+	if (!OldWeapon || !NewWeapon)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SwapAttachments: Invalid weapon reference!"));
+		return;
+	}
+
+	// 기존 무기의 부착물을 가져옴
+	TArray<AGJBaseGunAttachment*> OldAttachments = OldWeapon->Attachments;
+
+	// 기존 무기의 부착물 Detach & 숨기기
+	for (AGJBaseGunAttachment* Attachment : OldAttachments)
+	{
+		if (Attachment)
+		{
+			Attachment->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+			Attachment->SetActorHiddenInGame(true); // 숨김
+			Attachment->SetActorEnableCollision(false); // 충돌 비활성화
+		}
+	}
+
+	// 기존 무기에서 부착물 리스트 초기화
+	OldWeapon->Attachments.Empty();
+
+	// 새로운 무기에 부착물 장착
+	for (AGJBaseGunAttachment* Attachment : OldAttachments)
+	{
+		if (Attachment && NewWeapon)
+		{
+			// 새로운 무기에 부착
+			Attachment->AttachToComponent(
+				NewWeapon->GunMesh,
+				FAttachmentTransformRules::SnapToTargetIncludingScale,
+				Attachment->AttachmentSocketName
+			);
+
+			// 부착물 보이게 하기
+			Attachment->SetActorHiddenInGame(false);
+			Attachment->SetActorEnableCollision(true);
+
+			// 새로운 무기의 부착물 리스트에 추가
+			NewWeapon->Attachments.Add(Attachment);
+			Attachment->AttachToGun(NewWeapon);
+		}
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Attachments swapped from %s to %s"), *OldWeapon->GetName(), *NewWeapon->GetName());
 }
 
 float AGJBaseGun::GetDamage()
@@ -345,7 +443,7 @@ int32 AGJBaseGun::GetCurrentAmmo() const
 
 int32 AGJBaseGun::GetMaxAmmo() const
 {
-	return MaxAmmo;
+	return MagazineCapacity;
 }
 
 void AGJBaseGun::BeginPlay()

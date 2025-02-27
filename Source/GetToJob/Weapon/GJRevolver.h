@@ -21,7 +21,6 @@ public:
 	virtual void Fire() override;
 	virtual void Reload() override;
 	void EnableFire();
-	void FinishReload();
 	
 
 protected:
@@ -51,6 +50,5 @@ private:
 
 	UAnimMontage* ReloadMontage; // 재장전용 애니메이션
 
-	bool bIsReloading; // 재장전 여부 확인
 	FTimerHandle ReloadTimerHandle; // 재장전 타이머 핸들
 };

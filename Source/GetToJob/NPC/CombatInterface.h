@@ -17,4 +17,16 @@ class GETTOJOB_API ICombatInterface
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
 	int MeleeAttack();
+
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
+    int WeakAttack();
+
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
+    int StrongAttack();
+
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
+    int SpecialAttack();
+
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
+    int RangeAttack();
 };
