@@ -54,6 +54,8 @@ public:
 	UInputAction* TestDeathAction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* UseHealingItemAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* UltimateSkillAction;
 
 	AGJHUD* HUD;
 

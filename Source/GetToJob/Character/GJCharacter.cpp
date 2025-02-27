@@ -11,6 +11,7 @@
 #include "Weapon/GJRevolver.h"
 #include "Weapon/GJRifle.h"
 #include "Weapon/GJRocketLauncher.h"
+#include "Weapon/GJMiniGun.h"
 #include "UI/GJHUD.h"
 #include "Components/CapsuleComponent.h"
 #include "Character/GJHealingItem.h"
@@ -76,6 +77,51 @@ AGJCharacter::AGJCharacter()
 
     DebuffComponent = CreateDefaultSubobject<UGJDebuffComponent>(TEXT("DebuffComponent"));
 }
+
+// 궁극기 발동 (T키)
+void AGJCharacter::ActivateUltimateWeapon()
+{
+    UE_LOG(LogTemp, Warning, TEXT("ActivateUltimateWeapon() Called!"));
+
+    if (MiniGun)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("MiniGun Found! Activating..."));
+        MiniGun->ActivateMiniGun();
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("MiniGun is NULL! Check if it's properly initialized."));
+    }
+}
+
+void AGJCharacter::BeginPlay()
+{
+    Super::BeginPlay();
+
+    if (MiniGunClass)
+    {
+        MiniGun = GetWorld()->SpawnActor<AGJMiniGun>(MiniGunClass);
+        if (MiniGun)
+        {
+            MiniGun->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, MiniGun->GunSocketName);
+            MiniGun->SetOwner(this);
+
+            MiniGun->GunMesh->SetVisibility(false);
+            MiniGun->GunMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+            UE_LOG(LogTemp, Warning, TEXT("MiniGun Initialized at Game Start"));
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("MiniGun Spawn FAILED!"));
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("MiniGunClass is NULL!"));
+    }
+}
+
 
 // 캐릭터 이동속도 저장 및 유지하는 함수
 void AGJCharacter::SetSpeed(float NewSpeedMultiplier)
@@ -278,7 +324,6 @@ void AGJCharacter::EquipWeaponFromInventory(int32 SlotIndex)
 
 void AGJCharacter::UpdateWeaponState(AGJBaseGun* NewWeapon)
 {
-    // 이전 무기 상태 저장
     PreviousWeaponType = CurrentWeaponType;
 
     if (!NewWeapon)
@@ -287,7 +332,6 @@ void AGJCharacter::UpdateWeaponState(AGJBaseGun* NewWeapon)
         return;
     }
 
-    // 무기 클래스에 따라 무기 타입 업데이트
     if (Cast<AGJRevolver>(NewWeapon))
     {
         CurrentWeaponType = EWeaponType::Revolver;
@@ -299,6 +343,10 @@ void AGJCharacter::UpdateWeaponState(AGJBaseGun* NewWeapon)
     else if (Cast<AGJRocketLauncher>(NewWeapon))
     {
         CurrentWeaponType = EWeaponType::RocketLauncher;
+    }
+    else if (Cast<AGJMiniGun>(NewWeapon)) 
+    {
+        CurrentWeaponType = EWeaponType::MiniGun;
     }
     else
     {
@@ -327,11 +375,6 @@ float AGJCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
         }
     }
     return ActualDamage;
-}
-
-void AGJCharacter::BeginPlay()
-{
-    Super::BeginPlay();
 }
 
 void AGJCharacter::Tick(float Deltatime)
@@ -546,6 +589,14 @@ void AGJCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
                     &AGJCharacter::UseHealingItem
                 );
             }
+
+            // T 키 - 궁극기 발동
+            EnhancedInput->BindAction(
+                PlayerController->UltimateSkillAction,
+                ETriggerEvent::Triggered,
+                this,
+                &AGJCharacter::ActivateUltimateWeapon
+            );
         }
     }
 }
