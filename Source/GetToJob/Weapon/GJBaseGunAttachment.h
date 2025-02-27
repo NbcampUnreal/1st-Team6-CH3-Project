@@ -19,6 +19,9 @@ public:
 	USceneComponent* RootComp;
 	UPROPERTY()
 	USphereComponent* CollisionComp;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SkeletalMeshComp")
+	USkeletalMeshComponent* SkeletalMeshComp;
+
 
 	// Attachment를 부착할 소켓의 이름
 	UPROPERTY(EditDefaultsOnly, Category = "Attachment")

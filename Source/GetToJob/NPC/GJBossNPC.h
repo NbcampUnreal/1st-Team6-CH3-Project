@@ -33,13 +33,21 @@ public:
 
 	void SetBehaviorTree(UBehaviorTree* ChooseTree);
 
-	void AttackStart() const;
+	void AttackStart() ;
 
-	void AttackEnd() const;
+	void AttackEnd() ;
 
 	bool GetIsFist() const;
 
+	bool GetIsLeft() const;
+
+	bool GetIsRight() const;
+
 	void SetIsFist(bool IsItFist);
+
+	void SetIsRight(bool IsItRight);
+
+	void SetIsLeft(bool IsItLeft);
 
 	int WeakAttack_Implementation() override;
 
@@ -96,4 +104,18 @@ protected:
 	);
 
 	bool IsFist;
+
+	bool IsLeft;
+
+	bool IsRight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status")
+	float WeakDamage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status")
+	float StrongDamage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status")
+	float SpecialDamage;
+
 };

@@ -12,8 +12,6 @@ class GETTOJOB_API AGJScope : public AGJBaseGunAttachment
 public:
 	AGJScope();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StaticMesh")
-	USkeletalMeshComponent* SkeletalMeshComp;
 
 
 
