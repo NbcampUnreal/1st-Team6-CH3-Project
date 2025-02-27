@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystem.h"
 #include "NPC/GJNPC.h"
+#include "Weapon/GJMiniGun.h"
 #include "Particles/ParticleSystemComponent.h"
 
 AGJRevolver::AGJRevolver()
@@ -117,20 +118,20 @@ void AGJRevolver::Fire()
 					nullptr
 				);
 				//// 적 처치 시 게이지 상승 로직
-				//if (HitActor->ActorHasTag(FName("NPC")))
-				//{
-				//	UE_LOG(LogTemp, Warning, TEXT("Hit NPC!"));
+				if (HitActor->ActorHasTag(FName("NPC")))
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Hit NPC!"));
 
-				//	AGJNPC* HitEnemy = Cast<AGJNPC>(HitActor);
-				//	if (HitEnemy && HitEnemy->bIsDead)
-				//	{
-				//		UE_LOG(LogTemp, Warning, TEXT("NPC is Dead! Increasing MiniGun Gauge!"));
-				//		if (GJCharacter && GJCharacter->MiniGun)
-				//		{
-				//			GJCharacter->MiniGun->IncreaseGauge(20.0f);
-				//		}
-				//	}
-				//}
+					AGJNPC* HitEnemy = Cast<AGJNPC>(HitActor);
+					if (HitEnemy && HitEnemy->GetNPCDead())
+					{
+						UE_LOG(LogTemp, Warning, TEXT("NPC is Dead! Increasing MiniGun Gauge!"));
+						if (GJCharacter && GJCharacter->MiniGun)
+						{
+							GJCharacter->MiniGun->IncreaseGauge(20.0f);
+						}
+					}
+				}
 
 				if (HitActor->ActorHasTag(FName("NPC")))
 				{

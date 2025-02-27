@@ -53,13 +53,13 @@ private:
 	void StartDeactivationTimer();
 	void ResetGauge();
 
-	UPROPERTY(EditDefaultsOnly, Category = "MiniGun")
+	UPROPERTY(EditAnywhere, Category = "MiniGun")
 	float MaxGauge; // 최대 게이지 값
 
-	UPROPERTY(EditDefaultsOnly, Category = "MiniGun")
+	UPROPERTY(EditAnywhere, Category = "MiniGun")
 	float CurrentGauge; // 현재 게이지 값
 
-	UPROPERTY(EditDefaultsOnly, Category = "MiniGun")
+	UPROPERTY(EditAnywhere, Category = "MiniGun")
 	float MiniGunDuration; // 미니건 활성화 시간
 
 	FTimerHandle MiniGunTimerHandle;

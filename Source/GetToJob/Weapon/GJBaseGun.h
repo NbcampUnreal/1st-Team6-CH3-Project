@@ -33,8 +33,6 @@ public:
 	USphereComponent* CollisionComp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	USkeletalMeshComponent* GunMesh;
-	UPROPERTY(EditDefaultsOnly, Category = "Attachment")
-	FName AttachmentSocketName = TEXT("AttachmentSocket");
 	UPROPERTY(EditDefaultsOnly, Category = "Socket | Gun")
 	FName GunSocketName = TEXT("AttachmentSocket");
 
@@ -108,11 +106,13 @@ public:
 
 	void EnablePickup();
 	
-	
+	// 부착물 관련 함수
 	UFUNCTION(BlueprintCallable, Category = "Weapon Attachment")
 	void EquipAttachment(AGJBaseGunAttachment* Attachment);
 	UFUNCTION(BlueprintCallable, Category = "Weapon Attachment")
-	void RemoveAttachment();
+	void RemoveAttachment(AGJBaseGunAttachment* Attachment);
+	UFUNCTION()
+	void SwapAttachmentsWithGun(AGJBaseGun* OldWeapon, AGJBaseGun* NewWeapon);
 
 	virtual float GetDamage() override;
 	virtual int32 GetCurrentAmmo() const override;
@@ -149,7 +149,7 @@ protected:
 
 	// 총에 부착할 부착물
 	UPROPERTY()
-	AGJBaseGunAttachment* CurrentAttachment;
+	TArray<AGJBaseGunAttachment*> Attachments;
 
 	// 부착물 관련 변수
 	bool bIsSilenced;

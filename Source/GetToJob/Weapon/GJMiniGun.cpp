@@ -230,7 +230,7 @@ void AGJMiniGun::BeginPlay()
 {
 	Super::BeginPlay();
 
-	FTimerHandle GaugeHandle;
+	/*FTimerHandle GaugeHandle;
 	GetWorld()->GetTimerManager().SetTimer(
 		GaugeHandle,
 		[this]()
@@ -245,7 +245,7 @@ void AGJMiniGun::BeginPlay()
 		},
 		5.0f,
 		false
-	);
+	);*/
 }
 
 void AGJMiniGun::StartDeactivationTimer()
