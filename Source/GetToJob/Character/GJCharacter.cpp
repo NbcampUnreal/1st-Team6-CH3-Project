@@ -107,7 +107,7 @@ void AGJCharacter::BeginPlay()
             MiniGun->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, MiniGun->GunSocketName);
             MiniGun->SetOwner(this);
 
-            MiniGun->GunMesh->SetVisibility(false);
+            /*MiniGun->GunMesh->SetVisibility(false);*/
             MiniGun->GunMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
             UE_LOG(LogTemp, Warning, TEXT("MiniGun Initialized at Game Start"));
@@ -220,31 +220,31 @@ void AGJCharacter::ReloadWeapon()
     CurrentGun->Reload();
 }
 
-void AGJCharacter::DropWeapon()
-{
-    if (CurrentGun)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Weapon Dropped!"));
-
-        // 인벤토리에서 무기 제거
-        if (InventoryComponent)
-        {
-            InventoryComponent->RemoveWeapon(CurrentGun);
-        }
-
-        // 무기 비활성화 및 던지기 처리
-        CurrentGun->ThrowAway();
-
-        // 무기 애니메이션 상태 초기화
-        CurrentWeaponType = EWeaponType::None;
-
-        // 현재 무기 제거
-        CurrentGun = nullptr;
-
-        // 애니메이션 상태 업데이트 로그
-        UE_LOG(LogTemp, Log, TEXT("Weapon successfully dropped and removed from inventory. Weapon state set to NoWeapon."));
-    }
-}
+//void AGJCharacter::DropWeapon()
+//{
+//    if (CurrentGun)
+//    {
+//        UE_LOG(LogTemp, Warning, TEXT("Weapon Dropped!"));
+//
+//        // 인벤토리에서 무기 제거
+//        if (InventoryComponent)
+//        {
+//            InventoryComponent->RemoveWeapon(CurrentGun);
+//        }
+//
+//        // 무기 비활성화 및 던지기 처리
+//        CurrentGun->ThrowAway();
+//
+//        // 무기 애니메이션 상태 초기화
+//        CurrentWeaponType = EWeaponType::None;
+//
+//        // 현재 무기 제거
+//        CurrentGun = nullptr;
+//
+//        // 애니메이션 상태 업데이트 로그
+//        UE_LOG(LogTemp, Log, TEXT("Weapon successfully dropped and removed from inventory. Weapon state set to NoWeapon."));
+//    }
+//}
 
 void AGJCharacter::EquipWeapon(AGJBaseGun* NewWeapon)
 {
@@ -518,15 +518,15 @@ void AGJCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
                     &AGJPlayerController::OpenMainMenu);
             }
 
-            if (PlayerController->DropWeaponAction)
-            {
-                // 무기 드롭(G)
-                EnhancedInput->BindAction(
-                    PlayerController->DropWeaponAction, 
-                    ETriggerEvent::Triggered, 
-                    this, 
-                    &AGJCharacter::DropWeapon);
-            }
+            //if (PlayerController->DropWeaponAction)
+            //{
+            //    // 무기 드롭(G)
+            //    EnhancedInput->BindAction(
+            //        PlayerController->DropWeaponAction, 
+            //        ETriggerEvent::Triggered, 
+            //        this, 
+            //        &AGJCharacter::DropWeapon);
+            //}
 
             if (PlayerController->InteractAction)
             {
@@ -595,7 +595,7 @@ void AGJCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
             // T 키 - 궁극기 발동
             EnhancedInput->BindAction(
                 PlayerController->UltimateSkillAction,
-                ETriggerEvent::Triggered,
+                ETriggerEvent::Started,
                 this,
                 &AGJCharacter::ActivateUltimateWeapon
             );

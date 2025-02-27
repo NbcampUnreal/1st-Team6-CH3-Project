@@ -135,8 +135,8 @@ protected:
 	void ReloadWeapon();
 
 	// 무기 버리기 함수
-	UFUNCTION()
-	void DropWeapon();  // 무기 버리기 함수
+	/*UFUNCTION()
+	void DropWeapon();*/
 
 	/*virtual void Tick(float DeltaTime) override;*/
 	virtual void BeginPlay() override;
