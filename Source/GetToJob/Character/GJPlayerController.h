@@ -57,6 +57,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* UltimateSkillAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* AimAction;
+
 	AGJHUD* HUD;
 
 	// HUD ǥ��

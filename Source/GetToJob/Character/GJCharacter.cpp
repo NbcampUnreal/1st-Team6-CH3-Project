@@ -12,6 +12,7 @@
 #include "Weapon/GJRifle.h"
 #include "Weapon/GJRocketLauncher.h"
 #include "Weapon/GJMiniGun.h"
+#include "Weapon/GJScope.h"
 #include "UI/GJHUD.h"
 #include "Components/CapsuleComponent.h"
 #include "Character/GJHealingItem.h"
@@ -597,6 +598,10 @@ void AGJCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
                 this,
                 &AGJCharacter::ActivateUltimateWeapon
             );
+            // 우클릭(조준) - 줌인
+            EnhancedInput->BindAction(PlayerController->AimAction, ETriggerEvent::Triggered, this, &AGJCharacter::StartAiming);
+            // 우클릭 해제 - 줌아웃
+            EnhancedInput->BindAction(PlayerController->AimAction, ETriggerEvent::Completed, this, &AGJCharacter::StopAiming);
         }
     }
 }
@@ -713,6 +718,24 @@ void AGJCharacter::StopSit(const FInputActionValue& value)
         // 앉기에서 일어났을 때 점프 가능하게 재설정
         bCanJump = true;
     }
+}
+
+void AGJCharacter::StartAiming()
+{
+//    if (CurrentGun->bHasScope)
+//    {
+//        Scope->EnableScopeView();
+//        //bIsAiming = true;  // 상태 저장 (애니메이션 및 UI 처리 가능)
+//    }
+}
+
+void AGJCharacter::StopAiming()
+{
+//    if (CurrentGun && CurrentGun->Scope)
+//    {
+//        CurrentGun->Scope->DisableScopeView();
+//        //bIsAiming = false;
+//    }
 }
 
 void AGJCharacter::OnDeath()

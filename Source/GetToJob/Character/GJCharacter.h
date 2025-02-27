@@ -189,6 +189,9 @@ protected:
 	UFUNCTION()
 	void StopSit(const FInputActionValue& value);
 
+	void StartAiming();
+	void StopAiming();
+
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void OnDeath();
 

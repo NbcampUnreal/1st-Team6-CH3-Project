@@ -20,6 +20,7 @@ AGJPlayerController::AGJPlayerController()
     TestDeathAction(nullptr),
     UseHealingItemAction(nullptr),
     UltimateSkillAction(nullptr),
+    AimAction(nullptr),
     HUD(nullptr)
 {
 }
