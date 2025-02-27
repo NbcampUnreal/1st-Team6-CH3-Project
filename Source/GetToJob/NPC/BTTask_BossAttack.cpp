@@ -39,6 +39,8 @@ EBTNodeResult::Type UBTTask_BossAttack::ExecuteTask(UBehaviorTreeComponent& Owne
 			{
 				icombat->Execute_WeakAttack(npc);
 				npc->SetIsFist(true);
+				npc->SetIsRight(false);
+				npc->SetIsLeft(false);
 			}
 
 		}
@@ -54,6 +56,8 @@ EBTNodeResult::Type UBTTask_BossAttack::ExecuteTask(UBehaviorTreeComponent& Owne
 			{
 				icombat->Execute_StrongAttack(npc);
 				npc->SetIsFist(false);
+				npc->SetIsRight(true);
+				npc->SetIsLeft(false);
 			}
 		}
 	}
@@ -67,6 +71,8 @@ EBTNodeResult::Type UBTTask_BossAttack::ExecuteTask(UBehaviorTreeComponent& Owne
 			{
 				icombat->Execute_SpecialAttack(npc);
 				npc->SetIsFist(false);
+				npc->SetIsRight(false);
+				npc->SetIsLeft(true);
 			}
 		}
 	}

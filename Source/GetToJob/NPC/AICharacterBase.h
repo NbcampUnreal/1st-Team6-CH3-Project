@@ -17,17 +17,20 @@ public:
 	float GetHealth() const;
 	float GetAttack() const;
 	float GetMaxHealth() const;
-	void SetHealth(float const NewHealth);
-	void SetAttack(float const NewAttack);
+	void SetHealth(float NewHealth);
+	void SetAttack(float NewAttack);
 	void AttackStart() const;
 	void AttackEnd() const;
 	float MaxHealth{ 10000.f };
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Collision, meta = (AllowPrivateAccess = "ture"))
 	class UBoxComponent* RightFistCollisionBox;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status", meta = (AllowPrivateAccess = "ture"))
 	float Health;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status", meta = (AllowPrivateAccess = "ture"))
 	float Attack;
+
 	bool bCanAttack;
 protected:
 	virtual void BeginPlay() override;
@@ -58,9 +61,11 @@ protected:
 		int const OtherBodyIndex
 	);
 
+	void DestroyActor();
+
 private:
 	FTimerHandle AttackCooldownTimer;
 
-	void StartAttackCooldown();
+	void StartAttackCooldown(float Time);
 	void ResetAttackCooldown();
 };
