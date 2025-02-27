@@ -305,6 +305,7 @@ void AGJCharacter::EquipWeaponFromInventory(int32 SlotIndex)
         if (InventoryComponent->WeaponSlots[SlotIndex])
         {
             InventoryComponent->EquipWeaponFromSlot(SlotIndex);
+            CurrentGun->SwapAttachmentsWithGun(CurrentGun, InventoryComponent->EquipWeaponFromSlot(SlotIndex));
             UE_LOG(LogTemp, Log, TEXT("Equipped weapon from slot %d."), SlotIndex);
         }
         else
@@ -722,20 +723,80 @@ void AGJCharacter::StopSit(const FInputActionValue& value)
 
 void AGJCharacter::StartAiming()
 {
-//    if (CurrentGun->bHasScope)
-//    {
-//        Scope->EnableScopeView();
-//        //bIsAiming = true;  // 상태 저장 (애니메이션 및 UI 처리 가능)
-//    }
+    // CurrentGun이 nullptr인지 먼저 확인
+    if (!CurrentGun)
+    {
+        UE_LOG(LogTemp, Error, TEXT("StartAiming Failed: CurrentGun is NULL!"));
+        return;
+    }
+
+    // CurrentGun->Attachments가 유효한지 확인
+    if (CurrentGun->Attachments.Num() == 0)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("StartAiming Skipped: No attachments found on current weapon."));
+        return;
+    }
+
+    // bHasScope가 true인지 확인
+    if (!CurrentGun->bHasScope)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("StartAiming Skipped: CurrentGun does not have a scope!"));
+        return;
+    }
+
+    for (AGJBaseGunAttachment* Attachment : CurrentGun->Attachments)
+    {
+        if (!Attachment)
+        {
+            UE_LOG(LogTemp, Error, TEXT("StartAiming Failed: Null attachment found in weapon attachments!"));
+            continue;
+        }
+
+        if (AGJScope* Scope = Cast<AGJScope>(Attachment))
+        {
+            Scope->EnableScopeView();
+            UE_LOG(LogTemp, Log, TEXT("StartAiming: Scope activated successfully."));
+        }
+    }
 }
 
 void AGJCharacter::StopAiming()
 {
-//    if (CurrentGun && CurrentGun->Scope)
-//    {
-//        CurrentGun->Scope->DisableScopeView();
-//        //bIsAiming = false;
-//    }
+    // CurrentGun이 nullptr인지 먼저 확인
+    if (!CurrentGun)
+    {
+        UE_LOG(LogTemp, Error, TEXT("StopAiming Failed: CurrentGun is NULL!"));
+        return;
+    }
+
+    // CurrentGun->Attachments가 유효한지 확인
+    if (CurrentGun->Attachments.Num() == 0)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("StopAiming Skipped: No attachments found on current weapon."));
+        return;
+    }
+
+    // bHasScope가 true인지 확인
+    if (!CurrentGun->bHasScope)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("StopAiming Skipped: CurrentGun does not have a scope!"));
+        return;
+    }
+
+    for (AGJBaseGunAttachment* Attachment : CurrentGun->Attachments)
+    {
+        if (!Attachment)
+        {
+            UE_LOG(LogTemp, Error, TEXT("StopAiming Failed: Null attachment found in weapon attachments!"));
+            continue;
+        }
+
+        if (AGJScope* Scope = Cast<AGJScope>(Attachment))
+        {
+            Scope->DisableScopeView();
+            UE_LOG(LogTemp, Log, TEXT("StopAiming: Scope deactivated successfully."));
+        }
+    }
 }
 
 void AGJCharacter::OnDeath()
