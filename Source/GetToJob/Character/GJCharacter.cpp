@@ -229,7 +229,7 @@ void AGJCharacter::Tick(float Deltatime)
         );
 
         if (AGJPlayerController* GJController = Cast<AGJPlayerController>(GetController()))
-        {
+        {on
             GJController->HUD->UpdateCrosshairSize(NewSpread);
         }
     }
