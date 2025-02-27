@@ -1,5 +1,6 @@
 #include "NPC/AICharacterBase.h"
 #include "NPC/GJNPC.h"
+#include "NPC/GJBossNPC.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/Actor.h"
@@ -38,6 +39,21 @@ float AAICharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 		if (Health <= 0)
 		{
 			NPC->SetNPCDead(true);
+			NPC->GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+			NPC->GetMesh()->SetSimulatePhysics(true);
+			NPC->GetCapsuleComponent()->SetCollisionProfileName(TEXT("NoCollision"));
+
+		}
+	}
+	if (auto const NPC = Cast<AGJBossNPC>(this))
+	{
+		if (Health <= 0)
+		{
+			if (RightFistCollisionBox)
+			{
+				RightFistCollisionBox->SetCollisionProfileName("NoCollision");
+				RightFistCollisionBox->SetNotifyRigidBodyCollision(true);
+			}
 			NPC->GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
 			NPC->GetMesh()->SetSimulatePhysics(true);
 			NPC->GetCapsuleComponent()->SetCollisionProfileName(TEXT("NoCollision"));
@@ -130,6 +146,6 @@ void AAICharacterBase::AttackStart() const
 
 void AAICharacterBase::AttackEnd() const
 {
-	RightFistCollisionBox->SetCollisionProfileName("Fist");
+	RightFistCollisionBox->SetCollisionProfileName("NoCollision");
 	RightFistCollisionBox->SetNotifyRigidBodyCollision(false);
 }

@@ -40,9 +40,6 @@ protected:
 		AActor* DamgeCauser
 	) override;
 
-private:
-	FTimerHandle AttackCooldownTimer;
-
 	UFUNCTION()
 	void OnAttackOverlapBegin(
 		UPrimitiveComponent* const OverlappedComponent,
@@ -60,6 +57,9 @@ private:
 		UPrimitiveComponent* const OtherComponent,
 		int const OtherBodyIndex
 	);
+
+private:
+	FTimerHandle AttackCooldownTimer;
 
 	void StartAttackCooldown();
 	void ResetAttackCooldown();
