@@ -191,7 +191,12 @@ void UGJ_GameResultWidget::GameClearUI()
 
 void UGJ_GameResultWidget::OnRestartButtonClicked()
 {
-	UGameplayStatics::OpenLevel(GetWorld(), "LoopStage");
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		FName CurrentLevel = *World->GetMapName();
+		UGameplayStatics::OpenLevel(World, CurrentLevel);
+	}
 }
 
 void UGJ_GameResultWidget::OnGameQuitButtonClicked()
