@@ -50,6 +50,7 @@ bool AGJNPC::GetNPCDead() const
 	return IsNPCDead;
 }
 
+
 void AGJNPC::SetNPCDead(bool IsDead)
 {
 	IsNPCDead = IsDead;
