@@ -15,6 +15,11 @@ AGJSilencer::AGJSilencer()
 
 void AGJSilencer::AttachToGun(AGJBaseGun* Gun)
 {
+	if (Gun->GetGunType() != EGunType::Revolver)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AGJScope::AttachToGun - This attachment is only for Rifles!"));
+		return;
+	}
 	Super::AttachToGun(Gun);
 
 	if (Gun)

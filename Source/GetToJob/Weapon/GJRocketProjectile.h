@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Weapon/EGJElementalType.h"
 #include "GJRocketProjectile.generated.h"
 
 class USphereComponent;
@@ -37,8 +38,22 @@ public:
 	// 로켓 지속 시간
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Explosion | Lifetime")
 	float RocketLifetime;
+	UPROPERTY()
+	EGJElementalType ElementalType;
+	// 속성 관련 지속시간
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element | Lifetime")
+	float ShockDelay;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element | Lifetime")
+	float FreezeDelay;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element | Lifetime")
+	int32 BurnDelay;
+
+
+
 	// 로켓 지속 타이머
 	FTimerHandle DestroyTimerHandle;
+	// 속성 지속 타이머
+	FTimerHandle EffectTimerHandle;
 
 	// 충돌 함수: 충돌 시 폭발
 	UFUNCTION()
@@ -54,6 +69,7 @@ public:
 	void AutoExplode();
 
 	void ApplyKnockback(AActor* HitActor, FVector ImpactNormal);
+	void SetMaterial();
 
 protected:
 	virtual void BeginPlay() override;

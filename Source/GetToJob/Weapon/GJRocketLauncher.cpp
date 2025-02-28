@@ -6,6 +6,8 @@
 #include "Character/GJCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "Weapon/GJRocketProjectile.h"
+#include "Weapon/GJElementalRocketMagazine.h"
+#include "Weapon/EGJElementalType.h"
 
 
 
@@ -26,6 +28,7 @@ AGJRocketLauncher::AGJRocketLauncher()
 	bPickRocketLauncher = false;
 	ExplosionRadius = 300.f;
 	RecoilStrength = 10.0f;
+	bHasMagazine = false;
 
 	GunType = EGunType::RocketLauncher;
 }
@@ -74,7 +77,8 @@ void AGJRocketLauncher::Fire()
 
 			if (GJCharacter && GJCharacter->GetMesh())
 			{
-				MuzzleLocation = GJCharacter->GetMesh()->GetSocketLocation(TEXT("Rocket"));
+				MuzzleLocation = GunMesh->GetSocketLocation(TEXT("Rocket"));
+				UE_LOG(LogTemp, Warning, TEXT("Muzzle Location is Rocket!!!"));
 			}
 			else
 			{
@@ -88,6 +92,9 @@ void AGJRocketLauncher::Fire()
 			// 속도
 			InitialSpeed = 20000.0f;
 
+			
+			
+
 			// 로켓 생성
 			AGJRocketProjectile* SpawnedRocket = GetWorld()->SpawnActor<AGJRocketProjectile>(
 				ProjectileClass,
@@ -99,6 +106,15 @@ void AGJRocketLauncher::Fire()
 			{
 				// 로켓을 발사한 폰 설정
 				SpawnedRocket->SetInstigator(OwnerPawn);
+				// Magazine을 가지고 있을 경우
+				if (bHasMagazine)
+				{
+					// 탄 속성 추가
+					EGJElementalType RocketElement = GetNextRocketElement();
+					// 탄 속성 설정
+					SpawnedRocket->ElementalType = RocketElement;
+				}
+
 				// 로켓의 속도 초기화
 				UProjectileMovementComponent* ProjectileMovement = SpawnedRocket->FindComponentByClass<UProjectileMovementComponent>();
 				if (ProjectileMovement)
@@ -135,6 +151,22 @@ void AGJRocketLauncher::Reload()
 void AGJRocketLauncher::EnableFire()
 {
 	bCanFire = true;
+}
+
+EGJElementalType AGJRocketLauncher::GetNextRocketElement()
+{
+	if (EquippedElementalMagazine)
+	{
+		int32 Index = EquippedElementalMagazine->ShotCount % EquippedElementalMagazine->ElementalSequence.Num();
+		EquippedElementalMagazine->ShotCount++;
+		
+		EGJElementalType SelectedElement = EquippedElementalMagazine->ElementalSequence[Index];
+		UE_LOG(LogTemp, Warning, TEXT("Next Rocket Element: %d"), static_cast<int32>(SelectedElement));
+
+		return SelectedElement;
+	}
+	UE_LOG(LogTemp, Warning, TEXT("No Elemental Magazine Equipped, Returning None"));
+	return EGJElementalType::None;
 }
 
 
