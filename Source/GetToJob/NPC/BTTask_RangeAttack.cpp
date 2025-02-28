@@ -35,7 +35,6 @@ EBTNodeResult::Type UBTTask_RangeAttack::ExecuteTask(UBehaviorTreeComponent& Own
 		if (MontageHasFinished(npc) && WeakMontageHasFinished(npc) && StrongMontageHasFinished(npc) && SpecialMontageHasFinished(npc))
 		{
 			icombat->Execute_RangeAttack(npc);
-			npc->FireProjectile();
 		}
 	}
 
