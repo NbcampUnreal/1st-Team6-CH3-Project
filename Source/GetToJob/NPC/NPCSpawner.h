@@ -29,7 +29,8 @@ protected:
 
     virtual void BeginPlay() override;
 
-
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning", meta = (ClampMin = "0.0"))
+    float AiAttackDamage = 10.f;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning", meta = (ClampMin = "0.0"))
     float SpawnInterval = 2.5f;
 

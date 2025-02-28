@@ -107,6 +107,7 @@ void ANPCSpawner::SpawnNPCs()
             {
                 UE_LOG(LogTemp, Warning, TEXT("BT_NPC_RandomPath not set!"));
             }
+            SpawnedNPC->SetAttack(AiAttackDamage);
         }
     }
 }
