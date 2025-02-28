@@ -29,6 +29,8 @@ public:
 
 	UAnimMontage* GetRangeMontage() const;
 
+	void FireProjectile();
+
 	void SetPatrolPath(APatrolPath* Path);
 
 	void SetBehaviorTree(UBehaviorTree* ChooseTree);
@@ -87,6 +89,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation, meta = (AllowPrviateAccess = "true"))
 	UAnimMontage* RangeAttackMontage;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	USoundBase* HeatSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	USoundBase* HurtSound;
+
+
 	virtual void OnAttackOverlapBegin(
 		UPrimitiveComponent* const OverlappedComponent,
 		AActor* const OtherActor,
@@ -117,5 +126,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status")
 	float SpecialDamage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")
+	TSubclassOf<class AActor> ProjectileClass;
 
 };

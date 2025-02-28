@@ -5,18 +5,23 @@
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BlackBoardComponent.h"
 #include "NPC/GJBossNPC.h"
-#include "BTTask_BossAttack.generated.h"
+#include "BTTask_RangeAttack.generated.h"
+
 
 UCLASS()
-class GETTOJOB_API UBTTask_BossAttack : public UBTTask_BlackboardBase
+class GETTOJOB_API UBTTask_RangeAttack : public UBTTask_BlackboardBase
 {
 	GENERATED_BODY()
 public:
-	UBTTask_BossAttack();
+	UBTTask_RangeAttack();
 	EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 private:
+	bool MontageHasFinished(AGJBossNPC* const npc);
+
 	bool WeakMontageHasFinished(AGJBossNPC* const npc);
+
 	bool StrongMontageHasFinished(AGJBossNPC* const npc);
+
 	bool SpecialMontageHasFinished(AGJBossNPC* const npc);
-	bool RangeMontageHasFinished(AGJBossNPC* const npc);
+
 };
