@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Weapon/GJBaseGun.h"
+#include "Weapon/EGJElementalType.h"
 #include "GJRocketLauncher.generated.h"
 
 UCLASS()
@@ -14,14 +15,17 @@ class GETTOJOB_API AGJRocketLauncher : public AGJBaseGun
 public:
 	AGJRocketLauncher();
 	
+	// 부착된 속성 탄환 변수 선언
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attachment")
+	class AGJElementalRocketMagazine* EquippedElementalMagazine;
 
-
-	
+	bool bHasMagazine;
 
 	virtual void Fire() override;
 	virtual void Reload() override;
 	void EnableFire();
-
+	
+	EGJElementalType GetNextRocketElement();
 
 
 protected:
@@ -47,6 +51,7 @@ protected:
 private:
 	FTimerHandle CoolDownTimerHandle;
 	bool bCanFire;
+	
 
 	UAnimMontage* ReloadMontage; // 재장전용 애니메이션
 

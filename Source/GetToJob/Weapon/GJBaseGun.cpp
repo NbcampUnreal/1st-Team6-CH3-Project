@@ -4,8 +4,11 @@
 #include "Character/GJCharacter.h"
 #include "Weapon/GJBaseGunAttachment.h"
 #include "Weapon/GJScope.h"
+#include "Weapon/GJSilencer.h"
+#include "Weapon/GJElementalRocketMagazine.h"
 #include "Kismet/GameplayStatics.h"
 #include "Character/GJInventoryComponent.h"
+
 
 
 // Sets default values
@@ -340,6 +343,36 @@ void AGJBaseGun::EquipAttachment(AGJBaseGunAttachment* Attachment)
 		return;
 	}
 
+	// 특정 부착물이 특정 무기만 장착 가능하도록 제한 
+	if (AGJScope* GJScope = Cast<AGJScope>(Attachment))
+	{
+		if (GetGunType() != EGunType::Rifle) // Rifle이 아니면 장착 불가
+		{
+			UE_LOG(LogTemp, Warning, TEXT("EquipAttachment - Scopes can only be equipped on Rifles!"));
+			return;
+		}
+	}
+
+	// 특정 부착물이 특정 무기만 장착 가능하도록 제한 
+	if (AGJSilencer* GJSilencer = Cast<AGJSilencer>(Attachment))
+	{
+		if (GetGunType() != EGunType::Revolver) // Rifle이 아니면 장착 불가
+		{
+			UE_LOG(LogTemp, Warning, TEXT("EquipAttachment - Scopes can only be equipped on Rifles!"));
+			return;
+		}
+	}
+	// 특정 부착물이 특정 무기만 장착 가능하도록 제한 
+	if (AGJElementalRocketMagazine* GJElementalRocketMagazine = Cast<AGJElementalRocketMagazine>(Attachment))
+	{
+		if (GetGunType() != EGunType::RocketLauncher) // Rifle이 아니면 장착 불가
+		{
+			UE_LOG(LogTemp, Warning, TEXT("EquipAttachment - Scopes can only be equipped on Rifles!"));
+			return;
+		}
+	}
+
+
 	// 부착물 부착
 	Attachment->AttachToComponent(
 		GunMesh,
@@ -385,53 +418,53 @@ void AGJBaseGun::RemoveAttachment(AGJBaseGunAttachment* Attachment)
 
 void AGJBaseGun::SwapAttachmentsWithGun(AGJBaseGun* OldWeapon, AGJBaseGun* NewWeapon)
 {
-	if (!OldWeapon || !NewWeapon)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("SwapAttachments: Invalid weapon reference!"));
-		return;
-	}
+	//if (!OldWeapon || !NewWeapon)
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("SwapAttachments: Invalid weapon reference!"));
+	//	return;
+	//}
 
-	// 기존 무기의 부착물을 가져옴
-	TArray<AGJBaseGunAttachment*> OldAttachments = OldWeapon->Attachments;
+	//// 기존 무기의 부착물을 가져옴
+	//TArray<AGJBaseGunAttachment*> OldAttachments = OldWeapon->Attachments;
 
-	// 기존 무기의 부착물 Detach & 숨기기
-	for (AGJBaseGunAttachment* Attachment : OldAttachments)
-	{
-		if (Attachment)
-		{
-			RemoveAttachment(Attachment);
-			Attachment->SetActorHiddenInGame(true); // 숨김
-			Attachment->SetActorEnableCollision(false); // 충돌 비활성화
-		}
-	}
+	//// 기존 무기의 부착물 Detach & 숨기기
+	//for (AGJBaseGunAttachment* Attachment : OldAttachments)
+	//{
+	//	if (Attachment)
+	//	{
+	//		RemoveAttachment(Attachment);
+	//		Attachment->SetActorHiddenInGame(true); // 숨김
+	//		Attachment->SetActorEnableCollision(false); // 충돌 비활성화
+	//	}
+	//}
 
-	
+	//
 
-	// 새로운 무기에 부착물 장착
-	for (AGJBaseGunAttachment* Attachment : OldAttachments)
-	{
-		if (Attachment && NewWeapon)
-		{
-			// 새로운 무기에 부착
-			Attachment->AttachToComponent(
-				NewWeapon->GunMesh,
-				FAttachmentTransformRules::SnapToTargetIncludingScale,
-				Attachment->AttachmentSocketName
-			);
+	//// 새로운 무기에 부착물 장착
+	//for (AGJBaseGunAttachment* Attachment : OldAttachments)
+	//{
+	//	if (Attachment && NewWeapon)
+	//	{
+	//		// 새로운 무기에 부착
+	//		Attachment->AttachToComponent(
+	//			NewWeapon->GunMesh,
+	//			FAttachmentTransformRules::SnapToTargetIncludingScale,
+	//			Attachment->AttachmentSocketName
+	//		);
 
-			// 부착물 보이게 하기
-			Attachment->SetActorHiddenInGame(false);
-			Attachment->SetActorEnableCollision(true);
+	//		// 부착물 보이게 하기
+	//		Attachment->SetActorHiddenInGame(false);
+	//		Attachment->SetActorEnableCollision(true);
 
-			// 새로운 무기의 부착물 리스트에 추가
-			NewWeapon->Attachments.Add(Attachment);
-			Attachment->AttachToGun(NewWeapon);
-		}
-	}
-	// 기존 무기에서 부착물 리스트 초기화
-	OldWeapon->Attachments.Empty();
+	//		// 새로운 무기의 부착물 리스트에 추가
+	//		NewWeapon->Attachments.Add(Attachment);
+	//		Attachment->AttachToGun(NewWeapon);
+	//	}
+	//}
+	//// 기존 무기에서 부착물 리스트 초기화
+	//OldWeapon->Attachments.Empty();
 
-	UE_LOG(LogTemp, Warning, TEXT("Attachments swapped from %s to %s"), *OldWeapon->GetName(), *NewWeapon->GetName());
+	//UE_LOG(LogTemp, Warning, TEXT("Attachments swapped from %s to %s"), *OldWeapon->GetName(), *NewWeapon->GetName());
 }
 
 float AGJBaseGun::GetDamage()
@@ -446,7 +479,27 @@ int32 AGJBaseGun::GetCurrentAmmo() const
 
 int32 AGJBaseGun::GetMaxAmmo() const
 {
+	return MaxAmmo;
+}
+
+int32 AGJBaseGun::GetMagazineCapacity() const
+{
 	return MagazineCapacity;
+}
+
+void AGJBaseGun::RaiseMaxAmmo(int32 InAmmo)
+{
+	MaxAmmo += InAmmo;
+}
+
+void AGJBaseGun::RaiseMagazineCapacity(int32 InMagazineCapacity)
+{
+	MagazineCapacity += InMagazineCapacity;
+}
+
+void AGJBaseGun::SetCurrentAmmo(int32 InAmmo)
+{
+	CurrentAmmo += InAmmo;
 }
 
 void AGJBaseGun::SetDamage(float NewDamage)

@@ -7,6 +7,15 @@
 
 class USphereComponent;
 
+UENUM(BlueprintType)
+enum class ETrapEffectType : uint8
+{
+    Slow UMETA(DisplayName = "Slow"),
+    Bleed UMETA(DisplayName = "Bleed"),
+    Heal UMETA(DisplayName = "Heal"),
+    SpeedBoost UMETA(DisplayName = "Speed Boost")
+};
+
 UCLASS()
 class GETTOJOB_API AGJTrapActor : public AActor
 {
@@ -15,8 +24,11 @@ class GETTOJOB_API AGJTrapActor : public AActor
 public:
     AGJTrapActor();
 
+    UPROPERTY(EditDefaultsOnly, Category = "Trap")
+    TArray<ETrapEffectType> TrapEffects;
+
 protected:
-    virtual void BeginPlay() override;
+    /*virtual void BeginPlay() override;*/
 
 private:
     UPROPERTY(VisibleAnywhere)
@@ -33,4 +45,6 @@ private:
         bool bFromSweep,
         const FHitResult& SweepResult
     );
+
+    bool bHasActivated = false;
 };
