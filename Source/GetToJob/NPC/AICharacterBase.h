@@ -18,6 +18,7 @@ public:
 	float GetAttack() const;
 	float GetMaxHealth() const;
 	void SetHealth(float NewHealth);
+	void SetMaxHealth(float NewMaxHealth);
 	void SetAttack(float NewAttack);
 	void AttackStart() const;
 	void AttackEnd() const;

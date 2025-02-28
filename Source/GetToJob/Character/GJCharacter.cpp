@@ -1,5 +1,5 @@
 ﻿#include "Character/GJCharacter.h"
-#include "GJPlayerController.h"
+#include "Character/GJPlayerController.h"
 #include "GameManager/GJGameState.h"
 #include "EnhancedInputComponent.h"
 #include "Camera/CameraComponent.h"
@@ -46,7 +46,7 @@ AGJCharacter::AGJCharacter()
       HPWidget->SetWidgetSpace(EWidgetSpace::Screen);*/
 
     // 속도 설정
-    NormalSpeed = 600.0f; // 걷기 속도
+    NormalSpeed = 400.0f; // 걷기 속도
     SprintSpeedMultiplier = 1.5f; // 스프린트 속도 배율
     CrouchSpeed = 200.0f; // 앉기 속도
     SprintSpeed = NormalSpeed * SprintSpeedMultiplier; // 스프린트 속도 적용
@@ -66,7 +66,8 @@ AGJCharacter::AGJCharacter()
     
     // 현재 소지 총 초기화
     CurrentGun = nullptr;
-    SetHealth(100.f);
+    SetHealth(75.f);
+    SetMaxHealth(100.f);
 
     // 인벤토리 연결
     InventoryComponent = CreateDefaultSubobject<UGJInventoryComponent>(TEXT("InventoryComponent"));
@@ -95,9 +96,33 @@ void AGJCharacter::ActivateUltimateWeapon()
     }
 }
 
+void AGJCharacter::ModifyHealth(float Amount)
+{
+    // 이미 죽었으면 체력 조정 X
+    if (bIsDead) return;
+
+    // 체력 변경
+    SetHealth(GetHealth() + Amount);
+
+    // 체력이 0 이하이면 사망 처리 (단, 중복 호출 방지)
+    if (GetHealth() <= 0 && !bIsDead)
+    {
+        bIsDead = true; // 사망 상태로 설정
+        UE_LOG(LogTemp, Warning, TEXT("Character has died!"));
+        OnDeath();
+    }
+    else
+    {
+        UE_LOG(LogTemp, Log, TEXT("Character Health Modified: %f / %f"), GetHealth(), GetMaxHealth());
+    }
+}
+
+
 void AGJCharacter::BeginPlay()
 {
     Super::BeginPlay();
+
+    GJController = Cast<AGJPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 
     if (MiniGunClass)
     {
@@ -107,7 +132,7 @@ void AGJCharacter::BeginPlay()
             MiniGun->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, MiniGun->GunSocketName);
             MiniGun->SetOwner(this);
 
-            MiniGun->GunMesh->SetVisibility(false);
+            /*MiniGun->GunMesh->SetVisibility(false);*/
             MiniGun->GunMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
             UE_LOG(LogTemp, Warning, TEXT("MiniGun Initialized at Game Start"));
@@ -206,6 +231,12 @@ void AGJCharacter::FireWeapon()
     }
 
     CurrentGun->Fire(); // 발싸
+
+    //애니메이션 추가 currentGunt->fire() 밑에 두었습니다.
+    if (GJController)
+    {
+        GJController->HUD->ShowFireAnim();
+    }
 }
 
 void AGJCharacter::ReloadWeapon()
@@ -220,31 +251,31 @@ void AGJCharacter::ReloadWeapon()
     CurrentGun->Reload();
 }
 
-void AGJCharacter::DropWeapon()
-{
-    if (CurrentGun)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Weapon Dropped!"));
-
-        // 인벤토리에서 무기 제거
-        if (InventoryComponent)
-        {
-            InventoryComponent->RemoveWeapon(CurrentGun);
-        }
-
-        // 무기 비활성화 및 던지기 처리
-        CurrentGun->ThrowAway();
-
-        // 무기 애니메이션 상태 초기화
-        CurrentWeaponType = EWeaponType::None;
-
-        // 현재 무기 제거
-        CurrentGun = nullptr;
-
-        // 애니메이션 상태 업데이트 로그
-        UE_LOG(LogTemp, Log, TEXT("Weapon successfully dropped and removed from inventory. Weapon state set to NoWeapon."));
-    }
-}
+//void AGJCharacter::DropWeapon()
+//{
+//    if (CurrentGun)
+//    {
+//        UE_LOG(LogTemp, Warning, TEXT("Weapon Dropped!"));
+//
+//        // 인벤토리에서 무기 제거
+//        if (InventoryComponent)
+//        {
+//            InventoryComponent->RemoveWeapon(CurrentGun);
+//        }
+//
+//        // 무기 비활성화 및 던지기 처리
+//        CurrentGun->ThrowAway();
+//
+//        // 무기 애니메이션 상태 초기화
+//        CurrentWeaponType = EWeaponType::None;
+//
+//        // 현재 무기 제거
+//        CurrentGun = nullptr;
+//
+//        // 애니메이션 상태 업데이트 로그
+//        UE_LOG(LogTemp, Log, TEXT("Weapon successfully dropped and removed from inventory. Weapon state set to NoWeapon."));
+//    }
+//}
 
 void AGJCharacter::EquipWeapon(AGJBaseGun* NewWeapon)
 {
@@ -367,6 +398,12 @@ float AGJCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
         EventInstigator,
         DamgeCauser);
     SetHealth(FMath::Clamp(GetHealth() - DamageAmount, 0.0f, GetMaxHealth()));
+
+    if (GJController)
+    {
+        GJController->HUD->ShowHitEffect();
+    }
+
     if (auto const Player = Cast<AGJCharacter>(this))
     {
         if (GetHealth() <= 0)
@@ -392,7 +429,7 @@ void AGJCharacter::Tick(float Deltatime)
             Speed
         );
 
-        if (AGJPlayerController* GJController = Cast<AGJPlayerController>(GetController()))
+        if (GJController)
         {
             GJController->HUD->UpdateCrosshairSize(NewSpread);
         }
@@ -518,15 +555,15 @@ void AGJCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
                     &AGJPlayerController::OpenMainMenu);
             }
 
-            if (PlayerController->DropWeaponAction)
-            {
-                // 무기 드롭(G)
-                EnhancedInput->BindAction(
-                    PlayerController->DropWeaponAction, 
-                    ETriggerEvent::Triggered, 
-                    this, 
-                    &AGJCharacter::DropWeapon);
-            }
+            //if (PlayerController->DropWeaponAction)
+            //{
+            //    // 무기 드롭(G)
+            //    EnhancedInput->BindAction(
+            //        PlayerController->DropWeaponAction, 
+            //        ETriggerEvent::Triggered, 
+            //        this, 
+            //        &AGJCharacter::DropWeapon);
+            //}
 
             if (PlayerController->InteractAction)
             {
@@ -595,7 +632,7 @@ void AGJCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
             // T 키 - 궁극기 발동
             EnhancedInput->BindAction(
                 PlayerController->UltimateSkillAction,
-                ETriggerEvent::Triggered,
+                ETriggerEvent::Started,
                 this,
                 &AGJCharacter::ActivateUltimateWeapon
             );
@@ -801,37 +838,46 @@ void AGJCharacter::StopAiming()
 
 void AGJCharacter::OnDeath()
 {
-    // 추가적인 사망 후 로직 (예: 게임 오버 처리)
+    if (bIsDead) return; // 이미 죽었다면 다시 실행되지 않음
+
+    bIsDead = true; // 사망 상태 설정
+
+    // 모든 디버프 제거 (출혈 포함)
+    if (DebuffComponent)
+    {
+        DebuffComponent->RemoveAllDebuffs();
+    }
+
+    // 입력 비활성화
     if (GetController())
     {
-        GetController()->DisableInput(nullptr);  // 입력 비활성화
-        GetController()->UnPossess();  // 컨트롤러 해제 (더 이상 캐릭터 조작 불가)
+        GetController()->DisableInput(nullptr);
+        GetController()->UnPossess();
     }
 
     UE_LOG(LogTemp, Error, TEXT("Player has died! Game Over"));
 
-    // 죽음 사운드 재생
+    // 사망 사운드 재생 (한 번만 실행되도록 보장)
     if (DeathSound)
     {
         UGameplayStatics::PlaySoundAtLocation(this, DeathSound, GetActorLocation());
     }
 
-    // 레그돌 활성화
-    GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));  // 충돌 프로파일을 래그돌로 변경
-    GetMesh()->SetSimulatePhysics(true);  // 물리 시뮬레이션 활성화
+    if (GJController)
+    {
+        GJController->GameOver();
+    }
 
-    // 캡슐 콜라이더(캐릭터 충돌 상자) 비활성화
+    // 레그돌 활성화
+    GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+    GetMesh()->SetSimulatePhysics(true);
+
+    // 캡슐 콜라이더 비활성화
     GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Ignore);
 
-    // 일정 시간이 지나면 캐릭터 제거 (예: 30초 후)
+    // 일정 시간 후 캐릭터 제거
     SetLifeSpan(30.0f);
-
-    // 게임 오버 처리
-    /*if (AGJGameState* GameState = GetWorld() ? GetWorld()->GetGameState<AGJGameState>() : nullptr)
-    {
-        GameState->OnGameOver();
-    }*/
 }
 
 // 테스트용 죽이기 함수
