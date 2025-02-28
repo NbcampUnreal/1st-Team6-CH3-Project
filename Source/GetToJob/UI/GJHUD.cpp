@@ -2,6 +2,7 @@
 #include "GameManager/GJGameState.h"
 #include "Blueprint/UserWidget.h"
 #include "UI/GJ_MainWidget.h"
+#include "UI/GJ_GameResultWidget.h"
 #include "Blueprint/WidgetBlueprintGeneratedClass.h"
 
 void AGJHUD::DisplayHUD(GJHUDState HUDType)
@@ -20,8 +21,28 @@ void AGJHUD::DisplayHUD(GJHUDState HUDType)
 	case GJHUDState::PauseHUD:
 		break;
 	case GJHUDState::GameOver:
+		ResultHUDWidget = CreateWidget<UGJ_GameResultWidget>(GetWorld(), ResultHUDClass);
+		if (ResultHUDWidget)
+		{
+			ResultHUDWidget->AddToViewport();
+			ResultHUDWidget->WaveGameOver();
+		}
 		break;
 	case GJHUDState::GameClear:
+		ResultHUDWidget = CreateWidget<UGJ_GameResultWidget>(GetWorld(), ResultHUDClass);
+		if (ResultHUDWidget)
+		{
+			ResultHUDWidget->AddToViewport();
+			ResultHUDWidget->GameClearUI();
+		}
+		break;
+	case GJHUDState::GameFail:
+		ResultHUDWidget = CreateWidget<UGJ_GameResultWidget>(GetWorld(), ResultHUDClass);
+		if (ResultHUDWidget)
+		{
+			ResultHUDWidget->AddToViewport();
+			ResultHUDWidget->ClearFailUI();
+		}
 		break;
 	default:
 		break;
@@ -40,14 +61,27 @@ void AGJHUD::HideHUD(GJHUDState HUDType)
 	case GJHUDState::StartHUD:
 		break;
 	case GJHUDState::MainHUD:
+		if (MainHUDWidget)
+		{
+			MainHUDWidget->RemoveFromParent();
+			MainHUDWidget = nullptr;
+		}
 		break;
 	case GJHUDState::PauseHUD:
 		break;
-	case GJHUDState::CrossHairHUD:
-		break;
 	case GJHUDState::GameOver:
+		if (ResultHUDWidget)
+		{
+			ResultHUDWidget->RemoveFromParent();
+			ResultHUDWidget = nullptr;
+		}
 		break;
 	case GJHUDState::GameClear:
+		if (ResultHUDWidget)
+		{
+			ResultHUDWidget->RemoveFromParent();
+			ResultHUDWidget = nullptr;
+		}
 		break;
 	default:
 		break;
