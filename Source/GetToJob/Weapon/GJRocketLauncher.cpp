@@ -155,6 +155,7 @@ void AGJRocketLauncher::EnableFire()
 
 EGJElementalType AGJRocketLauncher::GetNextRocketElement()
 {
+	EquippedElementalMagazine = EquippedElementalMagazineClass->GetDefaultObject<AGJElementalRocketMagazine>();
 	if (EquippedElementalMagazine)
 	{
 		int32 Index = EquippedElementalMagazine->ShotCount % EquippedElementalMagazine->ElementalSequence.Num();
