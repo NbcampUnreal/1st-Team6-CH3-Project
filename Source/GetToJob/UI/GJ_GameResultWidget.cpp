@@ -26,8 +26,7 @@ void UGJ_GameResultWidget::NativeConstruct()
 	GJPlayerController = Cast<AGJPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 
 	CurrentScore = 0;
-	//TargetScore = GJGameInstance->GetTotalScore();
-	TargetScore = 50;
+	TargetScore = GJGameInstance->GetTotalScore();
 
 	if (ReStart)
 	{
