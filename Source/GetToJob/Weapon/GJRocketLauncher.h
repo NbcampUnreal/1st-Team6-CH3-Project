@@ -7,6 +7,8 @@
 #include "Weapon/EGJElementalType.h"
 #include "GJRocketLauncher.generated.h"
 
+class AGJElementalRocketMagazine;
+
 UCLASS()
 class GETTOJOB_API AGJRocketLauncher : public AGJBaseGun
 {
@@ -16,8 +18,12 @@ public:
 	AGJRocketLauncher();
 	
 	// 부착된 속성 탄환 변수 선언
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attachment")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Attachment")
 	class AGJElementalRocketMagazine* EquippedElementalMagazine;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attachment")
+	TSubclassOf<AGJElementalRocketMagazine> EquippedElementalMagazineClass;
+
+
 
 	bool bHasMagazine;
 
