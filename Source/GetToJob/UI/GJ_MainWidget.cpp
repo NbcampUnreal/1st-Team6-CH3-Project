@@ -242,6 +242,14 @@ void UGJ_MainWidget::SetCrosshairSize(float NewSpread)
 	}
 }
 
+void UGJ_MainWidget::PlayFireAnim()
+{
+	if (CrosshairTop && CrosshairBottom && CrosshairLeft && CrosshairRight && FireAnim)
+	{
+		PlayAnimation(FireAnim);
+	}
+}
+
 
 
 

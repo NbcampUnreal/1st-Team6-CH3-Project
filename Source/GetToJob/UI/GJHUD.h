@@ -6,6 +6,7 @@
 
 class UUserWidget;
 class UGJ_MainWidget;
+class UGJ_GameResultWidget;
 
 UENUM(BlueprintType)
 enum class GJHUDState : uint8
@@ -13,9 +14,9 @@ enum class GJHUDState : uint8
 	StartHUD, // 게임 시작 UI (게임 Start)
 	MainHUD, // 게임 플레이 기본 UI (플레이어 상태)
 	PauseHUD, // 일시정지 UI
-	CrossHairHUD, // 크로스헤어 UI
 	GameOver, // 게임 오버 UI
-	GameClear // 게임 클리어 UI
+	GameClear, // 게임 클리어 UI
+	GameFail
 };
 
 UCLASS()
@@ -31,6 +32,7 @@ public:
 	void UpdateMainHUD();
 	void ShowHitEffect();
 	void UpdateCrosshairSize(float NewSpread);
+	void ShowFireAnim();
 
 
 	//ui 위젯 클래스 (blueprint에서 설정)
@@ -40,11 +42,18 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UGJ_MainWidget> MainHUDClass;
 
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UGJ_GameResultWidget> ResultHUDClass;
+	
+
 	UPROPERTY()
 	UUserWidget* StartHUDWidget = nullptr;
 
 	UPROPERTY()
 	UGJ_MainWidget* MainHUDWidget = nullptr;
+
+	UPROPERTY()
+	UGJ_GameResultWidget* ResultHUDWidget = nullptr;
 
 	
 
