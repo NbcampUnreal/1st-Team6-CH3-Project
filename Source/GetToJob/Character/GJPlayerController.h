@@ -7,6 +7,7 @@
 
 class UInputMappingContext; // IMC ���� ���� ����
 class UInputAction; // IA ���� ���� ����
+class AGJHUD;
 
 UCLASS()
 class GETTOJOB_API AGJPlayerController : public APlayerController
@@ -62,15 +63,14 @@ public:
 
 	AGJHUD* HUD;
 
-	// HUD ǥ��
-	UFUNCTION(BlueprintCallable, Category = "HUD")
-	void ShowGameHUD();
-	// ���� �޴� ǥ��
-	UFUNCTION(BlueprintCallable, Category = "Menu")
-	void OpenMainMenu();
-	// ���� ����
-	UFUNCTION(BlueprintCallable, Category = "Menu")
-	void StartGame();
+	void GameOver();
+
+	void GameClear();
+
+	void GameClearFail();
+
+	//게임을 완전히 종료하는 함수
+	void QuitGame();
 
 	virtual void BeginPlay() override;
 

@@ -9,10 +9,11 @@ enum class EDebuffType : uint8
 {
     None        UMETA(DisplayName = "None"),
     Slow        UMETA(DisplayName = "Slow"),
-    Poison      UMETA(DisplayName = "Poison"),
+    Bleed      UMETA(DisplayName = "Bleed"),
     Stun        UMETA(DisplayName = "Stun"),
     Blind       UMETA(DisplayName = "Blind"),
-    Burn        UMETA(DisplayName = "Burn")
+    SpeedBoost        UMETA(DisplayName = "SpeedBoost"),
+    Heal        UMETA(DisplayName = "Heal")
 };
 
 // 디버프 데이터 구조체

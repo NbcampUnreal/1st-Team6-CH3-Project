@@ -12,6 +12,7 @@ class UCameraComponent; // 카메라 관련 클래스 전방 선언
 struct FInputActionValue; // Enhanced Input에서 액션 값을 받을 때 사용하는 구조체
 class AGJBaseGun;
 class AGJMiniGun; // 미니건 클래스 선언
+class AGJPlayerController;
 
 UENUM(BlueprintType)
 enum class EWeaponType : uint8
@@ -30,6 +31,12 @@ class GETTOJOB_API AGJCharacter : public AAICharacterBase
 
 public:
 	AGJCharacter();
+
+	AGJPlayerController* GJController;
+
+	// 체력 증감 함수 추가
+	UFUNCTION(BlueprintCallable, Category = "Character")
+	void ModifyHealth(float Amount);
 
 	void SetSpeed(float NewSpeedMultiplier);
 

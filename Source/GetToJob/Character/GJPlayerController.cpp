@@ -1,6 +1,7 @@
 #include "GJPlayerController.h"
 #include "UI/GJHUD.h"
 #include "EnhancedInputSubsystems.h" // Enhanced Input System의 Local Player Subsystem을 사용하기 위해 포함
+#include "Kismet/GameplayStatics.h"
 
 AGJPlayerController::AGJPlayerController()
     : InputMappingContext(nullptr),
@@ -47,41 +48,37 @@ void AGJPlayerController::BeginPlay()
     HUD = Cast<AGJHUD>(this->GetHUD());
 }
 
-void AGJPlayerController::OpenMainMenu()
+void AGJPlayerController::GameOver()
 {
-    //if (!MainMenuWidget)
-    //{
-    //    if (MainMenuClass)
-    //    {
-    //        MainMenuWidget = CreateWidget<UUserWidget>(this, MainMenuClass);
-    //        if (MainMenuWidget)
-    //        {
-    //            MainMenuWidget->AddToViewport();
-    //            SetShowMouseCursor(true);
-    //            SetInputMode(FInputModeUIOnly());
-    //        }
-    //    }
-    //}
-    //else
-    //{
-    //    MainMenuWidget->RemoveFromParent();
-    //    MainMenuWidget = nullptr;
-    //    SetShowMouseCursor(false);
-    //    SetInputMode(FInputModeGameOnly());
-    //}
+    HUD->HideHUD(GJHUDState::MainHUD);
+    HUD->DisplayHUD(GJHUDState::GameOver);
+    bShowMouseCursor = true;
+    SetInputMode(FInputModeUIOnly());
 }
 
-void AGJPlayerController::ShowGameHUD()
+void AGJPlayerController::GameClear()
 {
+    HUD->HideHUD(GJHUDState::MainHUD);
+    HUD->DisplayHUD(GJHUDState::GameClear);
+    bShowMouseCursor = true;
+    SetInputMode(FInputModeUIOnly());
 }
 
-void AGJPlayerController::StartGame()
+void AGJPlayerController::GameClearFail()
 {
-    /*if (USpartaGameInstance* SpartaGameInstance = Cast<USpartaGameInstance>(UGameplayStatics::GetGameInstance(this)))
-    {
-        SpartaGameInstance->CurrentLevelIndex = 0;
-        SpartaGameInstance->TotalScore = 0;
-    }
+    HUD->HideHUD(GJHUDState::MainHUD);
+    HUD->DisplayHUD(GJHUDState::GameFail);
+    bShowMouseCursor = true;
+    SetInputMode(FInputModeUIOnly());
+}
 
-    UGameplayStatics::OpenLevel(GetWorld(), FName("BasicLevel"));*/
+void AGJPlayerController::QuitGame()
+{
+    UKismetSystemLibrary::QuitGame
+    (
+        GetWorld(),
+        this,
+        EQuitPreference::Quit,
+        false
+    );
 }

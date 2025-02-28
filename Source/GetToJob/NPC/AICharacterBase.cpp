@@ -148,6 +148,11 @@ void AAICharacterBase::SetHealth(float NewHealth)
 	Health = NewHealth;
 }
 
+void AAICharacterBase::SetMaxHealth(float NewMaxHealth)
+{
+	MaxHealth = NewMaxHealth;
+}
+
 void AAICharacterBase::SetAttack(float NewAttack)
 {
 	Attack = NewAttack;

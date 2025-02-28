@@ -19,7 +19,18 @@ void UGJDebuffComponent::ApplyDebuff(const FDebuffEffect& Debuff)
 {
     if (!bCanApplyDebuff) return;
 
-    // 이미 존재하는 디버프인지 확인하고 중첩 여부 체크
+    AGJCharacter* OwnerCharacter = Cast<AGJCharacter>(GetOwner());
+    if (!OwnerCharacter) return;
+
+    // 즉시 효과 적용 (Heal)
+    if (Debuff.DebuffType == EDebuffType::Heal)
+    {
+        OwnerCharacter->ModifyHealth(20.0f); // 체력 회복
+        UE_LOG(LogTemp, Warning, TEXT("Healing Applied: +20 HP"));
+        return;
+    }
+
+    // 중첩 불가능한 디버프가 이미 있으면 return
     if (!Debuff.bCanStack && ActiveDebuffs.ContainsByPredicate([&Debuff](const FDebuffEffect& Effect)
         {
             return Effect.DebuffType == Debuff.DebuffType;
@@ -31,10 +42,17 @@ void UGJDebuffComponent::ApplyDebuff(const FDebuffEffect& Debuff)
     ActiveDebuffs.Add(Debuff);
     UpdateDebuffs();
 
-    // 디버프별 타이머를 멤버 변수로 관리
+    // 디버프 타이머 추가
     FTimerHandle& DebuffTimer = DebuffTimers.FindOrAdd(Debuff.DebuffType);
 
-    //  `FTimerDelegate`를 사용한 람다식 적용
+    // 출혈 효과 (Bleed)는 지속적인 체력 감소 효과이므로 따로 처리
+    if (Debuff.DebuffType == EDebuffType::Bleed)
+    {
+        ApplyBleedEffect(5.0f, 1.0f, Debuff.Duration);
+        return;
+    }
+
+    // 일반적인 디버프 타이머 설정
     FTimerDelegate TimerDelegate;
     TimerDelegate.BindLambda([this, Debuff]()
         {
@@ -49,6 +67,58 @@ void UGJDebuffComponent::ApplyDebuff(const FDebuffEffect& Debuff)
     );
 }
 
+// 출혈 효과 (Bleed) 처리
+void UGJDebuffComponent::ApplyBleedEffect(float DamagePerTick, float TickInterval, float Duration)
+{
+    AGJCharacter* OwnerCharacter = Cast<AGJCharacter>(GetOwner());
+    if (!OwnerCharacter) return;
+
+    // 기존 출혈 타이머가 있으면 초기화
+    if (DebuffTimers.Contains(EDebuffType::Bleed))
+    {
+        GetWorld()->GetTimerManager().ClearTimer(DebuffTimers[EDebuffType::Bleed]);
+    }
+
+    // 타이머로 출혈 효과 적용
+    FTimerHandle BleedTimer;
+    float ElapsedTime = 0.0f;
+
+    FTimerDelegate BleedDelegate;
+    BleedDelegate.BindLambda([this, OwnerCharacter, &ElapsedTime, Duration, DamagePerTick, TickInterval]()
+        {
+            if (ElapsedTime >= Duration) // 출혈 지속시간이 지나면 종료
+            {
+                UE_LOG(LogTemp, Warning, TEXT("Bleed Effect Ended."));
+                RemoveDebuff(EDebuffType::Bleed);
+                return;
+            }
+
+            OwnerCharacter->ModifyHealth(-DamagePerTick); // 체력 감소
+            ElapsedTime += TickInterval;
+
+            UE_LOG(LogTemp, Warning, TEXT("Bleed Effect: -%f HP"), DamagePerTick);
+        });
+
+    // 1초마다 출혈 효과 적용, 총 Duration(5초) 후 종료
+    GetWorld()->GetTimerManager().SetTimer(
+        DebuffTimers[EDebuffType::Bleed],
+        BleedDelegate,
+        TickInterval,
+        true // 반복 실행
+    );
+
+    // 5초 후 출혈 제거
+    GetWorld()->GetTimerManager().SetTimer(
+        BleedTimer,
+        FTimerDelegate::CreateLambda([this]()
+            {
+                RemoveDebuff(EDebuffType::Bleed);
+            }),
+        Duration, // 5초 후 제거
+        false // 한 번만 실행
+    );
+}
+
 // 디버프 제거
 void UGJDebuffComponent::RemoveDebuff(EDebuffType DebuffType)
 {
@@ -57,7 +127,6 @@ void UGJDebuffComponent::RemoveDebuff(EDebuffType DebuffType)
             return Effect.DebuffType == DebuffType;
         });
 
-    // 타이머 초기화
     if (DebuffTimers.Contains(DebuffType))
     {
         GetWorld()->GetTimerManager().ClearTimer(DebuffTimers[DebuffType]);
@@ -67,7 +136,22 @@ void UGJDebuffComponent::RemoveDebuff(EDebuffType DebuffType)
     UpdateDebuffs();
 }
 
-// 디버프 상태 업데이트 (Slow 디버프 적용)
+void UGJDebuffComponent::RemoveAllDebuffs()
+{
+    // 모든 디버프 제거
+    ActiveDebuffs.Empty();
+
+    // 모든 타이머 정리
+    for (auto& DebuffTimer : DebuffTimers)
+    {
+        GetWorld()->GetTimerManager().ClearTimer(DebuffTimer.Value);
+    }
+    DebuffTimers.Empty();
+
+    UpdateDebuffs(); // 속도 복원 등 업데이트
+}
+
+// 디버프 상태 업데이트
 void UGJDebuffComponent::UpdateDebuffs()
 {
     AGJCharacter* OwnerCharacter = Cast<AGJCharacter>(GetOwner());
@@ -84,12 +168,13 @@ void UGJDebuffComponent::UpdateDebuffs()
         {
             SpeedMultiplier *= Debuff.Intensity;
         }
+        else if (Debuff.DebuffType == EDebuffType::SpeedBoost)
+        {
+            SpeedMultiplier *= Debuff.Intensity; // 속도 증가
+        }
     }
 
-    // 기본 이동 속도 설정 (디버프 적용)
     OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed = OwnerCharacter->NormalSpeed * SpeedMultiplier;
-
-    // 스프린트 속도도 함께 감소 적용
     OwnerCharacter->SprintSpeed = OwnerCharacter->NormalSpeed * OwnerCharacter->SprintSpeedMultiplier * SpeedMultiplier;
     OwnerCharacter->GetCharacterMovement()->MaxWalkSpeedCrouched = OwnerCharacter->CrouchSpeed * SpeedMultiplier;
 

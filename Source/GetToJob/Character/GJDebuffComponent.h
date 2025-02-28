@@ -15,6 +15,7 @@ public:
 
     void ApplyDebuff(const FDebuffEffect& Debuff);
     void RemoveDebuff(EDebuffType DebuffType);
+    void RemoveAllDebuffs();
 
 protected:
     virtual void BeginPlay() override;
@@ -29,4 +30,6 @@ private:
     void UpdateDebuffs();
 
     TMap<EDebuffType, FTimerHandle> DebuffTimers; // 디버프별 타이머 저장
+
+    void ApplyBleedEffect(float DamagePerTick, float TickInterval, float Duration);
 };
