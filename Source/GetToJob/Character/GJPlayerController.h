@@ -72,6 +72,8 @@ public:
 	//게임을 완전히 종료하는 함수
 	void QuitGame();
 
+	void Pause();
+
 	virtual void BeginPlay() override;
 
 };

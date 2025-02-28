@@ -117,14 +117,14 @@ public:
 	// 궁극기 사용
 	void ActivateUltimateWeapon();
 
-protected:
 	virtual float TakeDamage(
 		float DamageAmount,
 		struct FDamageEvent const& DamageEvent,
 		AController* EventInstigator,
-		AActor* DamgeCauser
+		AActor* DamageCauser
 	) override;
 
+protected:
 	// 무기 장착 해제
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void UnequipCurrentWeapon();
