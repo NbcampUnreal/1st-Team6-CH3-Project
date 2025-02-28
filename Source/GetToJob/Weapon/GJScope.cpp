@@ -57,6 +57,12 @@ void AGJScope::DisableScopeView()
 
 void AGJScope::AttachToGun(AGJBaseGun* Gun)
 {
+	if (Gun->GetGunType() != EGunType::Rifle)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AGJScope::AttachToGun - This attachment is only for Rifles!"));
+		return;
+	}
+
 	Super::AttachToGun(Gun);
 
 	if (Gun && Gun->GetOwner())

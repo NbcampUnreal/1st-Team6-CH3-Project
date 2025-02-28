@@ -129,6 +129,10 @@ public:
 	virtual float GetDamage() override;
 	virtual int32 GetCurrentAmmo() const override;
 	virtual int32 GetMaxAmmo() const override;
+	virtual int32 GetMagazineCapacity() const override;
+	virtual void RaiseMaxAmmo(int32 InAmmo) override;
+	virtual void RaiseMagazineCapacity(int32 InMagazineCapacity) override;
+	virtual void SetCurrentAmmo(int32 InAmmo) override;
 	virtual void SetDamage(float NewDamage);
 
 	virtual void BeginPlay() override;

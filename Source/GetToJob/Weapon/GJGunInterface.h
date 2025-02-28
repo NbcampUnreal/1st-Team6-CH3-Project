@@ -31,4 +31,8 @@ public:
 	virtual void ThrowAway() = 0;
 	virtual int32 GetCurrentAmmo() const = 0;
 	virtual int32 GetMaxAmmo() const = 0;
+	virtual int32 GetMagazineCapacity() const = 0;
+	virtual void RaiseMaxAmmo(int32 InAmmo) = 0;
+	virtual void RaiseMagazineCapacity(int32 InMagazineCapacity) = 0;
+	virtual void SetCurrentAmmo(int32 InAmmo) = 0;
 };

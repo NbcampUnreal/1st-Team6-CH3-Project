@@ -2,27 +2,38 @@
 
 
 #include "Weapon/GJRocketProjectile.h"
-#include "GJRocketProjectile.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h" // ProjectileMovement를 위해 필요
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/DamageType.h"
+#include "Engine/EngineTypes.h"
+#include "Engine/DamageEvents.h"
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "GameFramework/Character.h"
 #include "Character/GJCharacter.h"
 #include "NPC/GJNPC.h"
 #include "Weapon/GJMiniGun.h"
+#include "Weapon/EGJElementalType.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 AGJRocketProjectile::AGJRocketProjectile()
 {
 	PrimaryActorTick.bCanEverTick = false;
+	
 
 	// 발사자의 충돌을 무시하도록 설정
-	if (GetInstigator())
+	AGJCharacter* InstigatorCharacter = Cast<AGJCharacter>(GetInstigator());
+	if (InstigatorCharacter)
 	{
-		CollisionComp->IgnoreActorWhenMoving(GetInstigator(), true);
+		CollisionComp->IgnoreActorWhenMoving(InstigatorCharacter, true);
+	}
+
+	if (GetOwner())
+	{
+		CollisionComp->IgnoreActorWhenMoving(GetOwner(), true);
 	}
 
 	// 충돌 감지를 위한 콜리전을 추가
@@ -50,6 +61,10 @@ AGJRocketProjectile::AGJRocketProjectile()
 	DamageRadius = 300.0f;
 	DamageAmount = 50.0f;
 	RocketLifetime = 3.0f;
+
+	ShockDelay = 2.0f;
+	FreezeDelay = 4.0f;
+	BurnDelay = 5;
 }
 
 void AGJRocketProjectile::OnImpact(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
@@ -142,6 +157,83 @@ void AGJRocketProjectile::AutoExplode()
 	{
 		if (Actor && Actor->ActorHasTag("NPC")) // NPC 태그를 확인
 		{
+			if (APawn* HitPawn = Cast<APawn>(Actor))
+			{
+				if (ACharacter* HitCharacter = Cast<ACharacter>(HitPawn))
+				{
+					if (UCharacterMovementComponent* MovementComp = HitCharacter->GetCharacterMovement())
+					{
+						float OriginalSpeed = MovementComp->MaxWalkSpeed;
+						// 속성 적용
+						switch (ElementalType)
+						{
+						case EGJElementalType::Shock:
+							// 이동 정지
+							MovementComp->DisableMovement();
+							UE_LOG(LogTemp, Warning, TEXT("Shock Effect Applied: %s is stunned for 2 seconds"), *HitCharacter->GetName());
+							// ShockDelay 후 이동 가능
+							GetWorld()->GetTimerManager().SetTimer(
+								EffectTimerHandle,
+								[MovementComp]()
+								{
+									if (MovementComp)
+									{
+										MovementComp->SetMovementMode(MOVE_NavWalking);
+										UE_LOG(LogTemp, Warning, TEXT("Shock Effect Ended: Character can move again"));
+									}
+								},
+								2.0f,
+								false
+							);
+							break;
+
+						case EGJElementalType::Freeze:
+							
+							MovementComp->MaxWalkSpeed *= 0.5f;
+							UE_LOG(LogTemp, Warning, TEXT("Freeze Effect Applied: %s speed reduced to %f"), *HitCharacter->GetName(), MovementComp->MaxWalkSpeed);
+
+							GetWorld()->GetTimerManager().SetTimer(
+								EffectTimerHandle,
+								[MovementComp, OriginalSpeed]()
+								{
+									if (MovementComp)
+									{
+										MovementComp->MaxWalkSpeed = OriginalSpeed;
+										UE_LOG(LogTemp, Warning, TEXT("Freeze Effect Ended: Speed restored to %f"), OriginalSpeed);
+									}
+								},
+								FreezeDelay,
+								false
+							);
+							break;
+
+
+						case EGJElementalType::Burn:
+							for (int i = 1; i < BurnDelay; i++)
+							{
+								GetWorld()->GetTimerManager().SetTimer(
+									EffectTimerHandle,
+									[HitCharacter]()
+									{
+										if (HitCharacter)
+										{
+											HitCharacter->TakeDamage(50.0f, FDamageEvent(), nullptr, nullptr);
+											UE_LOG(LogTemp, Warning, TEXT("Burn Damage Applied: %s took 50 damage"), *HitCharacter->GetName());
+										}
+									},
+									BurnDelay,
+									false
+								);
+							}
+							break;
+						default:
+							break;
+						}
+					}
+				}
+			}
+			
+
 			FVector ImpactDirection = (Actor->GetActorLocation() - GetActorLocation()).GetSafeNormal();
 			ApplyKnockback(Actor, -ImpactDirection);
 			AGJNPC* HitEnemy = Cast<AGJNPC>(Actor);
@@ -201,10 +293,47 @@ void AGJRocketProjectile::ApplyKnockback(AActor* HitActor, FVector ImpactNormal)
 	}
 }
 
+void AGJRocketProjectile::SetMaterial()
+{
+	// 로켓 머터리얼 설정
+	UMaterialInterface* NewMaterial = nullptr;
+	switch (ElementalType)
+	{
+	case EGJElementalType::Shock:
+		NewMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/VREditor/LaserPointer/TranslucentHoverMaterial.TranslucentHoverMaterial"));
+		UE_LOG(LogTemp, Warning, TEXT("Yellow Material"));
+		break;
+	case EGJElementalType::Freeze:
+		NewMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/VREditor/UI/KeyDiskMaterial.KeyDiskMaterial"));
+		UE_LOG(LogTemp, Warning, TEXT("Blue Material"));
+		break;
+	case EGJElementalType::Burn:
+		NewMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/VREditor/LaserPointer/TranslucentLaserPointerMaterialInst.TranslucentLaserPointerMaterialInst"));
+		UE_LOG(LogTemp, Warning, TEXT("Red Material"));
+		break;
+	default:
+		UE_LOG(LogTemp, Warning, TEXT("No Material"));
+		break;
+	}
+	// 로켓 머터리얼 적용
+	if (NewMaterial)
+	{
+		RocketMesh->SetMaterial(0, NewMaterial);
+	}
+}
+
 void AGJRocketProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 
+	FTimerHandle MaterialTimer;
+	GetWorld()->GetTimerManager().SetTimer(
+		MaterialTimer,
+		this,
+		&AGJRocketProjectile::SetMaterial,
+		0.1f,
+		false
+	);
 	
 
 	// 일정 시간 후 자동으로 폭발
