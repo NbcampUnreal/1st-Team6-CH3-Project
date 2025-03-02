@@ -41,6 +41,18 @@ protected:
 	virtual void AttachToGun(class AGJBaseGun* Gun) override;
 	virtual void DetachFromGun() override;
 
+	void FixZoomInRotation();
+	void FixZoomOutRotation();
+
 private:
+
+	// 줌인 관련 함수
+	FVector StoredCameraRelativeLocation;
+	FRotator StoredCameraRotation;
+	FRotator StoredControlRotation;
+	FRotator StoredSpringArmRotation;
+	float StoredSpringArmLength;
+
+	FTimerHandle ZoomDelayTimer;
 	
 };
