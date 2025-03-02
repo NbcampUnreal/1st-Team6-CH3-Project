@@ -17,8 +17,9 @@ public class GetToJob : ModuleRules
 			"AIModule",
             "GameplayTasks",
             "NavigationSystem",
-			"UMG"
-		});
+			"UMG",
+            "Niagara"
+        });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 

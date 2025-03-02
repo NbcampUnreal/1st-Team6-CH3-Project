@@ -7,6 +7,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
+//#include "NiagaraFunctionLibrary.h"
+//#include "NiagaraComponent.h" // 나이아가라 추가
 
 AGJMiniGun::AGJMiniGun()
 {
@@ -132,7 +134,7 @@ void AGJMiniGun::Fire()
 
 		if (GJCharacter && GJCharacter->GetMesh())
 		{
-			MuzzleLocation = GJCharacter->GetMesh()->GetSocketLocation(TEXT("MiniGun"));
+			MuzzleLocation = GunMesh->GetSocketLocation(TEXT("MiniGun"));
 		}
 		else
 		{
@@ -202,16 +204,37 @@ void AGJMiniGun::Fire()
 
 
 			}
-			// 맞췄을 때 디버그 라인
-			DrawDebugLine(GetWorld(), TraceStart, HitResult.ImpactPoint, FColor::Red, false, 3.0f);
+			TraceEnd = HitResult.ImpactPoint;
+
+
+			// 레이저 연출: 굵은 디버그 실린더 추가
+			DrawDebugCylinder(GetWorld(), TraceStart, TraceEnd, 7.0f, 12, FColor::Red, false, 0.1f, 0, 5.0f);
 		}
 		else
 		{
-			// 못 맞췄을 때 디버그 라인
-			DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Blue, false, 3.0f);
+			// 레이저 연출: 굵은 디버그 실린더 추가
+			DrawDebugCylinder(GetWorld(), TraceStart, TraceEnd, 7.0f, 12, FColor::Red, false, 0.1f, 0, 5.0f);
 		}
-	}
 
+		//// Niagara 기반 Sci-Fi 레이저 효과 적용
+		//if (LaserBeamNiagara)
+		//{
+		//	UNiagaraComponent* LaserEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+		//		GetWorld(),
+		//		LaserBeamNiagara,
+		//		TraceStart
+		//	);
+
+		//	if (LaserEffect)
+		//	{
+		//		// Beam의 끝 위치 설정
+		//		LaserEffect->SetVectorParameter(TEXT("BeamEnd"), TraceEnd);
+
+		//		// UV Scroll 속도 설정 (빛이 흐르는 효과)
+		//		LaserEffect->SetFloatParameter(TEXT("BeamStart"), TraceStart);
+		//	}
+		//}
+	}
 	// 사격 속도에 따른 Delay 필요
 	bCanFire = false;
 	GetWorldTimerManager().SetTimer(
