@@ -128,7 +128,7 @@ void AGJScope::DetachFromGun()
 
 void AGJScope::FixZoomInRotation()
 {
-	// ✅ SpringArm이 FPS 전환 후 회전값이 어긋나는 걸 방지
+	// SpringArm이 FPS 전환 후 회전값이 어긋나는 걸 방지
 	if (PlayerController)
 	{
 		PlayerController->SetControlRotation(StoredControlRotation);
@@ -137,7 +137,7 @@ void AGJScope::FixZoomInRotation()
 
 void AGJScope::FixZoomOutRotation()
 {
-	// 🔥 SpringArm이 다시 활성화되면서 틀어진 회전을 다시 원래 값으로 고정하는 함수!
+	// SpringArm이 다시 활성화되면서 틀어진 회전을 다시 원래 값으로 고정하는 함수!
 	if (PlayerController)
 	{
 		PlayerController->SetControlRotation(StoredControlRotation);
