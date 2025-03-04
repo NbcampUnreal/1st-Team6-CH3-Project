@@ -47,11 +47,15 @@ public:
 
 	bool GetIsRight() const;
 
+	bool GetIsBossDead() const;
+
 	void SetIsFist(bool IsItFist);
 
 	void SetIsRight(bool IsItRight);
 
 	void SetIsLeft(bool IsItLeft);
+
+	void SetIsBossDead(bool BossIsDead);
 
 	int WeakAttack_Implementation() override;
 
@@ -142,6 +146,8 @@ protected:
 	bool IsLeft;
 
 	bool IsRight;
+
+	bool IsBossDead;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status")
 	float WeakDamage;
