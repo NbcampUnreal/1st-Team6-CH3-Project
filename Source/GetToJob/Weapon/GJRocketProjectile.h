@@ -30,6 +30,12 @@ public:
 	//충돌 시 폭발하는 효과
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Explosion | Effect")
 	UParticleSystem* ExplosionEffect;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Explosion | Effect")
+	UParticleSystem* ShockEffect;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Explosion | Effect")
+	UParticleSystem* FreezeEffect;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Explosion | Effect")
+	UParticleSystem* BurnEffect;
 	// 폭발 데미지와 반경
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Explosion | Damage")
 	float DamageRadius;
@@ -70,6 +76,8 @@ public:
 
 	void ApplyKnockback(AActor* HitActor, FVector ImpactNormal);
 	void SetMaterial();
+
+	void SpawnElementalParticle();
 
 protected:
 	virtual void BeginPlay() override;

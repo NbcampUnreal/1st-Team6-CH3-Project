@@ -166,14 +166,14 @@ void AGJRevolver::Fire()
 				}
 				
 			}
-			// 맞췄을 때 디버그 라인
-			DrawDebugLine(GetWorld(), TraceStart, HitResult.ImpactPoint, FColor::Red, false, 3.0f);
+			//// 맞췄을 때 디버그 라인
+			//DrawDebugLine(GetWorld(), TraceStart, HitResult.ImpactPoint, FColor::Red, false, 3.0f);
 		}
-		else
-		{
-			// 못 맞췄을 때 디버그 라인
-			DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Blue, false, 3.0f);
-		}
+		//else
+		//{
+		//	// 못 맞췄을 때 디버그 라인
+		//	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Blue, false, 3.0f);
+		//}
 	}
 
 
