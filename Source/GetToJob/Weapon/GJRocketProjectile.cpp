@@ -86,6 +86,13 @@ void AGJRocketProjectile::OnImpact(UPrimitiveComponent* HitComp, AActor* OtherAc
 			// 넉백 적용 함수 호출
 			ApplyKnockback(OtherActor, Hit.ImpactNormal);
 		}
+
+		else if(OtherActor->ActorHasTag("Ground"))
+		{
+
+			UE_LOG(LogTemp, Warning, TEXT("Ground!"));
+		}
+
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("This Actor is not CharacterClass!"))
