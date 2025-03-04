@@ -15,5 +15,5 @@ public:
 	virtual void OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrivateAccess = "yes"))
-	float LeftHp = 5000.f;
+	float LeftHp = 1000.f;
 };
