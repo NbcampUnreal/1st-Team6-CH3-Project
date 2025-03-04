@@ -73,7 +73,7 @@ void UGJDebuffComponent::ApplyBleedEffect(float DamagePerTick, float TickInterva
     AGJCharacter* OwnerCharacter = Cast<AGJCharacter>(GetOwner());
     if (!OwnerCharacter) return;
 
-    // 기존 출혈 타이머가 있으면 초기화
+    // 기존 출혈 타이머가 있으면 제거
     if (DebuffTimers.Contains(EDebuffType::Bleed))
     {
         GetWorld()->GetTimerManager().ClearTimer(DebuffTimers[EDebuffType::Bleed]);
@@ -86,6 +86,14 @@ void UGJDebuffComponent::ApplyBleedEffect(float DamagePerTick, float TickInterva
     FTimerDelegate BleedDelegate;
     BleedDelegate.BindLambda([this, OwnerCharacter, &ElapsedTime, Duration, DamagePerTick, TickInterval]()
         {
+            // 체력이 10 이하이면 출혈 즉시 해제
+            if (OwnerCharacter->GetHealth() <= 10.0f)
+            {
+                UE_LOG(LogTemp, Warning, TEXT("Bleed Effect Stopped: Health too low (<= 10)."));
+                RemoveDebuff(EDebuffType::Bleed);
+                return;
+            }
+
             if (ElapsedTime >= Duration) // 출혈 지속시간이 지나면 종료
             {
                 UE_LOG(LogTemp, Warning, TEXT("Bleed Effect Ended."));
@@ -96,7 +104,7 @@ void UGJDebuffComponent::ApplyBleedEffect(float DamagePerTick, float TickInterva
             OwnerCharacter->ModifyHealth(-DamagePerTick); // 체력 감소
             ElapsedTime += TickInterval;
 
-            UE_LOG(LogTemp, Warning, TEXT("Bleed Effect: -%f HP"), DamagePerTick);
+            UE_LOG(LogTemp, Warning, TEXT("Bleed Effect: -%f HP, Current Health: %f"), DamagePerTick, OwnerCharacter->GetHealth());
         });
 
     // 1초마다 출혈 효과 적용, 총 Duration(5초) 후 종료
@@ -118,6 +126,7 @@ void UGJDebuffComponent::ApplyBleedEffect(float DamagePerTick, float TickInterva
         false // 한 번만 실행
     );
 }
+
 
 // 디버프 제거
 void UGJDebuffComponent::RemoveDebuff(EDebuffType DebuffType)

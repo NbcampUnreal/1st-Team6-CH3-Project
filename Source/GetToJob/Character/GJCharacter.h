@@ -117,17 +117,20 @@ public:
 	// 궁극기 사용
 	void ActivateUltimateWeapon();
 
-protected:
 	virtual float TakeDamage(
 		float DamageAmount,
 		struct FDamageEvent const& DamageEvent,
 		AController* EventInstigator,
-		AActor* DamgeCauser
+		AActor* DamageCauser
 	) override;
 
+protected:
 	// 무기 장착 해제
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void UnequipCurrentWeapon();
+
+	// UI가 입력을 막고있으면 다시 해제
+	void EnableGameInput();
 
 	// 무기 장착 요청(인벤토리에서)
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
