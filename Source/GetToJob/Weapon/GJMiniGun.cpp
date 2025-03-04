@@ -7,8 +7,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
-//#include "NiagaraFunctionLibrary.h"
-//#include "NiagaraComponent.h" // 나이아가라 추가
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h" // 나이아가라 추가
 
 AGJMiniGun::AGJMiniGun()
 {
@@ -216,24 +216,34 @@ void AGJMiniGun::Fire()
 			DrawDebugCylinder(GetWorld(), TraceStart, TraceEnd, 7.0f, 12, FColor::Red, false, 0.1f, 0, 5.0f);
 		}
 
-		//// Niagara 기반 Sci-Fi 레이저 효과 적용
-		//if (LaserBeamNiagara)
-		//{
-		//	UNiagaraComponent* LaserEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-		//		GetWorld(),
-		//		LaserBeamNiagara,
-		//		TraceStart
-		//	);
+		// Niagara 기반 Sci-Fi 레이저 효과 적용
+		if (LaserBeamNiagara)
+		{
+			UNiagaraComponent* LaserEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+				GetWorld(),
+				LaserBeamNiagara,
+				TraceStart
+			);
 
-		//	if (LaserEffect)
-		//	{
-		//		// Beam의 끝 위치 설정
-		//		LaserEffect->SetVectorParameter(TEXT("BeamEnd"), TraceEnd);
+			if (LaserEffect)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("TraceStart: %s, TraceEnd: %s"),
+					*TraceStart.ToString(), *TraceEnd.ToString());
 
-		//		// UV Scroll 속도 설정 (빛이 흐르는 효과)
-		//		LaserEffect->SetFloatParameter(TEXT("BeamStart"), TraceStart);
-		//	}
-		//}
+				// Beam의 끝 위치 설정
+				LaserEffect->SetVectorParameter(TEXT("BeamEnd"), TraceEnd);
+
+				// Beam의 시작 위치 설정
+				LaserEffect->SetVectorParameter(TEXT("BeamStart"), TraceStart);	
+
+				// 실행 상태 확인
+				LaserEffect->SetAutoActivate(true);
+				LaserEffect->ActivateSystem();
+				LaserEffect->ReinitializeSystem(); // 강제 업데이트
+
+				UE_LOG(LogTemp, Error, TEXT("Beam Render working!"));
+			}
+		}
 	}
 	// 사격 속도에 따른 Delay 필요
 	bCanFire = false;

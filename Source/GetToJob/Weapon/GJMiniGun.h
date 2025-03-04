@@ -4,6 +4,7 @@
 #include "Weapon/GJBaseGun.h"
 #include "GJMiniGun.generated.h"
 
+class UNiagaraSystem;
 
 UCLASS()
 class GETTOJOB_API AGJMiniGun : public AGJBaseGun
@@ -30,6 +31,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ultra")
 	bool bUltraIsReady;
 
+	// 나이아가라 시스템
+	UPROPERTY(EditAnywhere, Category = "Effects")
+	UNiagaraSystem* LaserBeamNiagara;
 
 	UFUNCTION()
 	void ActivateMiniGun();
