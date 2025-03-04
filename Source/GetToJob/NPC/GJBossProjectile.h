@@ -57,4 +57,7 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	USphereComponent* HitArea;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	USoundBase* FireSound;
 };

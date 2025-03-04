@@ -29,4 +29,19 @@ public:
 
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
     int RangeAttack();
+
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
+    int WeakAttack_Rage();
+
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
+    int StrongAttack_Rage();
+
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
+    int SpecialAttack_Rage();
+
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
+    int RangeAttack_Rage();
+
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
+    int RageMotion();
 };
