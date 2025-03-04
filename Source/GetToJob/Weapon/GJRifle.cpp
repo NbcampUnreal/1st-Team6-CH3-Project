@@ -132,7 +132,7 @@ void AGJRifle::Fire()
 				}
 
 
-				if (HitActor->ActorHasTag(FName("NPC")))
+				if (HitActor)
 				{
 					UParticleSystemComponent* SpawnedEffect = UGameplayStatics::SpawnEmitterAtLocation(
 						GetWorld(),
