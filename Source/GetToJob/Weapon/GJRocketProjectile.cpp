@@ -65,6 +65,11 @@ AGJRocketProjectile::AGJRocketProjectile()
 	ShockDelay = 2.0f;
 	FreezeDelay = 4.0f;
 	BurnDelay = 5;
+	
+	ExplosionEffect = nullptr;
+	ShockEffect = nullptr;
+	FreezeEffect = nullptr;
+	BurnEffect = nullptr;
 }
 
 void AGJRocketProjectile::OnImpact(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
@@ -102,29 +107,31 @@ void AGJRocketProjectile::OnImpact(UPrimitiveComponent* HitComp, AActor* OtherAc
 
 void AGJRocketProjectile::AutoExplode()
 {
-	if (ExplosionEffect)
-	{
-		UParticleSystemComponent* SpawnedEffect = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation());
+	// 속성별 폭발 파티클 생성
+	SpawnElementalParticle();
+	//if (ExplosionEffect)
+	//{
+	//	UParticleSystemComponent* SpawnedEffect = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation());
 
-		if (SpawnedEffect)
-		{
-			// 3초 후에 이펙트를 제거하는 타이머 설정
-			FTimerHandle ExplosionEffectTimer;
-			GetWorldTimerManager().SetTimer(
-				ExplosionEffectTimer,
-				[SpawnedEffect]()
-				{
-					if (SpawnedEffect)
-					{
-						SpawnedEffect->DeactivateSystem(); // 이펙트 중지
-						SpawnedEffect->DestroyComponent(); // 컴포넌트 삭제
-					}
-				},
-				3.0f,
-				false
-			);
-		}
-	}
+	//	if (SpawnedEffect)
+	//	{
+	//		// 3초 후에 이펙트를 제거하는 타이머 설정
+	//		FTimerHandle ExplosionEffectTimer;
+	//		GetWorldTimerManager().SetTimer(
+	//			ExplosionEffectTimer,
+	//			[SpawnedEffect]()
+	//			{
+	//				if (SpawnedEffect)
+	//				{
+	//					SpawnedEffect->DeactivateSystem(); // 이펙트 중지
+	//					SpawnedEffect->DestroyComponent(); // 컴포넌트 삭제
+	//				}
+	//			},
+	//			3.0f,
+	//			false
+	//		);
+	//	}
+	//}
 	// 폭발 반경 내의 액터들을 배열에 저장
 	TArray<AActor*> OverlappedActors;
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
@@ -327,6 +334,116 @@ void AGJRocketProjectile::SetMaterial()
 	{
 		RocketMesh->SetMaterial(0, NewMaterial);
 	}
+}
+
+void AGJRocketProjectile::SpawnElementalParticle()
+{
+	UParticleSystemComponent* SpawnedEffect = nullptr;
+	FTimerHandle ExplosionEffectTimer;
+	switch (ElementalType)
+	{
+	case EGJElementalType::Shock:
+		if (ShockEffect)
+		{
+			SpawnedEffect = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ShockEffect, GetActorLocation());
+			SpawnedEffect->SetWorldScale3D(FVector(2.0f, 2.0f, 2.0f));
+
+			if (SpawnedEffect)
+			{
+				// 3초 후에 이펙트를 제거하는 타이머 설정
+
+				GetWorldTimerManager().SetTimer(
+					ExplosionEffectTimer,
+					[SpawnedEffect]()
+					{
+						if (SpawnedEffect)
+						{
+							SpawnedEffect->DeactivateSystem(); // 이펙트 중지
+							SpawnedEffect->DestroyComponent(); // 컴포넌트 삭제
+						}
+					},
+					2.0f,
+					false
+				);
+			}
+			UE_LOG(LogTemp, Warning, TEXT("Spawn is Shock"));
+		}
+		break;
+	case EGJElementalType::Freeze:
+		if (FreezeEffect)
+		{
+			SpawnedEffect = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), FreezeEffect, GetActorLocation());
+			SpawnedEffect->SetWorldScale3D(FVector(2.0f, 2.0f, 2.0f));
+
+			if (SpawnedEffect)
+			{
+				GetWorldTimerManager().SetTimer(
+					ExplosionEffectTimer,
+					[SpawnedEffect]()
+					{
+						if (SpawnedEffect)
+						{
+							SpawnedEffect->DeactivateSystem(); // 이펙트 중지
+							SpawnedEffect->DestroyComponent(); // 컴포넌트 삭제
+						}
+					},
+					4.0f,
+					false
+				);
+			}
+			UE_LOG(LogTemp, Warning, TEXT("Freeze is Shock"));
+		}
+		break;
+	case EGJElementalType::Burn:
+		if (BurnEffect)
+		{
+			SpawnedEffect = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BurnEffect, GetActorLocation());
+
+			if (SpawnedEffect)
+			{
+				GetWorldTimerManager().SetTimer(
+					ExplosionEffectTimer,
+					[SpawnedEffect]()
+					{
+						if (SpawnedEffect)
+						{
+							SpawnedEffect->DeactivateSystem(); // 이펙트 중지
+							SpawnedEffect->DestroyComponent(); // 컴포넌트 삭제
+						}
+					},
+					3.0f,
+					false
+				);
+			}
+			UE_LOG(LogTemp, Warning, TEXT("Spawn is Burn"));
+		}
+		break;
+	default:
+		if (ExplosionEffect)
+		{
+			SpawnedEffect = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation());
+
+			if (SpawnedEffect)
+			{
+				GetWorldTimerManager().SetTimer(
+					ExplosionEffectTimer,
+					[SpawnedEffect]()
+					{
+						if (SpawnedEffect)
+						{
+							SpawnedEffect->DeactivateSystem(); // 이펙트 중지
+							SpawnedEffect->DestroyComponent(); // 컴포넌트 삭제
+						}
+					},
+					3.0f,
+					false
+				);
+			}
+		}
+		UE_LOG(LogTemp, Warning, TEXT("Spawn is Explosion"));
+
+	}
+	
 }
 
 void AGJRocketProjectile::BeginPlay()

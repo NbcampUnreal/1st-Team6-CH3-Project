@@ -37,6 +37,7 @@ float AAICharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 		Health = FMath::Clamp(Health - DamageAmount, 0.0f, MaxHealth);
 		if (Health <= 0)
 		{
+			NPC->SpawnDropItem();
 			NPC->SetNPCDead(true);
 			NPC->GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
 			NPC->GetMesh()->SetSimulatePhysics(true);
@@ -49,6 +50,7 @@ float AAICharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	if (auto const Boss = Cast<AGJBossNPC>(this))
 	{
 		Health = FMath::Clamp(Health - DamageAmount, 0.0f, MaxHealth);
+		Boss->PlayHurtSound();
 		if (Health <= 0)
 		{
 			if (RightFistCollisionBox)
@@ -87,6 +89,7 @@ void AAICharacterBase::OnAttackOverlapBegin(UPrimitiveComponent* const Overlappe
 		UE_LOG(LogTemp, Error, TEXT("Hitted"));
 		if (auto const Boss = Cast<AGJBossNPC>(this))
 		{
+			Boss->PlayHeatSound();
 			StartAttackCooldown(1.f);
 		}
 		if (auto const NPC = Cast<AGJNPC>(this))

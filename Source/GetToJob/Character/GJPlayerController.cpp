@@ -72,6 +72,13 @@ void AGJPlayerController::GameClearFail()
     SetInputMode(FInputModeUIOnly());
 }
 
+void AGJPlayerController::Pause()
+{
+    HUD->DisplayHUD(GJHUDState::PauseHUD);
+    bShowMouseCursor = true;
+    SetInputMode(FInputModeUIOnly());
+}
+
 void AGJPlayerController::QuitGame()
 {
     UKismetSystemLibrary::QuitGame

@@ -17,7 +17,10 @@ public class GetToJob : ModuleRules
 			"AIModule",
             "GameplayTasks",
             "NavigationSystem",
-			"UMG"
+			"UMG",
+			"MovieScene",
+			"MovieSceneTracks",
+			"LevelSequence"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

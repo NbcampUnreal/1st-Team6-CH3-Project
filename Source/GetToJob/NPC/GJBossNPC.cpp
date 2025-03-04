@@ -1,6 +1,9 @@
 #include "NPC/GJBossNPC.h"
+#include "NPC/GJBossProjectile.h"
+#include "Kismet/GameplayStatics.h"
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 #include "GJBossAIController.h"
 
 AGJBossNPC::AGJBossNPC() :
@@ -58,6 +61,40 @@ UAnimMontage* AGJBossNPC::GetSpecialMontage() const
 UAnimMontage* AGJBossNPC::GetRangeMontage() const
 {
 	return RangeAttackMontage;
+}
+
+UAnimMontage* AGJBossNPC::GetRageMontage() const
+{
+	return RageMontage;
+}
+
+void AGJBossNPC::FireProjectile()
+{
+	if (ProjectileClass)
+	{
+		ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+		if (PlayerCharacter)
+		{
+			FVector PlayerLocation = PlayerCharacter->GetActorLocation();
+			FVector NPCLocation = GetActorLocation();
+			FVector LaunchDirection = (PlayerLocation - NPCLocation).GetSafeNormal();
+
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.Owner = this;
+			SpawnParams.Instigator = GetInstigatorController()->GetPawn();
+
+
+			UE_LOG(LogTemp, Warning, TEXT("FireProjectile: Instigator=%s"), *GetNameSafe(SpawnParams.Instigator));
+
+			AGJBossProjectile* Projectile = GetWorld()->SpawnActor<AGJBossProjectile>(ProjectileClass, NPCLocation, LaunchDirection.Rotation(), SpawnParams);
+
+			if (Projectile)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("It Spawnned"));
+				Projectile->ProjectileComponent->Velocity = LaunchDirection * Projectile->ProjectileComponent->InitialSpeed;
+			}
+		}
+	}
 }
 
 void AGJBossNPC::SetPatrolPath(APatrolPath* Path)
@@ -162,7 +199,6 @@ int AGJBossNPC::StrongAttack_Implementation()
 {
 	if (StrongAttackMontage)
 	{
-		PlayAnimMontage(StrongAttackMontage);
 	}
 	return 0;
 }
@@ -172,6 +208,7 @@ int AGJBossNPC::SpecialAttack_Implementation()
 	if (SpecialAttackMontage)
 	{
 		PlayAnimMontage(SpecialAttackMontage);
+
 	}
 	return 0;
 }
@@ -185,6 +222,100 @@ int AGJBossNPC::RangeAttack_Implementation()
 	return 0;
 }
 
+int AGJBossNPC::WeakAttack_Rage_Implementation()
+{
+	if (WeakAttackMontage)
+	{
+		if (AnimInstance)
+		{
+			AnimInstance->Montage_Play(WeakAttackMontage, 1.5f);
+		}
+		else PlayAnimMontage(WeakAttackMontage);
+	}
+	return 0;
+}
+
+int AGJBossNPC::StrongAttack_Rage_Implementation()
+{
+	if (StrongAttackMontage)
+	{
+		if (AnimInstance)
+		{
+			AnimInstance->Montage_Play(StrongAttackMontage, 1.5f);
+		}
+		else PlayAnimMontage(StrongAttackMontage);
+	}
+	return 0;
+}
+
+int AGJBossNPC::SpecialAttack_Rage_Implementation()
+{
+	if (SpecialAttackMontage)
+	{
+		if (AnimInstance)
+		{
+			AnimInstance->Montage_Play(SpecialAttackMontage, 1.5f);
+		}
+		else PlayAnimMontage(SpecialAttackMontage);
+	}
+	return 0;
+}
+
+int AGJBossNPC::RangeAttack_Rage_Implementation()
+{
+	if (RangeAttackMontage)
+	{
+		if (AnimInstance)
+		{
+			AnimInstance->Montage_Play(RangeAttackMontage, 1.5f);
+		}
+		else PlayAnimMontage(RangeAttackMontage);
+	}
+	return 0;
+}
+
+int AGJBossNPC::RageMotion_Implementation()
+{
+	if (RageMontage)
+	{
+		PlayAnimMontage(RageMontage);
+		if (RageSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(
+				GetWorld(),
+				RageSound,
+				GetActorLocation()
+			);
+		}
+	}
+	return 0;
+}
+
+void AGJBossNPC::PlayHeatSound()
+{
+	if (HeatSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			GetWorld(),
+			HeatSound,
+			GetActorLocation()
+		);
+	}
+}
+
+void AGJBossNPC::PlayHurtSound()
+{
+	if (HurtSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			GetWorld(),
+			HurtSound,
+			GetActorLocation()
+		);
+	}
+}
+
+
 void AGJBossNPC::BeginPlay()
 {
 	Super::BeginPlay();
@@ -193,6 +324,9 @@ void AGJBossNPC::BeginPlay()
 	RightFootCollisionBox->OnComponentEndOverlap.AddDynamic(this, &AGJBossNPC::OnAttackOverlapEnd);
 	LeftFootCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &AGJBossNPC::OnAttackOverlapBegin);
 	LeftFootCollisionBox->OnComponentEndOverlap.AddDynamic(this, &AGJBossNPC::OnAttackOverlapEnd);
+
+	SkeletalMeshCom = this->GetMesh();
+	AnimInstance = SkeletalMeshCom->GetAnimInstance();
 }
 
 void AGJBossNPC::OnAttackOverlapBegin(UPrimitiveComponent* const OverlappedComponent, AActor* const OtherActor, UPrimitiveComponent* const OtherComponent, int const OtherBodyIndex, bool const FromSweep, FHitResult const& SweepResult)
