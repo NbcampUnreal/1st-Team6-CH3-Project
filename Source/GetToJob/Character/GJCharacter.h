@@ -34,6 +34,9 @@ public:
 
 	AGJPlayerController* GJController;
 
+	// 캐릭터 무적
+	bool bIsInvincible;
+
 	// 체력 증감 함수 추가
 	UFUNCTION(BlueprintCallable, Category = "Character")
 	void ModifyHealth(float Amount);
