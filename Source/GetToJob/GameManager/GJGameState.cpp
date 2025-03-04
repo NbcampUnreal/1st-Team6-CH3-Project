@@ -129,6 +129,8 @@ void AGJGameState::NextWave()
 
 	if (LevelMapNames.IsValidIndex(CurrentWaveIndex))
 	{
+		GetWorldTimerManager().ClearTimer(LevelTimerHandle);
+		GetWorldTimerManager().ClearTimer(UIUpdateTimerHandle);
 		UGameplayStatics::OpenLevel(GetWorld(), LevelMapNames[CurrentWaveIndex]);
 	}
 	
