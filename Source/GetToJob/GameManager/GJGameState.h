@@ -68,5 +68,7 @@ public:
 
 	//���� ������ �Ѿ�� �Լ�
 
-	
+	void LoadNextLevel();
+
+	FTimerHandle WaveTransitionTimerHandle; // 유예시간 타이머 핸들 추가
 };

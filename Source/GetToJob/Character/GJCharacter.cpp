@@ -16,6 +16,7 @@
 #include "UI/GJHUD.h"
 #include "Components/CapsuleComponent.h"
 #include "Character/GJHealingItem.h"
+#include "GameManager/GJGameInstance.h"
 //#include "Components/WidgetComponent.h"
 //#include "Components/TextBlock.h"
 //#include "Components/ProgressBar.h"
@@ -81,6 +82,8 @@ AGJCharacter::AGJCharacter()
 
     // 생성시 플레이어 컨트롤러 연결
     GJController = Cast<AGJPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+
+    bIsInvincible = false; // 기본적으로 무적 상태 아님
 }
 
 // 궁극기 발동 (T키)
@@ -144,6 +147,12 @@ void AGJCharacter::EnableGameInput()
 void AGJCharacter::BeginPlay()
 {
     Super::BeginPlay();
+
+    UGJGameInstance* GameInstance = Cast<UGJGameInstance>(GetGameInstance());
+    if (GameInstance)
+    {
+        GameInstance->LoadCharacterState(this);
+    }
 
     // 컨트롤러 재 확인
     if (!GJController)
@@ -451,6 +460,14 @@ void AGJCharacter::UpdateWeaponState(AGJBaseGun* NewWeapon)
 
 float AGJCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamgeCauser)
 {
+
+    // 무적 상태이면 데미지를 받지 않음
+    if (bIsInvincible)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Character is invincible! No damage taken."));
+        return 0.0f;
+    }
+
     float ActualDamage = Super::TakeDamage(DamageAmount,
         DamageEvent,
         EventInstigator,
