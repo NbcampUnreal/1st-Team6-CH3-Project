@@ -1,6 +1,7 @@
 #include "NPC/BTTask_RangeAttack.h"
 #include "CombatInterface.h"
 #include "AIController.h"
+#include "GJBossAIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Runtime/Engine/Classes/Engine/World.h"
@@ -27,14 +28,26 @@ EBTNodeResult::Type UBTTask_RangeAttack::ExecuteTask(UBehaviorTreeComponent& Own
 	// npc's are in range so get the AI's Controller and the NPC itself
 	auto const* const cont = OwnerComp.GetAIOwner();
 	auto* const npc = Cast<AGJBossNPC>(cont->GetPawn());
-
+	auto* const Controller = Cast<AGJBossAIController>(npc->GetController());
+	UBehaviorTreeComponent* Compo = Cast<UBehaviorTreeComponent>(Controller->GetBrainComponent());
+	bool IsRage = Compo->GetBlackboardComponent()->GetValueAsBool(TEXT("IsBossDoRage"));
 	// if the NPC supports the ICombatInterface, cast and call the Execute_MeleeAttack function
 	if (auto* const icombat = Cast<ICombatInterface>(npc))
 	{
 		// necessary check to see if the montage has finished so we don't try and play it again
-		if (MontageHasFinished(npc) && WeakMontageHasFinished(npc) && StrongMontageHasFinished(npc) && SpecialMontageHasFinished(npc))
+		if (!IsRage) 
 		{
-			icombat->Execute_RangeAttack(npc);
+			if (MontageHasFinished(npc) && WeakMontageHasFinished(npc) && StrongMontageHasFinished(npc) && SpecialMontageHasFinished(npc))
+			{
+				icombat->Execute_RangeAttack(npc);
+			}
+		}
+		else
+		{
+			if (MontageHasFinished(npc) && WeakMontageHasFinished(npc) && StrongMontageHasFinished(npc) && SpecialMontageHasFinished(npc))
+			{
+				icombat->Execute_RangeAttack_Rage(npc);
+			}
 		}
 	}
 
