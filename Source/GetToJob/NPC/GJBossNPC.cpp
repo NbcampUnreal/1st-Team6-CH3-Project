@@ -26,6 +26,7 @@ AGJBossNPC::AGJBossNPC() :
 	IsFist = false;
 	IsRight = false;
 	IsLeft = false;
+	IsBossDead = false;
 }
 
 void AGJBossNPC::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -166,6 +167,11 @@ bool AGJBossNPC::GetIsRight() const
 	return IsRight;
 }
 
+bool AGJBossNPC::GetIsBossDead() const
+{
+	return IsBossDead;
+}
+
 bool AGJBossNPC::GetIsLeft() const
 {
 	return IsLeft;
@@ -184,6 +190,11 @@ void AGJBossNPC::SetIsRight(bool IsItRight)
 void AGJBossNPC::SetIsLeft(bool IsItLeft)
 {
 	IsLeft = IsItLeft;
+}
+
+void AGJBossNPC::SetIsBossDead(bool BossIsDead)
+{
+	IsBossDead = BossIsDead;
 }
 
 int AGJBossNPC::WeakAttack_Implementation()
