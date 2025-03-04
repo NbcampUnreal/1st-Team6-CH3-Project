@@ -116,6 +116,14 @@ void AGJBossProjectile::BeginPlay()
 
 	HitArea->OnComponentBeginOverlap.AddDynamic(this, &AGJBossProjectile::BeginOverlap);
 	HitArea->OnComponentEndOverlap.AddDynamic(this, &AGJBossProjectile::EndOverlap);
+	if (FireSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			GetWorld(),
+			FireSound,
+			GetActorLocation()
+		);
+	}
 	GetWorldTimerManager().SetTimer(
 		DestroyTimerHandle,
 		this,

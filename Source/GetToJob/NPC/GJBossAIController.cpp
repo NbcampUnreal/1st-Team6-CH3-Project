@@ -32,7 +32,7 @@ void AGJBossAIController::SetupPerceptionSystem()
 	{
 		SetPerceptionComponent(*CreateDefaultSubobject<UAIPerceptionComponent>(
 			TEXT("Perception Component")));
-		SightConfig->SightRadius = 4000.f;
+		SightConfig->SightRadius = 12000.f;
 		SightConfig->LoseSightRadius = SightConfig->SightRadius + 25.f;
 		SightConfig->PeripheralVisionAngleDegrees = 360.f;
 		SightConfig->SetMaxAge(10.f);
@@ -53,7 +53,7 @@ void AGJBossAIController::OnTargetDetected(AActor* Actor, FAIStimulus const Stim
 	{
 		float const DistanceToPlayer = ch->GetDistanceTo(GetPawn()); // 플레이어와 NPC 사이의 거리 계산
 
-		if (DistanceToPlayer <= 4500.f) // 500 거리 이내에 있을 경우
+		if (DistanceToPlayer <= 10000.f)
 		{
 			GetBlackboardComponent()->SetValueAsBool("CanSeePlayer", Stimulus.WasSuccessfullySensed()); // 즉시 추적
 		}

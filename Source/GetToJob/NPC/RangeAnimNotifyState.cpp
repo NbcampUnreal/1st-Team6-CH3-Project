@@ -21,6 +21,7 @@ void URangeAnimNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSeq
 			if (AGJBossNPC* const BossNPC = Cast<AGJBossNPC>(MeshComp->GetOwner()))
 			{
 				BossNPC->FireProjectile();
+				
 			}
 		}
 	}

@@ -29,6 +29,8 @@ public:
 
 	UAnimMontage* GetRangeMontage() const;
 
+	UAnimMontage* GetRageMontage() const;
+
 	void FireProjectile();
 
 	void SetPatrolPath(APatrolPath* Path);
@@ -58,6 +60,20 @@ public:
 	int SpecialAttack_Implementation() override;
 
 	int RangeAttack_Implementation() override;
+
+	int WeakAttack_Rage_Implementation() override;
+
+	int StrongAttack_Rage_Implementation() override;
+
+	int SpecialAttack_Rage_Implementation() override;
+
+	int RangeAttack_Rage_Implementation() override;
+
+	int RageMotion_Implementation() override;
+
+	void PlayHeatSound();
+
+	void PlayHurtSound();
 
 protected:
 	virtual void BeginPlay() override;
@@ -89,12 +105,21 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation, meta = (AllowPrviateAccess = "true"))
 	UAnimMontage* RangeAttackMontage;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation, meta = (AllowPrviateAccess = "true"))
+	UAnimMontage* RageMontage;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
 	USoundBase* HeatSound;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
 	USoundBase* HurtSound;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	USoundBase* RageSound;
+
+	USkeletalMeshComponent* SkeletalMeshCom;
+
+	UAnimInstance* AnimInstance;
 
 	virtual void OnAttackOverlapBegin(
 		UPrimitiveComponent* const OverlappedComponent,
