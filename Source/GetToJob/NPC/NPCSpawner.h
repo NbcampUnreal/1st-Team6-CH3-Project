@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "PatrolPath.h"
 #include "NPC/GJNPC.h"
 #include "NPC/NPCSpawnRow.h"
 #include "NPCSpawner.generated.h"
@@ -40,6 +41,11 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrivateAccess = "true"))
     UBehaviorTree* ChoicePath; // 추가된 부분
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrviateAccess = "true"))
+    APatrolPath* PatrolPath;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrviateAccess = "true"))
+    int32 LimitNPC;
     FTimerHandle SpawnTimerHandle;
 
 

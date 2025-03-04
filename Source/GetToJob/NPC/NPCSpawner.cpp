@@ -12,6 +12,7 @@ ANPCSpawner::ANPCSpawner()
 	SpawningBox = CreateDefaultSubobject<UBoxComponent>(TEXT("SpawningBox"));
 	SpawningBox->SetupAttachment(Scene);
 
+    LimitNPC = 50;
 	ChoicePath = nullptr;
 }
 
@@ -82,16 +83,33 @@ void ANPCSpawner::SpawnNPCs()
         UE_LOG(LogTemp, Warning, TEXT("NPCDataTable not set!"));
         return;
     }
-
+    UWorld* World = GetWorld();
+    int32 ActorCount = 0;
+    for (TActorIterator<AActor> ActorItr(World); ActorItr; ++ActorItr)
+    {
+        AActor* Actor = *ActorItr;
+        if (Actor->Tags.Contains(FName("NPC"))) // NPC 태그 확인
+        {
+            ActorCount++;
+        }
+    }
+    if (ActorCount >= LimitNPC) return;
     for (int32 i = 0; i < NumberOfActorsToSpawn; ++i)
     {
         AGJNPC* SpawnedNPC = SpawnRandomNPC();
         if (SpawnedNPC)
         {
-            APatrolPath* FoundPath = FindPatrolPath();
-            if (FoundPath)
+            if (PatrolPath)
             {
-                SpawnedNPC->SetPatrolPath(FoundPath); // PatrolPath 할당
+                SpawnedNPC->SetPatrolPath(PatrolPath);
+            }
+            else 
+            {
+                APatrolPath* FoundPath = FindPatrolPath();
+                if (FoundPath)
+                {
+                    SpawnedNPC->SetPatrolPath(FoundPath); // PatrolPath 할당
+                }
             }
             if (ChoicePath) // 변경할 Behavior Tree가 설정되었는지 확인
             {
