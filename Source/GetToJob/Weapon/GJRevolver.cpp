@@ -136,7 +136,7 @@ void AGJRevolver::Fire()
 					}
 				}
 
-				if (HitActor->ActorHasTag(FName("NPC")))
+				if (HitActor)
 				{
 					UParticleSystemComponent* SpawnedEffect = UGameplayStatics::SpawnEmitterAtLocation(
 						GetWorld(),
