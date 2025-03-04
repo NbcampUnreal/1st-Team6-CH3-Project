@@ -18,4 +18,5 @@ private:
 	bool WeakMontageHasFinished(AGJBossNPC* const npc);
 	bool StrongMontageHasFinished(AGJBossNPC* const npc);
 	bool SpecialMontageHasFinished(AGJBossNPC* const npc);
+	bool RangeMontageHasFinished(AGJBossNPC* const npc);
 };

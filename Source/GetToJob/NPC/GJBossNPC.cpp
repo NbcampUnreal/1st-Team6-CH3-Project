@@ -1,6 +1,9 @@
 #include "NPC/GJBossNPC.h"
+#include "NPC/GJBossProjectile.h"
+#include "Kismet/GameplayStatics.h"
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 #include "GJBossAIController.h"
 
 AGJBossNPC::AGJBossNPC() :
@@ -58,6 +61,35 @@ UAnimMontage* AGJBossNPC::GetSpecialMontage() const
 UAnimMontage* AGJBossNPC::GetRangeMontage() const
 {
 	return RangeAttackMontage;
+}
+
+void AGJBossNPC::FireProjectile()
+{
+	if (ProjectileClass)
+	{
+		ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+		if (PlayerCharacter)
+		{
+			FVector PlayerLocation = PlayerCharacter->GetActorLocation();
+			FVector NPCLocation = GetActorLocation();
+			FVector LaunchDirection = (PlayerLocation - NPCLocation).GetSafeNormal();
+
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.Owner = this;
+			SpawnParams.Instigator = GetInstigatorController()->GetPawn();
+
+
+			UE_LOG(LogTemp, Warning, TEXT("FireProjectile: Instigator=%s"), *GetNameSafe(SpawnParams.Instigator));
+
+			AGJBossProjectile* Projectile = GetWorld()->SpawnActor<AGJBossProjectile>(ProjectileClass, NPCLocation, LaunchDirection.Rotation(), SpawnParams);
+
+			if (Projectile)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("It Spawnned"));
+				Projectile->ProjectileComponent->Velocity = LaunchDirection * Projectile->ProjectileComponent->InitialSpeed;
+			}
+		}
+	}
 }
 
 void AGJBossNPC::SetPatrolPath(APatrolPath* Path)
@@ -198,6 +230,14 @@ void AGJBossNPC::BeginPlay()
 void AGJBossNPC::OnAttackOverlapBegin(UPrimitiveComponent* const OverlappedComponent, AActor* const OtherActor, UPrimitiveComponent* const OtherComponent, int const OtherBodyIndex, bool const FromSweep, FHitResult const& SweepResult)
 {
 	Super::OnAttackOverlapBegin(OverlappedComponent, OtherActor, OtherComponent, OtherBodyIndex, FromSweep, SweepResult);
+	if (HeatSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			GetWorld(),
+			HeatSound,
+			GetActorLocation()
+		);
+	}
 }
 
 void AGJBossNPC::OnAttackOverlapEnd(UPrimitiveComponent* const OverlappedComponent, AActor* const OtherActor, UPrimitiveComponent* const OtherComponent, int const OtherBodyIndex)

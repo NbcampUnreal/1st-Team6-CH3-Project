@@ -538,15 +538,20 @@ void AGJCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
                 );
             }
 
-            if (PlayerController->ESCAction)
+            /*if (PlayerController->ESCAction)
             {
                 // 메인메뉴 (ESC)
                 EnhancedInput->BindAction(
                     PlayerController->ESCAction, 
                     ETriggerEvent::Triggered, 
                     PlayerController,
+<<<<<<< HEAD
                     &AGJPlayerController::Pause);
             }
+=======
+                    &AGJPlayerController::OpenMainMenu);
+            }*/
+>>>>>>> dev
 
             //if (PlayerController->DropWeaponAction)
             //{
