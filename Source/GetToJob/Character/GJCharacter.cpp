@@ -297,6 +297,20 @@ void AGJCharacter::EquipWeapon(AGJBaseGun* NewWeapon)
         CurrentGun->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
         CurrentGun->SetActorHiddenInGame(true);
         CurrentGun->SetActorEnableCollision(false);
+        if (CurrentGun->Attachments.Num() > 0)
+        {
+            TArray<USkeletalMeshComponent*> MeshComponents;
+            CurrentGun->Attachments[0]->GetComponents<USkeletalMeshComponent>(MeshComponents);
+
+            for (USkeletalMeshComponent* MeshComp : MeshComponents)
+            {
+                if (MeshComp)
+                {
+                    MeshComp->SetVisibility(false);
+                }
+            }
+        }
+        
     }
 
     // 새 무기 장착
@@ -308,6 +322,19 @@ void AGJCharacter::EquipWeapon(AGJBaseGun* NewWeapon)
     CurrentGun->SetActorHiddenInGame(false);
     CurrentGun->SetActorEnableCollision(true);
     CurrentGun->SetOwner(this);
+    if (CurrentGun->Attachments.Num() > 0)
+    {
+        TArray<USkeletalMeshComponent*> MeshComponents;
+        CurrentGun->Attachments[0]->GetComponents<USkeletalMeshComponent>(MeshComponents);
+
+        for (USkeletalMeshComponent* MeshComp : MeshComponents)
+        {
+            if (MeshComp)
+            {
+                MeshComp->SetVisibility(true);
+            }
+        }
+    }
 
     // 무기 상태 업데이트
     UpdateWeaponState(CurrentGun);
@@ -637,7 +664,7 @@ void AGJCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
                 &AGJCharacter::ActivateUltimateWeapon
             );
             // 우클릭(조준) - 줌인
-            EnhancedInput->BindAction(PlayerController->AimAction, ETriggerEvent::Triggered, this, &AGJCharacter::StartAiming);
+            EnhancedInput->BindAction(PlayerController->AimAction, ETriggerEvent::Started, this, &AGJCharacter::StartAiming);
             // 우클릭 해제 - 줌아웃
             EnhancedInput->BindAction(PlayerController->AimAction, ETriggerEvent::Completed, this, &AGJCharacter::StopAiming);
         }

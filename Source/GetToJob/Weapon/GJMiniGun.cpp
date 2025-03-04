@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Weapon/GJBaseGunAttachment.h"
 //#include "NiagaraFunctionLibrary.h"
 //#include "NiagaraComponent.h" // 나이아가라 추가
 
@@ -49,11 +50,24 @@ void AGJMiniGun::ActivateMiniGun()
 	}
 
 	// 기존 무기 비활성화
-	if (GJCharacter->CurrentGun)
+	if (GJCharacter->CurrentGun && GJCharacter)
 	{
 		
 		GJCharacter->CurrentGun->SetActorHiddenInGame(true);
 		GunMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		if (GJCharacter->CurrentGun->Attachments.Num() > 0)
+		{
+			TArray<USkeletalMeshComponent*> MeshComponents;
+			GJCharacter->CurrentGun->Attachments[0]->GetComponents<USkeletalMeshComponent>(MeshComponents);
+
+			for (USkeletalMeshComponent* MeshComp : MeshComponents)
+			{
+				if (MeshComp)
+				{
+					MeshComp->SetVisibility(false);
+				}
+			}
+		}
 	}
 
 	GunMesh->SetVisibility(true);
@@ -81,6 +95,19 @@ void AGJMiniGun::DeactivateMiniGun()
 	GJCharacter->CurrentWeaponType = EWeaponType::None;
 	UE_LOG(LogTemp, Warning, TEXT("MiniGun Deactivated!!"));
 	bPickupMiniGun = false;
+	/*if (GJCharacter->CurrentGun && GJCharacter->CurrentGun->Attachments.Num() > 0)
+	{
+		TArray<USkeletalMeshComponent*> MeshComponents;
+		GJCharacter->CurrentGun->Attachments[0]->GetComponents<USkeletalMeshComponent>(MeshComponents);
+
+		for (USkeletalMeshComponent* MeshComp : MeshComponents)
+		{
+			if (MeshComp)
+			{
+				MeshComp->SetVisibility(true);
+			}
+		}
+	}*/
 
 	ResetGauge();
 	bUltraIsReady = false;
@@ -216,7 +243,7 @@ void AGJMiniGun::Fire()
 			DrawDebugCylinder(GetWorld(), TraceStart, TraceEnd, 7.0f, 12, FColor::Red, false, 0.1f, 0, 5.0f);
 		}
 
-		//// Niagara 기반 Sci-Fi 레이저 효과 적용
+		// Niagara 기반 Sci-Fi 레이저 효과 적용
 		//if (LaserBeamNiagara)
 		//{
 		//	UNiagaraComponent* LaserEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
@@ -227,11 +254,21 @@ void AGJMiniGun::Fire()
 
 		//	if (LaserEffect)
 		//	{
+		//		UE_LOG(LogTemp, Warning, TEXT("TraceStart: %s, TraceEnd: %s"),
+		//			*TraceStart.ToString(), *TraceEnd.ToString());
+
 		//		// Beam의 끝 위치 설정
 		//		LaserEffect->SetVectorParameter(TEXT("BeamEnd"), TraceEnd);
 
-		//		// UV Scroll 속도 설정 (빛이 흐르는 효과)
-		//		LaserEffect->SetFloatParameter(TEXT("BeamStart"), TraceStart);
+		//		// Beam의 시작 위치 설정
+		//		LaserEffect->SetVectorParameter(TEXT("BeamStart"), TraceStart);	
+
+		//		// 실행 상태 확인
+		//		LaserEffect->SetAutoActivate(true);
+		//		LaserEffect->ActivateSystem();
+		//		LaserEffect->ReinitializeSystem(); // 강제 업데이트
+
+		//		UE_LOG(LogTemp, Error, TEXT("Beam Render working!"));
 		//	}
 		//}
 	}
@@ -255,6 +292,16 @@ bool AGJMiniGun::IsMiniGunActive() const
 void AGJMiniGun::EnableFire()
 {
 	bCanFire = true;
+}
+
+float AGJMiniGun::GetMaxGauge() const
+{
+	return MaxGauge;
+}
+
+float AGJMiniGun::GetCurrentGauge() const
+{
+	return CurrentGauge;
 }
 
 void AGJMiniGun::BeginPlay()
@@ -288,10 +335,35 @@ void AGJMiniGun::StartDeactivationTimer()
 		MiniGunDuration,
 		false
 	);
+
+	// 매 프레임마다 CurrentGauge 감소 (0.1초마다 실행)
+	GetWorld()->GetTimerManager().SetTimer(
+		GaugeDecreaseTimerHandle,
+		this,
+		&AGJMiniGun::DecreaseGauge,
+		0.1f,  // 0.1초마다 실행
+		true
+	);
 }
 
 void AGJMiniGun::ResetGauge()
 {
 	CurrentGauge = 0.0f;
 	UE_LOG(LogTemp, Warning, TEXT("MiniGun Gauge Reset to 0!"));
+}
+
+void AGJMiniGun::DecreaseGauge()
+{
+	if (CurrentGauge > 0)
+	{
+		float DecreaseAmount = 100.0f / (MiniGunDuration / 0.1f); // MiniGunDuration 동안 100 -> 0으로 감소
+		CurrentGauge = FMath::Clamp(CurrentGauge - DecreaseAmount, 0.0f, 100.0f);
+
+		UE_LOG(LogTemp, Warning, TEXT("CurrentGauge: %f"), CurrentGauge);
+	}
+	else
+	{
+		// CurrentGauge가 0이 되면 감소 타이머 해제
+		GetWorld()->GetTimerManager().ClearTimer(GaugeDecreaseTimerHandle);
+	}
 }
