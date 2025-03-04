@@ -66,7 +66,7 @@ AGJCharacter::AGJCharacter()
     
     // 현재 소지 총 초기화
     CurrentGun = nullptr;
-    SetHealth(20.f);
+    SetHealth(75.f);
     SetMaxHealth(100.f);
 
     // 인벤토리 연결
@@ -98,15 +98,24 @@ void AGJCharacter::ActivateUltimateWeapon()
 
 void AGJCharacter::ModifyHealth(float Amount)
 {
-    if (bIsDead) return; // 이미 죽었으면 실행 안 함
+    // 이미 죽었으면 체력 조정 X
+    if (bIsDead) return;
 
     // 체력 변경
-    SetHealth(FMath::Max(GetHealth() + Amount, 10.0f));
+    SetHealth(GetHealth() + Amount);
 
-    UE_LOG(LogTemp, Log, TEXT("ModifyHealth: Current Health = %f"), GetHealth());
+    // 체력이 0 이하이면 사망 처리 (단, 중복 호출 방지)
+    if (GetHealth() <= 0 && !bIsDead)
+    {
+        bIsDead = true; // 사망 상태로 설정
+        UE_LOG(LogTemp, Warning, TEXT("Character has died!"));
+        OnDeath();
+    }
+    else
+    {
+        UE_LOG(LogTemp, Log, TEXT("Character Health Modified: %f / %f"), GetHealth(), GetMaxHealth());
+    }
 }
-
-
 
 
 void AGJCharacter::BeginPlay()
@@ -382,30 +391,28 @@ void AGJCharacter::UpdateWeaponState(AGJBaseGun* NewWeapon)
         static_cast<uint8>(CurrentWeaponType));
 }
 
-float AGJCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+float AGJCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamgeCauser)
 {
-    if (bIsDead) return 0.0f; // 이미 죽었다면 데미지를 받지 않음
-
-    float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-
-    // 체력 감소
+    float ActualDamage = Super::TakeDamage(DamageAmount,
+        DamageEvent,
+        EventInstigator,
+        DamgeCauser);
     SetHealth(FMath::Clamp(GetHealth() - DamageAmount, 0.0f, GetMaxHealth()));
-
-    UE_LOG(LogTemp, Warning, TEXT("TakeDamage: %f | Current Health: %f"), DamageAmount, GetHealth());
 
     if (GJController)
     {
         GJController->HUD->ShowHitEffect();
     }
 
-    // 체력이 0 이하가 되면 OnDeath() 실행
-    if (GetHealth() <= 0 && !bIsDead)
+    if (auto const Player = Cast<AGJCharacter>(this))
     {
-        bIsDead = true;
-        UE_LOG(LogTemp, Error, TEXT("Dead - Executing OnDeath()"));
-        OnDeath();
+        if (GetHealth() <= 0)
+        {
+            UE_LOG(LogTemp, Error, TEXT("Dead"));
+            OnDeath();
+            bIsDead = true;  // 중복 실행 방지
+        }
     }
-
     return ActualDamage;
 }
 
@@ -538,20 +545,15 @@ void AGJCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
                 );
             }
 
-            /*if (PlayerController->ESCAction)
-            {
-                // 메인메뉴 (ESC)
-                EnhancedInput->BindAction(
-                    PlayerController->ESCAction, 
-                    ETriggerEvent::Triggered, 
-                    PlayerController,
-<<<<<<< HEAD
-                    &AGJPlayerController::Pause);
-            }
-=======
-                    &AGJPlayerController::OpenMainMenu);
-            }*/
->>>>>>> dev
+            //if (PlayerController->ESCAction)
+            //{
+            //    // 메인메뉴 (ESC)
+            //    EnhancedInput->BindAction(
+            //        PlayerController->ESCAction, 
+            //        ETriggerEvent::Triggered, 
+            //        PlayerController,
+            //        &AGJPlayerController::OpenMainMenu);
+            //}
 
             //if (PlayerController->DropWeaponAction)
             //{
@@ -836,24 +838,14 @@ void AGJCharacter::StopAiming()
 
 void AGJCharacter::OnDeath()
 {
-    if (bIsDead) return; // 중복 실행 방지
+    if (bIsDead) return; // 이미 죽었다면 다시 실행되지 않음
 
-    bIsDead = true;
-    UE_LOG(LogTemp, Error, TEXT("Player has died! Executing OnDeath()"));
+    bIsDead = true; // 사망 상태 설정
 
     // 모든 디버프 제거 (출혈 포함)
     if (DebuffComponent)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Removing all debuffs..."));
         DebuffComponent->RemoveAllDebuffs();
-    }
-
-    // 출혈 타이머가 실행 중이라면 제거
-    if (DebuffComponent && DebuffComponent->DebuffTimers.Contains(EDebuffType::Bleed))
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Clearing Bleed Timer..."));
-        GetWorld()->GetTimerManager().ClearTimer(DebuffComponent->DebuffTimers[EDebuffType::Bleed]);
-        DebuffComponent->DebuffTimers.Remove(EDebuffType::Bleed);
     }
 
     // 입력 비활성화
@@ -863,10 +855,17 @@ void AGJCharacter::OnDeath()
         GetController()->UnPossess();
     }
 
-    // 사망 사운드 재생
+    UE_LOG(LogTemp, Error, TEXT("Player has died! Game Over"));
+
+    // 사망 사운드 재생 (한 번만 실행되도록 보장)
     if (DeathSound)
     {
         UGameplayStatics::PlaySoundAtLocation(this, DeathSound, GetActorLocation());
+    }
+
+    if (GJController)
+    {
+        GJController->GameOver();
     }
 
     // 레그돌 활성화

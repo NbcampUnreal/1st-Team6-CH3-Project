@@ -18,8 +18,10 @@ public class GetToJob : ModuleRules
             "GameplayTasks",
             "NavigationSystem",
 			"UMG",
-            "Niagara"
-        });
+			"MovieScene",
+			"MovieSceneTracks",
+			"LevelSequence"
+		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
