@@ -92,20 +92,10 @@ void ANPCSpawner::SpawnNPCs()
             if (FoundPath)
             {
                 SpawnedNPC->SetPatrolPath(FoundPath); // PatrolPath 할당
-                UE_LOG(LogTemp, Warning, TEXT("PatrolPath Found!"));
-            }
-            else
-            {
-                UE_LOG(LogTemp, Warning, TEXT("PatrolPath Not Found!"));
             }
             if (ChoicePath) // 변경할 Behavior Tree가 설정되었는지 확인
             {
                 SpawnedNPC->SetBehaviorTree(ChoicePath);
-                UE_LOG(LogTemp, Warning, TEXT("Behavior Tree Changed!"));
-            }
-            else
-            {
-                UE_LOG(LogTemp, Warning, TEXT("BT_NPC_RandomPath not set!"));
             }
             SpawnedNPC->SetAttack(AiAttackDamage);
         }
