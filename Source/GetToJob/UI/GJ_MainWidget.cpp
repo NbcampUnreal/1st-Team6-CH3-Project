@@ -27,6 +27,11 @@ void UGJ_MainWidget::NativeConstruct()
 	}
 
 	SetCrosshairSize(5.0f);
+
+	if (Ult)
+	{
+		Ult->SetPercent(0.0f);
+	}
 }
 
 void UGJ_MainWidget::UpdateHUD()
@@ -248,6 +253,10 @@ void UGJ_MainWidget::PlayFireAnim()
 	{
 		PlayAnimation(FireAnim);
 	}
+}
+
+void UGJ_MainWidget::UpdateUltimateGauge()
+{
 }
 
 
