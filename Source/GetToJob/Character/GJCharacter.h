@@ -129,6 +129,9 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void UnequipCurrentWeapon();
 
+	// UI가 입력을 막고있으면 다시 해제
+	void EnableGameInput();
+
 	// 무기 장착 요청(인벤토리에서)
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void EquipWeaponFromInventory(int32 SlotIndex);

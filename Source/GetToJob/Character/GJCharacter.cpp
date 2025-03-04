@@ -78,6 +78,9 @@ AGJCharacter::AGJCharacter()
     PrimaryActorTick.bCanEverTick = true;
 
     DebuffComponent = CreateDefaultSubobject<UGJDebuffComponent>(TEXT("DebuffComponent"));
+
+    // 생성시 플레이어 컨트롤러 연결
+    GJController = Cast<AGJPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 }
 
 // 궁극기 발동 (T키)
@@ -85,15 +88,23 @@ void AGJCharacter::ActivateUltimateWeapon()
 {
     UE_LOG(LogTemp, Warning, TEXT("ActivateUltimateWeapon() Called!"));
 
-    if (MiniGun)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("MiniGun Found! Activating..."));
-        MiniGun->ActivateMiniGun();
-    }
-    else
+    // 미니건 체크
+    if (!MiniGun)
     {
         UE_LOG(LogTemp, Error, TEXT("MiniGun is NULL! Check if it's properly initialized."));
+        return;
     }
+
+    // 미니건이 활성화 가능한 상태인지 확인
+    if (!MiniGun->bUltraIsReady || MiniGun->GetCurrentGauge() < MiniGun->GetMaxGauge())
+    {
+        UE_LOG(LogTemp, Warning, TEXT("MiniGun activation failed: Not enough gauge!"));
+        return;
+    }
+
+    // 미니건 활성화
+    UE_LOG(LogTemp, Warning, TEXT("MiniGun Found! Activating..."));
+    MiniGun->ActivateMiniGun();
 }
 
 void AGJCharacter::ModifyHealth(float Amount)
@@ -117,12 +128,32 @@ void AGJCharacter::ModifyHealth(float Amount)
     }
 }
 
+void AGJCharacter::EnableGameInput()
+{
+    if (GJController)
+    {
+        FInputModeGameOnly InputMode;
+        GJController->SetInputMode(InputMode);
+        GJController->bShowMouseCursor = false;
+
+        UE_LOG(LogTemp, Warning, TEXT("Game Input Mode Restored!"));
+    }
+}
+
 
 void AGJCharacter::BeginPlay()
 {
     Super::BeginPlay();
 
-    GJController = Cast<AGJPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+    // 컨트롤러 재 확인
+    if (!GJController)
+    {
+        GJController = Cast<AGJPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+    }
+
+    bIsDead = false;
+
+    EnableGameInput();
 
     if (MiniGunClass)
     {
@@ -876,11 +907,11 @@ void AGJCharacter::OnDeath()
     }
 
     // 입력 비활성화
-    if (GetController())
-    {
-        GetController()->DisableInput(nullptr);
-        GetController()->UnPossess();
-    }
+    //if (GetController())
+    //{
+    //    GetController()->DisableInput(nullptr);
+    //    GetController()->UnPossess();
+    //}
 
     UE_LOG(LogTemp, Error, TEXT("Player has died! Game Over"));
 
