@@ -100,6 +100,16 @@ void AGJRocketProjectile::OnImpact(UPrimitiveComponent* HitComp, AActor* OtherAc
 
 void AGJRocketProjectile::AutoExplode()
 {
+	// 사운드 재생
+	float AdjustVolume = 1.0f;
+	UGameplayStatics::PlaySoundAtLocation(
+		GetWorld(),
+		FireSound,
+		GetActorLocation(),
+		AdjustVolume
+	);
+
+
 	// 속성별 폭발 파티클 생성
 	SpawnElementalParticle();
 	//if (ExplosionEffect)
