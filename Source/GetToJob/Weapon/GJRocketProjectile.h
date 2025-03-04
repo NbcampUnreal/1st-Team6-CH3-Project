@@ -54,6 +54,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element | Lifetime")
 	int32 BurnDelay;
 
+	// 로켓 폭발하는 소리
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	USoundBase* FireSound;
 
 
 	// 로켓 지속 타이머
