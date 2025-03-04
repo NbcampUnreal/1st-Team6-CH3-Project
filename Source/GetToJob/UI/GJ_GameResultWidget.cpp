@@ -193,8 +193,18 @@ void UGJ_GameResultWidget::OnRestartButtonClicked()
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		FName CurrentLevel = *World->GetMapName();
-		UGameplayStatics::OpenLevel(World, CurrentLevel);
+		//FName CurrentLevel = *World->GetMapName();
+		//UGameplayStatics::OpenLevel(World, CurrentLevel);
+
+		if (GJGameInstance->CurrentWaveIndex < 3)
+		{
+			UGameplayStatics::OpenLevel(World, "MainLevel");
+		}
+		else
+		{
+			UGameplayStatics::OpenLevel(World, "BossLevel");
+		}
+
 	}
 }
 

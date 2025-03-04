@@ -29,7 +29,7 @@ public:
 	int32 CurrentWaveIndex;
 
 	//�ִ� ������ ����
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Level")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Level")
 	int32 MaxLevels;
 
 	//���� ����
