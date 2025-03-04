@@ -36,6 +36,8 @@ public:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	void SpawnDropItem();
+
 protected:
 	virtual void BeginPlay() override;
 	
@@ -44,7 +46,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Collision, meta = (AllowPrivateAccess = "true"))
 	class USphereComponent* HeadCollisionSphere;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrviateAccess = "true")) // UPROPERTY �� ���� ������ BehaviorTree �ν��Ͻ� ����
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrviateAccess = "true"))
 	UBehaviorTree* Tree;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrviateAccess = "true"))
@@ -52,4 +54,16 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation, meta = (AllowPrviateAccess = "true"))
 	UAnimMontage* Montage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DropItem")
+	TSubclassOf<AActor> FirstAmmo;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DropItem")
+	TSubclassOf<AActor> SecondAmmo;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DropItem")
+	float FirstAmmoChance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DropItem")
+	float SecondAmmoChance;
 };

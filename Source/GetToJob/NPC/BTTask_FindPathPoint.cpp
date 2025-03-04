@@ -26,7 +26,6 @@ EBTNodeResult::Type UBTTask_FindPathPoint::ExecuteTask(UBehaviorTreeComponent& O
 				APatrolPath* PatrolPath = npc->GetPatrolParth();
 				if (PatrolPath == nullptr)
 				{
-					UE_LOG(LogTemp, Warning, TEXT("PatrolPath is null!"));
 					return EBTNodeResult::Failed;
 				}
 				// get the current patrol path vector from the NPC - this is local to the patrol path actor

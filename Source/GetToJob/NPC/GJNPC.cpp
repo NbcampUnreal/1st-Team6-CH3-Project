@@ -11,6 +11,8 @@ AGJNPC::AGJNPC() :
 	{
 		HeadCollisionSphere->SetupAttachment(GetMesh(), "head_socket");
 	}
+	FirstAmmoChance = 20.f;
+	SecondAmmoChance = 5.f;
 }
 
 UBehaviorTree* AGJNPC::GetBehaviorTree() const
@@ -72,6 +74,41 @@ void AGJNPC::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+void AGJNPC::SpawnDropItem()
+{
+	const float RandValue = FMath::FRandRange(0.0f, 100.f);
+	UWorld* World = GetWorld();
+	if (RandValue <= SecondAmmoChance)
+	{
+		if (SecondAmmo)
+		{
+			FVector NPCLocation = GetActorLocation();
+			FRotator NPCRotation = GetActorRotation();
+
+			NPCLocation.Z -= 90.f;
+
+			World -> SpawnActor<AActor>(SecondAmmo, NPCLocation, NPCRotation);
+			UE_LOG(LogTemp, Warning, TEXT("ISSpawned"));
+		}
+	}
+	else if (SecondAmmoChance < RandValue && FirstAmmoChance >= RandValue)
+	{
+		if (FirstAmmo)
+		{
+			FVector NPCLocation = GetActorLocation();
+			FRotator NPCRotation = GetActorRotation();
+
+			NPCLocation.Z -= 90.f;
+
+			World->SpawnActor<AActor>(FirstAmmo, NPCLocation, NPCRotation);
+			UE_LOG(LogTemp, Warning, TEXT("ISSpawned"));
+		}
+	}
+	else return;
+
+	return;
 }
 
 int AGJNPC::MeleeAttack_Implementation()
