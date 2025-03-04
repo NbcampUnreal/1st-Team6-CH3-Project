@@ -4,6 +4,7 @@
 #include "Weapon/GJBaseGun.h"
 #include "GJMiniGun.generated.h"
 
+class UNiagaraSystem;
 
 UCLASS()
 class GETTOJOB_API AGJMiniGun : public AGJBaseGun
@@ -30,6 +31,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ultra")
 	bool bUltraIsReady;
 
+	//// 나이아가라 시스템
+	//UPROPERTY(EditAnywhere, Category = "Effects")
+	//UNiagaraSystem* LaserBeamNiagara;
 
 	UFUNCTION()
 	void ActivateMiniGun();
@@ -43,7 +47,10 @@ public:
 	
 	bool IsMiniGunActive() const;
 	void EnableFire();
+	float GetMaxGauge() const;
+	float GetCurrentGauge() const;
 
+	FTimerHandle MiniGunTimerHandle;
 protected:
 	virtual void BeginPlay() override;
 
@@ -51,6 +58,7 @@ protected:
 private:
 	void StartDeactivationTimer();
 	void ResetGauge();
+	void DecreaseGauge();
 
 	UPROPERTY(EditAnywhere, Category = "MiniGun")
 	float MaxGauge; // 최대 게이지 값
@@ -61,8 +69,8 @@ private:
 	UPROPERTY(EditAnywhere, Category = "MiniGun")
 	float MiniGunDuration; // 미니건 활성화 시간
 
-	FTimerHandle MiniGunTimerHandle;
-
+	
+	FTimerHandle GaugeDecreaseTimerHandle;
 	FTimerHandle CoolDownTimerHandle;
 	bool bCanFire;
 };
