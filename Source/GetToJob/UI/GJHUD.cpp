@@ -44,6 +44,13 @@ void AGJHUD::DisplayHUD(GJHUDState HUDType)
 			ResultHUDWidget->ClearFailUI();
 		}
 		break;
+	case GJHUDState::BossHUD:
+		BossHUDWidget = CreateWidget<UUserWidget>(GetWorld(), BossHUDClass);
+		if (BossHUDWidget)
+		{
+			BossHUDWidget->AddToViewport();
+		}
+		break;
 	default:
 		break;
 	}
@@ -83,6 +90,13 @@ void AGJHUD::HideHUD(GJHUDState HUDType)
 			ResultHUDWidget = nullptr;
 		}
 		break;
+	case GJHUDState::BossHUD:
+		if (BossHUDWidget)
+		{
+			BossHUDWidget->RemoveFromParent();
+			BossHUDWidget = nullptr;
+		}
+		break;
 	default:
 		break;
 	}
@@ -93,6 +107,22 @@ void AGJHUD::UpdateMainHUD()
 	if (MainHUDWidget)
 	{
 		MainHUDWidget->UpdateHUD();;
+	}
+}
+
+void AGJHUD::UpdateMainBossHUD()
+{
+	if (MainHUDWidget)
+	{
+		MainHUDWidget->UpdateBossHUD();
+	}
+}
+
+void AGJHUD::UpdateBossHUD()
+{
+	if (BossHUDWidget)
+	{
+		
 	}
 }
 

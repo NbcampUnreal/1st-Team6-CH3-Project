@@ -127,6 +127,10 @@ public:
 		AActor* DamageCauser
 	) override;
 
+	bool bIsFiring;
+
+	void StopFireWeapon();
+
 protected:
 	// 무기 장착 해제
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
