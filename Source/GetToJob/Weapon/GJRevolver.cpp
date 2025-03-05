@@ -131,7 +131,7 @@ void AGJRevolver::Fire()
 						UE_LOG(LogTemp, Warning, TEXT("NPC is Dead! Increasing MiniGun Gauge!"));
 						if (GJCharacter && GJCharacter->MiniGun)
 						{
-							GJCharacter->MiniGun->IncreaseGauge(20.0f);
+							GJCharacter->MiniGun->IncreaseGauge(7.0f);
 						}
 					}
 				}
