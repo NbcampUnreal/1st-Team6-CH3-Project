@@ -1,6 +1,7 @@
 #include "NPC/AICharacterBase.h"
 #include "NPC/GJNPC.h"
 #include "NPC/GJBossNPC.h"
+#include "GameManager/GJGameState.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/Actor.h"
@@ -38,6 +39,11 @@ float AAICharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 		Health = FMath::Clamp(Health - DamageAmount, 0.0f, MaxHealth);
 		if (Health <= 0)
 		{
+
+			AGJGameState* const GameState = Cast<AGJGameState>(UGameplayStatics::GetGameState(GetWorld()));
+			GameState->AddScore(100);
+			GameState->AddEnemyKillCount(1);
+			NPC->SpawnDropItem();
 			NPC->SetNPCDead(true);
 			NPC->GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
 			NPC->GetMesh()->SetSimulatePhysics(true);
@@ -50,8 +56,10 @@ float AAICharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	if (auto const Boss = Cast<AGJBossNPC>(this))
 	{
 		Health = FMath::Clamp(Health - DamageAmount, 0.0f, MaxHealth);
+		Boss->PlayHurtSound();
 		if (Health <= 0)
 		{
+			Boss->SetIsBossDead(true);
 			if (RightFistCollisionBox)
 			{
 				RightFistCollisionBox->SetCollisionProfileName("NoCollision");
@@ -94,6 +102,7 @@ void AAICharacterBase::OnAttackOverlapBegin(UPrimitiveComponent* const Overlappe
 		UE_LOG(LogTemp, Error, TEXT("Hitted"));
 		if (auto const Boss = Cast<AGJBossNPC>(this))
 		{
+			Boss->PlayHeatSound();
 			StartAttackCooldown(1.f);
 		}
 		if (auto const NPC = Cast<AGJNPC>(this))

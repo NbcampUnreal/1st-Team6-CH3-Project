@@ -26,6 +26,7 @@ AGJBossNPC::AGJBossNPC() :
 	IsFist = false;
 	IsRight = false;
 	IsLeft = false;
+	IsBossDead = false;
 }
 
 void AGJBossNPC::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -61,6 +62,11 @@ UAnimMontage* AGJBossNPC::GetSpecialMontage() const
 UAnimMontage* AGJBossNPC::GetRangeMontage() const
 {
 	return RangeAttackMontage;
+}
+
+UAnimMontage* AGJBossNPC::GetRageMontage() const
+{
+	return RageMontage;
 }
 
 void AGJBossNPC::FireProjectile()
@@ -161,6 +167,11 @@ bool AGJBossNPC::GetIsRight() const
 	return IsRight;
 }
 
+bool AGJBossNPC::GetIsBossDead() const
+{
+	return IsBossDead;
+}
+
 bool AGJBossNPC::GetIsLeft() const
 {
 	return IsLeft;
@@ -181,6 +192,11 @@ void AGJBossNPC::SetIsLeft(bool IsItLeft)
 	IsLeft = IsItLeft;
 }
 
+void AGJBossNPC::SetIsBossDead(bool BossIsDead)
+{
+	IsBossDead = BossIsDead;
+}
+
 int AGJBossNPC::WeakAttack_Implementation()
 {
 	if (WeakAttackMontage)
@@ -194,7 +210,6 @@ int AGJBossNPC::StrongAttack_Implementation()
 {
 	if (StrongAttackMontage)
 	{
-		PlayAnimMontage(StrongAttackMontage);
 	}
 	return 0;
 }
@@ -204,6 +219,7 @@ int AGJBossNPC::SpecialAttack_Implementation()
 	if (SpecialAttackMontage)
 	{
 		PlayAnimMontage(SpecialAttackMontage);
+
 	}
 	return 0;
 }
@@ -217,19 +233,77 @@ int AGJBossNPC::RangeAttack_Implementation()
 	return 0;
 }
 
-void AGJBossNPC::BeginPlay()
+int AGJBossNPC::WeakAttack_Rage_Implementation()
 {
-	Super::BeginPlay();
-
-	RightFootCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &AGJBossNPC::OnAttackOverlapBegin);
-	RightFootCollisionBox->OnComponentEndOverlap.AddDynamic(this, &AGJBossNPC::OnAttackOverlapEnd);
-	LeftFootCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &AGJBossNPC::OnAttackOverlapBegin);
-	LeftFootCollisionBox->OnComponentEndOverlap.AddDynamic(this, &AGJBossNPC::OnAttackOverlapEnd);
+	if (WeakAttackMontage)
+	{
+		if (AnimInstance)
+		{
+			AnimInstance->Montage_Play(WeakAttackMontage, 1.5f);
+		}
+		else PlayAnimMontage(WeakAttackMontage);
+	}
+	return 0;
 }
 
-void AGJBossNPC::OnAttackOverlapBegin(UPrimitiveComponent* const OverlappedComponent, AActor* const OtherActor, UPrimitiveComponent* const OtherComponent, int const OtherBodyIndex, bool const FromSweep, FHitResult const& SweepResult)
+int AGJBossNPC::StrongAttack_Rage_Implementation()
 {
-	Super::OnAttackOverlapBegin(OverlappedComponent, OtherActor, OtherComponent, OtherBodyIndex, FromSweep, SweepResult);
+	if (StrongAttackMontage)
+	{
+		if (AnimInstance)
+		{
+			AnimInstance->Montage_Play(StrongAttackMontage, 1.5f);
+		}
+		else PlayAnimMontage(StrongAttackMontage);
+	}
+	return 0;
+}
+
+int AGJBossNPC::SpecialAttack_Rage_Implementation()
+{
+	if (SpecialAttackMontage)
+	{
+		if (AnimInstance)
+		{
+			AnimInstance->Montage_Play(SpecialAttackMontage, 1.5f);
+		}
+		else PlayAnimMontage(SpecialAttackMontage);
+	}
+	return 0;
+}
+
+int AGJBossNPC::RangeAttack_Rage_Implementation()
+{
+	if (RangeAttackMontage)
+	{
+		if (AnimInstance)
+		{
+			AnimInstance->Montage_Play(RangeAttackMontage, 1.5f);
+		}
+		else PlayAnimMontage(RangeAttackMontage);
+	}
+	return 0;
+}
+
+int AGJBossNPC::RageMotion_Implementation()
+{
+	if (RageMontage)
+	{
+		PlayAnimMontage(RageMontage);
+		if (RageSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(
+				GetWorld(),
+				RageSound,
+				GetActorLocation()
+			);
+		}
+	}
+	return 0;
+}
+
+void AGJBossNPC::PlayHeatSound()
+{
 	if (HeatSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(
@@ -238,6 +312,37 @@ void AGJBossNPC::OnAttackOverlapBegin(UPrimitiveComponent* const OverlappedCompo
 			GetActorLocation()
 		);
 	}
+}
+
+void AGJBossNPC::PlayHurtSound()
+{
+	if (HurtSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			GetWorld(),
+			HurtSound,
+			GetActorLocation()
+		);
+	}
+}
+
+
+void AGJBossNPC::BeginPlay()
+{
+	Super::BeginPlay();
+
+	RightFootCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &AGJBossNPC::OnAttackOverlapBegin);
+	RightFootCollisionBox->OnComponentEndOverlap.AddDynamic(this, &AGJBossNPC::OnAttackOverlapEnd);
+	LeftFootCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &AGJBossNPC::OnAttackOverlapBegin);
+	LeftFootCollisionBox->OnComponentEndOverlap.AddDynamic(this, &AGJBossNPC::OnAttackOverlapEnd);
+
+	SkeletalMeshCom = this->GetMesh();
+	AnimInstance = SkeletalMeshCom->GetAnimInstance();
+}
+
+void AGJBossNPC::OnAttackOverlapBegin(UPrimitiveComponent* const OverlappedComponent, AActor* const OtherActor, UPrimitiveComponent* const OtherComponent, int const OtherBodyIndex, bool const FromSweep, FHitResult const& SweepResult)
+{
+	Super::OnAttackOverlapBegin(OverlappedComponent, OtherActor, OtherComponent, OtherBodyIndex, FromSweep, SweepResult);
 }
 
 void AGJBossNPC::OnAttackOverlapEnd(UPrimitiveComponent* const OverlappedComponent, AActor* const OtherActor, UPrimitiveComponent* const OtherComponent, int const OtherBodyIndex)

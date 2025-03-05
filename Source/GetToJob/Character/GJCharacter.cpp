@@ -16,6 +16,7 @@
 #include "UI/GJHUD.h"
 #include "Components/CapsuleComponent.h"
 #include "Character/GJHealingItem.h"
+#include "GameManager/GJGameInstance.h"
 //#include "Components/WidgetComponent.h"
 //#include "Components/TextBlock.h"
 //#include "Components/ProgressBar.h"
@@ -78,6 +79,11 @@ AGJCharacter::AGJCharacter()
     PrimaryActorTick.bCanEverTick = true;
 
     DebuffComponent = CreateDefaultSubobject<UGJDebuffComponent>(TEXT("DebuffComponent"));
+
+    // 생성시 플레이어 컨트롤러 연결
+    GJController = Cast<AGJPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+
+    bIsInvincible = false; // 기본적으로 무적 상태 아님
 }
 
 // 궁극기 발동 (T키)
@@ -85,15 +91,23 @@ void AGJCharacter::ActivateUltimateWeapon()
 {
     UE_LOG(LogTemp, Warning, TEXT("ActivateUltimateWeapon() Called!"));
 
-    if (MiniGun)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("MiniGun Found! Activating..."));
-        MiniGun->ActivateMiniGun();
-    }
-    else
+    // 미니건 체크
+    if (!MiniGun)
     {
         UE_LOG(LogTemp, Error, TEXT("MiniGun is NULL! Check if it's properly initialized."));
+        return;
     }
+
+    // 미니건이 활성화 가능한 상태인지 확인
+    if (!MiniGun->bUltraIsReady || MiniGun->GetCurrentGauge() < MiniGun->GetMaxGauge())
+    {
+        UE_LOG(LogTemp, Warning, TEXT("MiniGun activation failed: Not enough gauge!"));
+        return;
+    }
+
+    // 미니건 활성화
+    UE_LOG(LogTemp, Warning, TEXT("MiniGun Found! Activating..."));
+    MiniGun->ActivateMiniGun();
 }
 
 void AGJCharacter::ModifyHealth(float Amount)
@@ -101,8 +115,9 @@ void AGJCharacter::ModifyHealth(float Amount)
     // 이미 죽었으면 체력 조정 X
     if (bIsDead) return;
 
-    // 체력 변경
-    SetHealth(GetHealth() + Amount);
+    // 체력 변경 (최대 체력을 초과하지 않도록 제한)
+    float NewHealth = FMath::Clamp(GetHealth() + Amount, 0.0f, GetMaxHealth());
+    SetHealth(NewHealth);
 
     // 체력이 0 이하이면 사망 처리 (단, 중복 호출 방지)
     if (GetHealth() <= 0 && !bIsDead)
@@ -117,12 +132,38 @@ void AGJCharacter::ModifyHealth(float Amount)
     }
 }
 
+void AGJCharacter::EnableGameInput()
+{
+    if (GJController)
+    {
+        FInputModeGameOnly InputMode;
+        GJController->SetInputMode(InputMode);
+        GJController->bShowMouseCursor = false;
+
+        UE_LOG(LogTemp, Warning, TEXT("Game Input Mode Restored!"));
+    }
+}
+
 
 void AGJCharacter::BeginPlay()
 {
     Super::BeginPlay();
 
-    GJController = Cast<AGJPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+    UGJGameInstance* GameInstance = Cast<UGJGameInstance>(GetGameInstance());
+    if (GameInstance)
+    {
+        GameInstance->LoadCharacterState(this);
+    }
+
+    // 컨트롤러 재 확인
+    if (!GJController)
+    {
+        GJController = Cast<AGJPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+    }
+
+    bIsDead = false;
+
+    EnableGameInput();
 
     if (MiniGunClass)
     {
@@ -241,7 +282,7 @@ void AGJCharacter::FireWeapon()
 
 void AGJCharacter::ReloadWeapon()
 {
-    // 🔍 무기 변수 또는 필수 포인터가 `nullptr`인지 확인
+    // 무기 변수 또는 필수 포인터가 `nullptr`인지 확인
     if (!CurrentGun)
     {
         UE_LOG(LogTemp, Error, TEXT("ReloadWeapon Failed: CurrentWeapon is nullptr!"));
@@ -420,6 +461,14 @@ void AGJCharacter::UpdateWeaponState(AGJBaseGun* NewWeapon)
 
 float AGJCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamgeCauser)
 {
+
+    // 무적 상태이면 데미지를 받지 않음
+    if (bIsInvincible)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Character is invincible! No damage taken."));
+        return 0.0f;
+    }
+
     float ActualDamage = Super::TakeDamage(DamageAmount,
         DamageEvent,
         EventInstigator,
@@ -876,11 +925,11 @@ void AGJCharacter::OnDeath()
     }
 
     // 입력 비활성화
-    if (GetController())
-    {
-        GetController()->DisableInput(nullptr);
-        GetController()->UnPossess();
-    }
+    //if (GetController())
+    //{
+    //    GetController()->DisableInput(nullptr);
+    //    GetController()->UnPossess();
+    //}
 
     UE_LOG(LogTemp, Error, TEXT("Player has died! Game Over"));
 

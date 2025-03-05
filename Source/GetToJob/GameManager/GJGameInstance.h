@@ -2,6 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+#include "Weapon/GJBaseGun.h"
+#include "Weapon/GJMiniGun.h"
 #include "GJGameInstance.generated.h"
 
 UCLASS()
@@ -11,6 +13,18 @@ class GETTOJOB_API UGJGameInstance : public UGameInstance
 
 public:
 	UGJGameInstance();
+
+	// 추가: 캐릭터 상태 저장을 위한 변수들
+	float SavedHealth;
+	float SavedMaxHealth;
+	float SavedUltimateGauge;
+	TArray<TSubclassOf<AGJBaseGun>> SavedWeapons;  // 소지 무기 리스트
+	int32 SavedCurrentWeaponIndex; // 현재 장착 무기
+	TMap<TSubclassOf<AGJBaseGun>, int32> SavedAmmoMap; // 무기별 탄약량 저장
+
+	// 상태 저장 메서드
+	void SaveCharacterState(class AGJCharacter* Character);
+	void LoadCharacterState(class AGJCharacter* Character);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "GameData")
 	int32 EnemyTotalKillCount; //전체 적 킬 수

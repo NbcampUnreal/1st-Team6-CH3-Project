@@ -1,4 +1,8 @@
 #include "GameManager/GJGameInstance.h"
+#include "Character/GJCharacter.h"
+#include "Weapon/GJBaseGun.h"
+#include "Weapon/GJMiniGun.h"
+
 
 UGJGameInstance::UGJGameInstance()
 {
@@ -9,6 +13,71 @@ UGJGameInstance::UGJGameInstance()
 	ThreeWaveScore = 0;
 	BossWaveScore = 0;
 	CurrentWaveIndex = 0;
+    SavedHealth = 100.0f;
+    SavedMaxHealth = 100.0f;
+    SavedUltimateGauge = 0.0f;
+    SavedCurrentWeaponIndex = -1;
+}
+
+void UGJGameInstance::SaveCharacterState(AGJCharacter* Character)
+{
+    if (!Character) return;
+
+    SavedHealth = Character->GetHealth();
+    SavedMaxHealth = Character->GetMaxHealth();
+
+    if (Character->MiniGun)
+    {
+        SavedUltimateGauge = Character->MiniGun->GetCurrentGauge();
+    }
+
+    // 인벤토리에서 무기 저장
+    SavedWeapons.Empty();
+    SavedAmmoMap.Empty();
+
+    for (AGJBaseGun* Weapon : Character->InventoryComponent->WeaponSlots)
+    {
+        if (Weapon)
+        {
+            TSubclassOf<AGJBaseGun> WeaponClass = Weapon->GetClass();
+            SavedWeapons.Add(WeaponClass);
+        }
+    }
+
+    // 현재 장착된 무기 저장
+    SavedCurrentWeaponIndex = Character->InventoryComponent->WeaponSlots.Find(Character->CurrentGun);
+}
+
+
+void UGJGameInstance::LoadCharacterState(AGJCharacter* Character)
+{
+    if (!Character) return;
+
+    Character->SetHealth(SavedHealth);
+    Character->SetMaxHealth(SavedMaxHealth);
+
+    if (Character->MiniGun)
+    {
+        Character->MiniGun->IncreaseGauge(SavedUltimateGauge);
+    }
+
+    // 인벤토리 복원
+    Character->InventoryComponent->WeaponSlots.Empty();
+
+    for (TSubclassOf<AGJBaseGun> WeaponClass : SavedWeapons)
+    {
+        AGJBaseGun* NewWeapon = Character->GetWorld()->SpawnActor<AGJBaseGun>(WeaponClass);
+        if (NewWeapon)
+        {
+            Character->InventoryComponent->AddWeapon(NewWeapon);
+        }
+    }
+
+    // 무기 장착 복원
+    if (Character->InventoryComponent->WeaponSlots.IsValidIndex(SavedCurrentWeaponIndex))
+    {
+        Character->EquipWeapon(Character->InventoryComponent->WeaponSlots[SavedCurrentWeaponIndex]);
+    }
 }
 
 void UGJGameInstance::AddToScore(int amount)
