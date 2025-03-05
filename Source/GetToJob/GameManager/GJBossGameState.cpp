@@ -178,6 +178,24 @@ void AGJBossGameState::SetBossDefeated()
 			}
 		}
 
+
+		if (GameInstance)
+		{
+			if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+			{
+				if (AGJCharacter* Character = Cast<AGJCharacter>(PlayerController->GetPawn()))
+				{
+					GameInstance->SaveCharacterState(Character);
+
+					// 유예시간 동안 무적 설정
+					Character->bIsInvincible = true;
+					// 플레이어 입력 차단 (유예시간 동안 움직이지 못하게)
+					Character->DisableInput(PlayerController);
+					UE_LOG(LogTemp, Warning, TEXT("Player input disabled for wave transition."));
+				}
+			}
+		}
+
 		AGJBossGameMode* GameMode = Cast<AGJBossGameMode>(GetWorld()->GetAuthGameMode());
 		if (GameMode)
 		{

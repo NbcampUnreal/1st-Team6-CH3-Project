@@ -2,7 +2,6 @@
 #include "GameManager/GJGameInstance.h"
 #include "GameManager/GJBossGameState.h"
 #include "Character/GJPlayerController.h"
-#include "Character/GJCharacter.h"
 #include "LevelSequenceActor.h"
 #include "LevelSequencePlayer.h"
 #include "Kismet/GameplayStatics.h"
@@ -18,44 +17,32 @@ void AGJBossGameMode::BeginPlay()
 
 void AGJBossGameMode::OnBossDefeated()
 {
-	UGJGameInstance* GameInstance = Cast<UGJGameInstance>(GetGameInstance());
-	if (!GameInstance) return;
-
-	int32 FinalScore = GameInstance->TotalScore;
-
-	if (FinalScore > ClearScoreCheck)
+	if (!ResultCheck)
 	{
-		if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+		ResultCheck = true;
+		UGJGameInstance* GameInstance = Cast<UGJGameInstance>(GetGameInstance());
+		if (!GameInstance) return;
+
+		int32 FinalScore = GameInstance->TotalScore;
+
+		if (FinalScore > ClearScoreCheck)
 		{
-			if (AGJPlayerController* GJPlayerController = Cast<AGJPlayerController>(PlayerController))
+			if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
 			{
-				AGJCharacter* Character = Cast<AGJCharacter>(GJPlayerController->GetPawn());
-				if (!Character) return;
-				// 강제적으로 무기 발사 중지 (추가적인 안전 조치)
-				Character->StopFireWeapon();
-				// 유예시간 동안 무적 설정
-				Character->bIsInvincible = true;
-				// 플레이어 입력 차단 (유예시간 동안 움직이지 못하게)
-				Character->DisableInput(PlayerController);
-				GJPlayerController->GameClear();
+				if (AGJPlayerController* GJPlayerController = Cast<AGJPlayerController>(PlayerController))
+				{
+					GJPlayerController->GameClear();
+				}
 			}
 		}
-	}
-	else
-	{
-		if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+		else
 		{
-			if (AGJPlayerController* GJPlayerController = Cast<AGJPlayerController>(PlayerController))
+			if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
 			{
-				AGJCharacter* Character = Cast<AGJCharacter>(GJPlayerController->GetPawn());
-				if (!Character) return;
-				// 강제적으로 무기 발사 중지 (추가적인 안전 조치)
-				Character->StopFireWeapon();
-				// 유예시간 동안 무적 설정
-				Character->bIsInvincible = true;
-				// 플레이어 입력 차단 (유예시간 동안 움직이지 못하게)
-				Character->DisableInput(PlayerController);
-				GJPlayerController->GameClearFail();
+				if (AGJPlayerController* GJPlayerController = Cast<AGJPlayerController>(PlayerController))
+				{
+					GJPlayerController->GameClearFail();
+				}
 			}
 		}
 	}

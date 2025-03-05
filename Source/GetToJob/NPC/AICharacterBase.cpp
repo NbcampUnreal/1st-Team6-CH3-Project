@@ -4,11 +4,12 @@
 #include "GameManager/GJGameState.h"
 #include "GameManager/GJBossGameState.h"
 #include "Components/BoxComponent.h"
+#include "Character/GJPlayerController.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/Actor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Character/GJCharacter.h"
-#include "GameManager/GJBossGameState.h"
+#include "UI/GJHUD.h"
 
 AAICharacterBase::AAICharacterBase():
 	Health{ 100.f },
@@ -64,6 +65,15 @@ float AAICharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	{
 		Health = FMath::Clamp(Health - DamageAmount, 0.0f, MaxHealth);
 		Boss->PlayHurtSound();
+
+		if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+		{
+			if (AGJHUD* HUD = Cast<AGJHUD>(PlayerController->GetHUD()))
+			{
+				HUD->UpdateBossHUD(GetHealth(), GetMaxHealth());
+			}
+		}
+
 		if (Health <= 0)
 		{
 			Boss->SetIsBossDead(true);
