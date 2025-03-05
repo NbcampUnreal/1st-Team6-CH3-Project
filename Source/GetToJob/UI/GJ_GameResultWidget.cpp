@@ -1,6 +1,7 @@
 ﻿#include "UI/GJ_GameResultWidget.h"
 #include "GameManager/GJGameInstance.h"
 #include "Character/GJPlayerController.h"
+#include "GameManager/GJBossGameMode.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Components/Widget.h"
@@ -54,7 +55,7 @@ void UGJ_GameResultWidget::NativeConstruct()
 
 		if (ClearButton)
 		{
-			ClearButton->OnClicked.AddDynamic(this, &UGJ_GameResultWidget::OnGameQuitButtonClicked);
+			ClearButton->OnClicked.AddDynamic(this, &UGJ_GameResultWidget::OnGameClearButtonClicked);
 		}
 	}
 }
@@ -74,27 +75,32 @@ void UGJ_GameResultWidget::WaveGameOver()
 
 	if (OneWaveScore)
 	{
-		OneWaveScore->SetText(FText::FromString(FString::Printf(TEXT("1차 면접 : %d"), GJGameInstance->GetOneWaveScore())));
+		OneWaveScore->SetText(FText::FromString(FString::Printf(TEXT("서류 면접 : %d"), GJGameInstance->GetOneWaveScore())));
 	}
 
 	if (TwoWaveScore)
 	{
-		TwoWaveScore->SetText(FText::FromString(FString::Printf(TEXT("2차 면접 : %d"), GJGameInstance->GetTwoWaveScore())));
+		TwoWaveScore->SetText(FText::FromString(FString::Printf(TEXT("인성 면접 : %d"), GJGameInstance->GetTwoWaveScore())));
 	}
 
 	if (ThreeWaveScore)
 	{
-		ThreeWaveScore->SetText(FText::FromString(FString::Printf(TEXT("3차 면접 : %d"), GJGameInstance->GetThreeWaveScore())));
+		ThreeWaveScore->SetText(FText::FromString(FString::Printf(TEXT("직무 테스트 : %d"), GJGameInstance->GetThreeWaveScore())));
 	}
 
 	if (BossScore)
 	{
-		BossScore->SetText(FText::FromString(FString::Printf(TEXT("최종 면접 : %d"), GJGameInstance->GetBossScore())));
+		BossScore->SetText(FText::FromString(FString::Printf(TEXT("임원 면접 : %d"), GJGameInstance->GetBossScore())));
 	}
 
 	if (TotalScore)
 	{
 		TotalScore->SetText(FText::FromString(FString::Printf(TEXT("최종 점수 : 0"))));
+	}
+
+	if (Seal)
+	{
+		Seal->SetBrushFromTexture(FailSeal);
 	}
 
 	isClear = false;
@@ -137,6 +143,11 @@ void UGJ_GameResultWidget::ClearFailUI()
 	if (TotalScore)
 	{
 		TotalScore->SetText(FText::FromString(FString::Printf(TEXT("최종 점수 : 0"))));
+	}
+
+	if (Seal)
+	{
+		Seal->SetBrushFromTexture(FailSeal);
 	}
 
 	isClear = false;
@@ -183,6 +194,11 @@ void UGJ_GameResultWidget::GameClearUI()
 		TotalScore->SetText(FText::FromString(FString::Printf(TEXT("최종 점수 : 0"))));
 	}
 
+	if (Seal)
+	{
+		Seal->SetBrushFromTexture(ClearSeal);
+	}
+
 	PlayScoreAnim();
 
 	isClear = true;
@@ -193,18 +209,23 @@ void UGJ_GameResultWidget::OnRestartButtonClicked()
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		//FName CurrentLevel = *World->GetMapName();
-		//UGameplayStatics::OpenLevel(World, CurrentLevel);
-
 		if (GJGameInstance->CurrentWaveIndex < 3)
 		{
 			UGameplayStatics::OpenLevel(World, "MainLevel");
 		}
 		else
 		{
-			UGameplayStatics::OpenLevel(World, "BossLevel");
+			UGameplayStatics::OpenLevel(World, "BossStage");
 		}
+	}
+}
 
+void UGJ_GameResultWidget::OnGameClearButtonClicked()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		UGameplayStatics::OpenLevel(World, "EndingStage");
 	}
 }
 

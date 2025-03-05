@@ -4,6 +4,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "UI/GJHUD.h"
 #include "Character/GJPlayerController.h"
+#include <EnhancedInputSubsystems.h>
 
 AGJGameState::AGJGameState()
 {
@@ -82,19 +83,22 @@ void AGJGameState::StartWave()
 		}
 	}
 
-	//Level Timer
-	GetWorldTimerManager().SetTimer(
-		LevelTimerHandle,
-		this,
-		&AGJGameState::NextWave,
-		LevelLimitTime,
-		false
-	);
+	if (CurrentWaveIndex < 3)
+	{
+		//Level Timer
+		GetWorldTimerManager().SetTimer(
+			LevelTimerHandle,
+			this,
+			&AGJGameState::NextWave,
+			LevelLimitTime,
+			false
+		);
+	}
 }
 
 void AGJGameState::NextWave()
 {
-	
+
 	//NextWave 
 	if (UGameInstance* GameInstance = GetGameInstance())
 	{
@@ -109,6 +113,18 @@ void AGJGameState::NextWave()
 			{
 				if (AGJCharacter* Character = Cast<AGJCharacter>(PlayerController->GetPawn()))
 				{
+					// `GetLocalPlayer()`가 nullptr이 아닐 때만 실행
+					if (ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer())
+					{
+						if (UEnhancedInputLocalPlayerSubsystem* InputSubsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
+						{
+							InputSubsystem->ClearAllMappings();
+						}
+					}
+
+					// 강제적으로 무기 발사 중지 (추가적인 안전 조치)
+					Character->StopFireWeapon();
+
 					GJGameInstance->SaveCharacterState(Character);
 
 					// 유예시간 동안 무적 설정
@@ -154,7 +170,7 @@ void AGJGameState::NextWave()
 			false
 		);
 	}
-	
+
 
 	UE_LOG(LogTemp, Warning, TEXT("NextLevel %f, %d"), LevelLimitTime, CurrentWaveIndex);
 }
