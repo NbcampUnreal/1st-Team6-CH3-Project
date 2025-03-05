@@ -7,6 +7,7 @@
 class UUserWidget;
 class UGJ_MainWidget;
 class UGJ_GameResultWidget;
+class UGJ_BossHUDUserWidget;
 
 UENUM(BlueprintType)
 enum class GJHUDState : uint8
@@ -32,7 +33,7 @@ public:
 	void HideHUD(GJHUDState HUDType);
 	void UpdateMainHUD();
 	void UpdateMainBossHUD();
-	void UpdateBossHUD();
+	void UpdateBossHUD(float CurrentHp, float Maxhp);
 	void ShowHitEffect();
 	void UpdateCrosshairSize(float NewSpread);
 	void ShowFireAnim();
@@ -49,7 +50,7 @@ public:
 	TSubclassOf<UGJ_GameResultWidget> ResultHUDClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<UUserWidget> BossHUDClass;
+	TSubclassOf<UGJ_BossHUDUserWidget> BossHUDClass;
 	
 
 	UPROPERTY()
@@ -62,7 +63,7 @@ public:
 	UGJ_GameResultWidget* ResultHUDWidget = nullptr;
 
 	UPROPERTY()
-	UUserWidget* BossHUDWidget = nullptr;
+	UGJ_BossHUDUserWidget* BossHUDWidget = nullptr;
 
 	
 

@@ -2,6 +2,7 @@
 #include "NPC/GJNPC.h"
 #include "NPC/GJBossNPC.h"
 #include "GameManager/GJGameState.h"
+#include "GameManager/GJBossGameState.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/Actor.h"
@@ -39,10 +40,16 @@ float AAICharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 		Health = FMath::Clamp(Health - DamageAmount, 0.0f, MaxHealth);
 		if (Health <= 0)
 		{
-
-			AGJGameState* const GameState = Cast<AGJGameState>(UGameplayStatics::GetGameState(GetWorld()));
-			GameState->AddScore(100);
-			GameState->AddEnemyKillCount(1);
+			if(AGJGameState* const GameState = Cast<AGJGameState>(UGameplayStatics::GetGameState(GetWorld())))
+			{
+				GameState->AddScore(100);
+				GameState->AddEnemyKillCount(1);
+			}
+			if (AGJBossGameState* const GameState = Cast<AGJBossGameState>(UGameplayStatics::GetGameState(GetWorld())))
+			{
+				GameState->AddScore(100);
+				GameState->AddEnemyKillCount(1);
+			}
 			NPC->SpawnDropItem();
 			NPC->SetNPCDead(true);
 			NPC->GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));

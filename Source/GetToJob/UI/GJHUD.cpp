@@ -2,6 +2,7 @@
 #include "GameManager/GJGameState.h"
 #include "Blueprint/UserWidget.h"
 #include "UI/GJ_MainWidget.h"
+#include "UI/GJ_BossHUDUserWidget.h"
 #include "UI/GJ_GameResultWidget.h"
 #include "Blueprint/WidgetBlueprintGeneratedClass.h"
 
@@ -45,7 +46,7 @@ void AGJHUD::DisplayHUD(GJHUDState HUDType)
 		}
 		break;
 	case GJHUDState::BossHUD:
-		BossHUDWidget = CreateWidget<UUserWidget>(GetWorld(), BossHUDClass);
+		BossHUDWidget = CreateWidget<UGJ_BossHUDUserWidget>(GetWorld(), BossHUDClass);
 		if (BossHUDWidget)
 		{
 			BossHUDWidget->AddToViewport();
@@ -118,11 +119,11 @@ void AGJHUD::UpdateMainBossHUD()
 	}
 }
 
-void AGJHUD::UpdateBossHUD()
+void AGJHUD::UpdateBossHUD(float CurrentHp, float Maxhp)
 {
 	if (BossHUDWidget)
 	{
-		
+		BossHUDWidget->UpdateHealthBar(CurrentHp, Maxhp);
 	}
 }
 
