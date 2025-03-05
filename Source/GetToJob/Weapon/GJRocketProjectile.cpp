@@ -245,7 +245,7 @@ void AGJRocketProjectile::AutoExplode()
 											UE_LOG(LogTemp, Warning, TEXT("Burn Damage Applied: %s took 50 damage"), *HitCharacter->GetName());
 										}
 									},
-									BurnDelay,
+									i,
 									false
 								);
 							}
