@@ -282,7 +282,7 @@ void AGJCharacter::FireWeapon()
 
 void AGJCharacter::ReloadWeapon()
 {
-    // 🔍 무기 변수 또는 필수 포인터가 `nullptr`인지 확인
+    // 무기 변수 또는 필수 포인터가 `nullptr`인지 확인
     if (!CurrentGun)
     {
         UE_LOG(LogTemp, Error, TEXT("ReloadWeapon Failed: CurrentWeapon is nullptr!"));
