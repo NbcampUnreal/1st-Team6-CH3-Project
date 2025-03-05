@@ -127,6 +127,14 @@ void AGJHUD::UpdateBossHUD(float CurrentHp, float Maxhp)
 	}
 }
 
+void AGJHUD::AngryBossHUD()
+{
+	if (BossHUDWidget)
+	{
+		BossHUDWidget->AngryUI();
+	}
+}
+
 void AGJHUD::ShowHitEffect()
 {
 	if (MainHUDWidget)

@@ -47,5 +47,6 @@ public:
 
 	void SetBossDefeated();
 
+	bool ResultCheck = false;
 
 };

@@ -17,28 +17,32 @@ void AGJBossGameMode::BeginPlay()
 
 void AGJBossGameMode::OnBossDefeated()
 {
-	UGJGameInstance* GameInstance = Cast<UGJGameInstance>(GetGameInstance());
-	if (!GameInstance) return;
-
-	int32 FinalScore = GameInstance->TotalScore;
-
-	if (FinalScore > ClearScoreCheck)
+	if (!ResultCheck)
 	{
-		if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+		ResultCheck = true;
+		UGJGameInstance* GameInstance = Cast<UGJGameInstance>(GetGameInstance());
+		if (!GameInstance) return;
+
+		int32 FinalScore = GameInstance->TotalScore;
+
+		if (FinalScore > ClearScoreCheck)
 		{
-			if (AGJPlayerController* GJPlayerController = Cast<AGJPlayerController>(PlayerController))
+			if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
 			{
-				GJPlayerController->GameClear();
+				if (AGJPlayerController* GJPlayerController = Cast<AGJPlayerController>(PlayerController))
+				{
+					GJPlayerController->GameClear();
+				}
 			}
 		}
-	}
-	else
-	{
-		if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+		else
 		{
-			if (AGJPlayerController* GJPlayerController = Cast<AGJPlayerController>(PlayerController))
+			if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
 			{
-				GJPlayerController->GameClearFail();
+				if (AGJPlayerController* GJPlayerController = Cast<AGJPlayerController>(PlayerController))
+				{
+					GJPlayerController->GameClearFail();
+				}
 			}
 		}
 	}

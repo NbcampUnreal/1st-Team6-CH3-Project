@@ -5,6 +5,7 @@
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "GJBossAIController.h"
+#include "UI/GJHUD.h"
 
 AGJBossNPC::AGJBossNPC() :
 	RightFootCollisionBox{ CreateDefaultSubobject<UBoxComponent>(TEXT("RightFootCollisionBox")) },
@@ -300,6 +301,15 @@ int AGJBossNPC::RageMotion_Implementation()
 	if (RageMontage)
 	{
 		PlayAnimMontage(RageMontage);
+
+		if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+		{
+			if (AGJHUD* HUD = Cast<AGJHUD>(PlayerController->GetHUD()))
+			{
+				HUD->AngryBossHUD();
+			}
+		}
+
 		if (RageSound)
 		{
 			UGameplayStatics::PlaySoundAtLocation(
@@ -348,6 +358,14 @@ void AGJBossNPC::BeginPlay()
 
 	SkeletalMeshCom = this->GetMesh();
 	AnimInstance = SkeletalMeshCom->GetAnimInstance();
+
+	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+	{
+		if (AGJHUD* HUD = Cast<AGJHUD>(PlayerController->GetHUD()))
+		{
+			HUD->UpdateBossHUD(GetHealth(), GetMaxHealth());
+		}
+	}
 }
 
 void AGJBossNPC::OnAttackOverlapBegin(UPrimitiveComponent* const OverlappedComponent, AActor* const OtherActor, UPrimitiveComponent* const OtherComponent, int const OtherBodyIndex, bool const FromSweep, FHitResult const& SweepResult)

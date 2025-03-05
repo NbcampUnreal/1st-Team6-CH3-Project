@@ -34,6 +34,7 @@ public:
 	void UpdateMainHUD();
 	void UpdateMainBossHUD();
 	void UpdateBossHUD(float CurrentHp, float Maxhp);
+	void AngryBossHUD();
 	void ShowHitEffect();
 	void UpdateCrosshairSize(float NewSpread);
 	void ShowFireAnim();

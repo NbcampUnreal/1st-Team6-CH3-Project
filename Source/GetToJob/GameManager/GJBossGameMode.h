@@ -22,10 +22,14 @@ private:
 
 
 public:
-	int32 ClearScoreCheck = 20000;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ClearScore")
+	int32 ClearScoreCheck;
+
 	void OnBossDefeated();
 
 	void StartCinematic();
 
 	void OnCinematicFinished();
+
+	bool ResultCheck = false;
 };
