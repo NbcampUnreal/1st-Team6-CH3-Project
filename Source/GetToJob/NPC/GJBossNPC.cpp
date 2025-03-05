@@ -71,7 +71,7 @@ UAnimMontage* AGJBossNPC::GetRageMontage() const
 
 void AGJBossNPC::FireProjectile()
 {
-	if (ProjectileClass)
+	if (ProjectileClass && GetWorld())
 	{
 		ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 		if (PlayerCharacter)
@@ -84,6 +84,16 @@ void AGJBossNPC::FireProjectile()
 			SpawnParams.Owner = this;
 			SpawnParams.Instigator = GetInstigatorController()->GetPawn();
 
+			AController* InstigatorController = GetInstigatorController();
+			if (InstigatorController && InstigatorController->GetPawn())
+			{
+				SpawnParams.Instigator = InstigatorController->GetPawn();
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("FireProjectile: InstigatorController 또는 Pawn이 유효하지 않습니다."));
+				SpawnParams.Instigator = nullptr; // Instigator가 유효하지 않으면 nullptr로 설정
+			}
 
 			UE_LOG(LogTemp, Warning, TEXT("FireProjectile: Instigator=%s"), *GetNameSafe(SpawnParams.Instigator));
 
@@ -338,7 +348,6 @@ void AGJBossNPC::BeginPlay()
 
 	SkeletalMeshCom = this->GetMesh();
 	AnimInstance = SkeletalMeshCom->GetAnimInstance();
-	Health = MaxHealth;
 }
 
 void AGJBossNPC::OnAttackOverlapBegin(UPrimitiveComponent* const OverlappedComponent, AActor* const OtherActor, UPrimitiveComponent* const OtherComponent, int const OtherBodyIndex, bool const FromSweep, FHitResult const& SweepResult)
