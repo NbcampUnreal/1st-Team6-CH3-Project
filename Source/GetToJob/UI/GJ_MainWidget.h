@@ -22,6 +22,7 @@ protected:
 	
 public:
 	void UpdateHUD();
+	void UpdateBossHUD();
 	void ShowHitAnim();
 	UFUNCTION(BlueprintCallable, Category = "Crosshair Test")
 	void SetCrosshairSize(float NewSpread);

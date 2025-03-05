@@ -49,6 +49,12 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	UImage* Seal;
 
+	UPROPERTY(EditAnywhere, Category = "Images")
+	UTexture2D* ClearSeal;
+
+	UPROPERTY(EditAnywhere, Category = "Images")
+	UTexture2D* FailSeal;
+
 	UPROPERTY(meta = (Bindwidget))
 	UUserWidget* ReStart;
 
@@ -66,6 +72,9 @@ private:
 	UUserWidget* GameClearButton;
 
 	UButton* ClearButton;
+
+	UFUNCTION()
+	void OnGameClearButtonClicked();
 
 	UFUNCTION()
 	void OnGameQuitButtonClicked();
