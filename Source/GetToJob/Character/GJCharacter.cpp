@@ -115,8 +115,9 @@ void AGJCharacter::ModifyHealth(float Amount)
     // 이미 죽었으면 체력 조정 X
     if (bIsDead) return;
 
-    // 체력 변경
-    SetHealth(GetHealth() + Amount);
+    // 체력 변경 (최대 체력을 초과하지 않도록 제한)
+    float NewHealth = FMath::Clamp(GetHealth() + Amount, 0.0f, GetMaxHealth());
+    SetHealth(NewHealth);
 
     // 체력이 0 이하이면 사망 처리 (단, 중복 호출 방지)
     if (GetHealth() <= 0 && !bIsDead)
