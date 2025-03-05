@@ -21,6 +21,7 @@ public:
 	TArray<TSubclassOf<AGJBaseGun>> SavedWeapons;  // 소지 무기 리스트
 	int32 SavedCurrentWeaponIndex; // 현재 장착 무기
 	TMap<TSubclassOf<AGJBaseGun>, int32> SavedAmmoMap; // 무기별 탄약량 저장
+	TMap<TSubclassOf<AGJBaseGun>, TArray<TSubclassOf<AGJBaseGunAttachment>>> SavedAttachmentMap; // 부착물 저장
 
 	// 상태 저장 메서드
 	void SaveCharacterState(class AGJCharacter* Character);
