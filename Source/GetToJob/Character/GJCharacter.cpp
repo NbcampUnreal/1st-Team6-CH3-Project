@@ -67,7 +67,7 @@ AGJCharacter::AGJCharacter()
     
     // 현재 소지 총 초기화
     CurrentGun = nullptr;
-    SetHealth(75.f);
+    SetHealth(100.f);
     SetMaxHealth(100.f);
 
     // 인벤토리 연결

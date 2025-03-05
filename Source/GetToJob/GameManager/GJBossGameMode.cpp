@@ -2,6 +2,7 @@
 #include "GameManager/GJGameInstance.h"
 #include "GameManager/GJBossGameState.h"
 #include "Character/GJPlayerController.h"
+#include "Character/GJCharacter.h"
 #include "LevelSequenceActor.h"
 #include "LevelSequencePlayer.h"
 #include "Kismet/GameplayStatics.h"
@@ -28,6 +29,14 @@ void AGJBossGameMode::OnBossDefeated()
 		{
 			if (AGJPlayerController* GJPlayerController = Cast<AGJPlayerController>(PlayerController))
 			{
+				AGJCharacter* Character = Cast<AGJCharacter>(GJPlayerController->GetPawn());
+				if (!Character) return;
+				// 강제적으로 무기 발사 중지 (추가적인 안전 조치)
+				Character->StopFireWeapon();
+				// 유예시간 동안 무적 설정
+				Character->bIsInvincible = true;
+				// 플레이어 입력 차단 (유예시간 동안 움직이지 못하게)
+				Character->DisableInput(PlayerController);
 				GJPlayerController->GameClear();
 			}
 		}
@@ -38,6 +47,14 @@ void AGJBossGameMode::OnBossDefeated()
 		{
 			if (AGJPlayerController* GJPlayerController = Cast<AGJPlayerController>(PlayerController))
 			{
+				AGJCharacter* Character = Cast<AGJCharacter>(GJPlayerController->GetPawn());
+				if (!Character) return;
+				// 강제적으로 무기 발사 중지 (추가적인 안전 조치)
+				Character->StopFireWeapon();
+				// 유예시간 동안 무적 설정
+				Character->bIsInvincible = true;
+				// 플레이어 입력 차단 (유예시간 동안 움직이지 못하게)
+				Character->DisableInput(PlayerController);
 				GJPlayerController->GameClearFail();
 			}
 		}
