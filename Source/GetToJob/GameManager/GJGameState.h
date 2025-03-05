@@ -29,7 +29,7 @@ public:
 	int32 CurrentWaveIndex;
 
 	//�ִ� ������ ����
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Level")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Level")
 	int32 MaxLevels;
 
 	//���� ����
@@ -68,5 +68,7 @@ public:
 
 	//���� ������ �Ѿ�� �Լ�
 
-	
+	void LoadNextLevel();
+
+	FTimerHandle WaveTransitionTimerHandle; // 유예시간 타이머 핸들 추가
 };

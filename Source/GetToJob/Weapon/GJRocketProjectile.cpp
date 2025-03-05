@@ -107,6 +107,16 @@ void AGJRocketProjectile::OnImpact(UPrimitiveComponent* HitComp, AActor* OtherAc
 
 void AGJRocketProjectile::AutoExplode()
 {
+	// 사운드 재생
+	float AdjustVolume = 1.0f;
+	UGameplayStatics::PlaySoundAtLocation(
+		GetWorld(),
+		FireSound,
+		GetActorLocation(),
+		AdjustVolume
+	);
+
+
 	// 속성별 폭발 파티클 생성
 	SpawnElementalParticle();
 	//if (ExplosionEffect)
@@ -257,7 +267,7 @@ void AGJRocketProjectile::AutoExplode()
 				UE_LOG(LogTemp, Warning, TEXT("NPC is Dead! Increasing MiniGun Gauge!"));
 				if (GJCharacter && GJCharacter->MiniGun)
 				{
-					GJCharacter->MiniGun->IncreaseGauge(20.0f);
+					GJCharacter->MiniGun->IncreaseGauge(7.0f);
 				}
 				else
 				{

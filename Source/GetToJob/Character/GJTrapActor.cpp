@@ -30,49 +30,44 @@ void AGJTrapActor::OnBeginOverlap(
     AGJCharacter* Character = Cast<AGJCharacter>(OtherActor);
     if (Character && Character->DebuffComponent)
     {
-        // 랜덤 효과 선택
-        int32 RandomIndex = FMath::RandRange(0, TrapEffects.Num() - 1);
-        ETrapEffectType SelectedEffect = TrapEffects[RandomIndex];
-
+        float RandomChance = FMath::RandRange(0.0f, 100.0f);
         FDebuffEffect AppliedEffect;
         AppliedEffect.Duration = 5.0f;
         AppliedEffect.bCanStack = false;
 
-        switch (SelectedEffect)
+        if (RandomChance < 10.0f) // 슬로우: 10% 확률
         {
-        case ETrapEffectType::Slow:
             AppliedEffect.DebuffType = EDebuffType::Slow;
-            AppliedEffect.Intensity = 0.5f;
+            AppliedEffect.Intensity = 1.5f;
+            AppliedEffect.Duration = 3.0f; // 지속 시간 3초
+            Character->DebuffComponent->ApplyDebuff(AppliedEffect);
             UE_LOG(LogTemp, Warning, TEXT("Trap Activated! Slow Effect Applied"));
-            break;
-
-        case ETrapEffectType::Bleed:
+        }
+        else if (RandomChance < 20.0f) // 출혈: 10% 확률
+        {
             AppliedEffect.DebuffType = EDebuffType::Bleed;
-            AppliedEffect.Intensity = 0.3f;
+            AppliedEffect.Intensity = 2.0f; // 틱당 2 데미지
+            AppliedEffect.Duration = 6.0f; // 지속 시간 5초
+            Character->DebuffComponent->ApplyDebuff(AppliedEffect);
             UE_LOG(LogTemp, Warning, TEXT("Trap Activated! Bleed Effect Applied"));
-            break;
-
-        case ETrapEffectType::Heal:
-            Character->ModifyHealth(20.0f); // 체력 회복
+        }
+        else if (RandomChance < 60.0f) // 회복: 40% 확률
+        {
+            Character->ModifyHealth(25.0f); // 체력 회복량 25
             UE_LOG(LogTemp, Warning, TEXT("Trap Activated! Healing Applied"));
-            break;
-
-        case ETrapEffectType::SpeedBoost:
+        }
+        else // 스피드 부스트: 40% 확률
+        {
             AppliedEffect.DebuffType = EDebuffType::SpeedBoost;
             AppliedEffect.Intensity = 1.5f;
-            UE_LOG(LogTemp, Warning, TEXT("Trap Activated! Speed Boost Applied"));
-            break;
-        }
-
-        if (SelectedEffect != ETrapEffectType::Heal)
-        {
             Character->DebuffComponent->ApplyDebuff(AppliedEffect);
+            UE_LOG(LogTemp, Warning, TEXT("Trap Activated! Speed Boost Applied"));
         }
 
         // 트랩이 한 번만 발동되도록 설정
         bHasActivated = true;
 
-        // 일정 시간 후 트랩 제거 (즉시 제거도 가능)
+        // 일정 시간 후 트랩 제거
         Destroy();
     }
 }

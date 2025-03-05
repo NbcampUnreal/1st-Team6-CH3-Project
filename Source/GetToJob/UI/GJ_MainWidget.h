@@ -10,6 +10,7 @@ class UWidgetAnimation;
 class UProgressBar;
 class UBorder;
 class AGJBaseGun;
+class AGjMiniGun;
 
 UCLASS()
 class GETTOJOB_API UGJ_MainWidget : public UUserWidget
@@ -116,4 +117,15 @@ private:
 
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Crosshair")
 	float CrossThickness = 5.0f;
+
+public:
+	//Ult
+	UPROPERTY(meta = (BindWidget))
+	UProgressBar* Ult;
+
+	float CurrentUltimateGauge;
+
+
+	UFUNCTION()
+	void UpdateUltimateGauge();
 };

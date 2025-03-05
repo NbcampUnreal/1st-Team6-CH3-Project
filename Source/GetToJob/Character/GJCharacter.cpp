@@ -16,6 +16,7 @@
 #include "UI/GJHUD.h"
 #include "Components/CapsuleComponent.h"
 #include "Character/GJHealingItem.h"
+#include "GameManager/GJGameInstance.h"
 //#include "Components/WidgetComponent.h"
 //#include "Components/TextBlock.h"
 //#include "Components/ProgressBar.h"
@@ -81,6 +82,8 @@ AGJCharacter::AGJCharacter()
 
     // 생성시 플레이어 컨트롤러 연결
     GJController = Cast<AGJPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+
+    bIsInvincible = false; // 기본적으로 무적 상태 아님
 }
 
 // 궁극기 발동 (T키)
@@ -112,8 +115,9 @@ void AGJCharacter::ModifyHealth(float Amount)
     // 이미 죽었으면 체력 조정 X
     if (bIsDead) return;
 
-    // 체력 변경
-    SetHealth(GetHealth() + Amount);
+    // 체력 변경 (최대 체력을 초과하지 않도록 제한)
+    float NewHealth = FMath::Clamp(GetHealth() + Amount, 0.0f, GetMaxHealth());
+    SetHealth(NewHealth);
 
     // 체력이 0 이하이면 사망 처리 (단, 중복 호출 방지)
     if (GetHealth() <= 0 && !bIsDead)
@@ -144,6 +148,12 @@ void AGJCharacter::EnableGameInput()
 void AGJCharacter::BeginPlay()
 {
     Super::BeginPlay();
+
+    UGJGameInstance* GameInstance = Cast<UGJGameInstance>(GetGameInstance());
+    if (GameInstance)
+    {
+        GameInstance->LoadCharacterState(this);
+    }
 
     // 컨트롤러 재 확인
     if (!GJController)
@@ -272,7 +282,7 @@ void AGJCharacter::FireWeapon()
 
 void AGJCharacter::ReloadWeapon()
 {
-    // 🔍 무기 변수 또는 필수 포인터가 `nullptr`인지 확인
+    // 무기 변수 또는 필수 포인터가 `nullptr`인지 확인
     if (!CurrentGun)
     {
         UE_LOG(LogTemp, Error, TEXT("ReloadWeapon Failed: CurrentWeapon is nullptr!"));
@@ -451,6 +461,14 @@ void AGJCharacter::UpdateWeaponState(AGJBaseGun* NewWeapon)
 
 float AGJCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamgeCauser)
 {
+
+    // 무적 상태이면 데미지를 받지 않음
+    if (bIsInvincible)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Character is invincible! No damage taken."));
+        return 0.0f;
+    }
+
     float ActualDamage = Super::TakeDamage(DamageAmount,
         DamageEvent,
         EventInstigator,
