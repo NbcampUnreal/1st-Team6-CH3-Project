@@ -2,7 +2,9 @@
 #include "Character/GJCharacter.h"
 #include "Weapon/GJBaseGun.h"
 #include "Weapon/GJMiniGun.h"
-
+#include "Weapon/GJScope.h"
+#include "Weapon/GJBaseGunAttachment.h"
+#include "Weapon/GJRifle.h"
 
 UGJGameInstance::UGJGameInstance()
 {
@@ -34,6 +36,7 @@ void UGJGameInstance::SaveCharacterState(AGJCharacter* Character)
     // 인벤토리에서 무기 저장
     SavedWeapons.Empty();
     SavedAmmoMap.Empty();
+    SavedAttachmentMap.Empty();
 
     for (AGJBaseGun* Weapon : Character->InventoryComponent->WeaponSlots)
     {
@@ -41,6 +44,17 @@ void UGJGameInstance::SaveCharacterState(AGJCharacter* Character)
         {
             TSubclassOf<AGJBaseGun> WeaponClass = Weapon->GetClass();
             SavedWeapons.Add(WeaponClass);
+
+            // 부착물 저장
+            TArray<TSubclassOf<AGJBaseGunAttachment>> AttachmentClasses;
+            for (AGJBaseGunAttachment* Attachment : Weapon->Attachments)
+            {
+                if (Attachment)
+                {
+                    AttachmentClasses.Add(Attachment->GetClass());
+                }
+            }
+            SavedAttachmentMap.Add(WeaponClass, AttachmentClasses);
         }
     }
 
@@ -70,6 +84,32 @@ void UGJGameInstance::LoadCharacterState(AGJCharacter* Character)
         if (NewWeapon)
         {
             Character->InventoryComponent->AddWeapon(NewWeapon);
+            NewWeapon->SetOwner(Character);
+
+            // 부착물 복원
+            if (SavedAttachmentMap.Contains(WeaponClass))
+            {
+                TArray<TSubclassOf<AGJBaseGunAttachment>> AttachmentClasses = SavedAttachmentMap[WeaponClass];
+
+                for (TSubclassOf<AGJBaseGunAttachment> AttachmentClass : AttachmentClasses)
+                {
+                    AGJBaseGunAttachment* NewAttachment = Character->GetWorld()->SpawnActor<AGJBaseGunAttachment>(AttachmentClass);
+                    /*if (AGJScope* GJScope = Cast<AGJScope>(NewAttachment))
+                    {
+                        if (AGJRifle* GJRifle = Cast<AGJRifle>(NewWeapon))
+                        {
+                            NewWeapon->bHasScope = true;
+                        }
+                    }*/
+                    if (NewAttachment)
+                    {
+                        NewWeapon->EquipAttachment(NewAttachment);
+                    }
+                }
+            }
+
+            
+            
         }
     }
 

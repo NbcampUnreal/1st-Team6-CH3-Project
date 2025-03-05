@@ -358,7 +358,7 @@ void AGJBaseGun::EquipAttachment(AGJBaseGunAttachment* Attachment)
 	{
 		if (GetGunType() != EGunType::Revolver) // Rifle이 아니면 장착 불가
 		{
-			UE_LOG(LogTemp, Warning, TEXT("EquipAttachment - Scopes can only be equipped on Rifles!"));
+			UE_LOG(LogTemp, Warning, TEXT("EquipAttachment - Silencer can only be equipped on Revolver!"));
 			return;
 		}
 	}
@@ -367,7 +367,7 @@ void AGJBaseGun::EquipAttachment(AGJBaseGunAttachment* Attachment)
 	{
 		if (GetGunType() != EGunType::RocketLauncher) // Rifle이 아니면 장착 불가
 		{
-			UE_LOG(LogTemp, Warning, TEXT("EquipAttachment - Scopes can only be equipped on Rifles!"));
+			UE_LOG(LogTemp, Warning, TEXT("EquipAttachment - Scopes can only be equipped on RocketLauncher!"));
 			return;
 		}
 	}

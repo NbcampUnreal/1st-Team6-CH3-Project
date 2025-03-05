@@ -492,6 +492,11 @@ float AGJCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
     return ActualDamage;
 }
 
+void AGJCharacter::StopFireWeapon()
+{
+    bIsFiring = false;
+}
+
 void AGJCharacter::Tick(float Deltatime)
 {
     Super::Tick(Deltatime);

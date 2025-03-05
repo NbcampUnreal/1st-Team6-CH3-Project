@@ -7,6 +7,7 @@
 #include "GameFramework/Actor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Character/GJCharacter.h"
+#include "GameManager/GJBossGameState.h"
 
 AAICharacterBase::AAICharacterBase():
 	Health{ 100.f },
@@ -70,6 +71,12 @@ float AAICharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 
 			FTimerHandle DestroyTimerHandle;
 			GetWorldTimerManager().SetTimer(DestroyTimerHandle, this, &AAICharacterBase::DestroyActor, 5.f, false);
+
+			AGJBossGameState* GameState = GetWorld()->GetGameState<AGJBossGameState>();
+			if (GameState)
+			{
+				GameState->SetBossDefeated();
+			}
 		}
 	}
 	return ActualDamage;

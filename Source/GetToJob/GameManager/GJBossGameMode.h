@@ -21,4 +21,11 @@ private:
 	AGJHUD* HUD;
 
 
+public:
+	int32 ClearScoreCheck = 20000;
+	void OnBossDefeated();
+
+	void StartCinematic();
+
+	void OnCinematicFinished();
 };
