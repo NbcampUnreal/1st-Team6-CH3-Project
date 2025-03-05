@@ -22,7 +22,7 @@ public:
 	void SetAttack(float NewAttack);
 	void AttackStart() const;
 	void AttackEnd() const;
-	float MaxHealth{ 10000.f };
+	float MaxHealth{ 2500.f };
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Collision, meta = (AllowPrivateAccess = "ture"))
 	class UBoxComponent* RightFistCollisionBox;
 

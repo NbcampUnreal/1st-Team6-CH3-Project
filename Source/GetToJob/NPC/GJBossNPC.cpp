@@ -338,6 +338,7 @@ void AGJBossNPC::BeginPlay()
 
 	SkeletalMeshCom = this->GetMesh();
 	AnimInstance = SkeletalMeshCom->GetAnimInstance();
+	Health = MaxHealth;
 }
 
 void AGJBossNPC::OnAttackOverlapBegin(UPrimitiveComponent* const OverlappedComponent, AActor* const OtherActor, UPrimitiveComponent* const OtherComponent, int const OtherBodyIndex, bool const FromSweep, FHitResult const& SweepResult)
