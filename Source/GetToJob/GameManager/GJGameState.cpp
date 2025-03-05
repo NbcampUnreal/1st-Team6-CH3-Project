@@ -82,14 +82,17 @@ void AGJGameState::StartWave()
 		}
 	}
 
-	//Level Timer
-	GetWorldTimerManager().SetTimer(
-		LevelTimerHandle,
-		this,
-		&AGJGameState::NextWave,
-		LevelLimitTime,
-		false
-	);
+	if (CurrentWaveIndex < 3)
+	{
+		//Level Timer
+		GetWorldTimerManager().SetTimer(
+			LevelTimerHandle,
+			this,
+			&AGJGameState::NextWave,
+			LevelLimitTime,
+			false
+		);
+	}
 }
 
 void AGJGameState::NextWave()
