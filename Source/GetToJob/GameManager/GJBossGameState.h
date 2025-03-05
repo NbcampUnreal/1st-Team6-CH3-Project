@@ -6,6 +6,7 @@
 
 class USoundBase;
 class UAudioComponent;
+class AHUD;
 
 UCLASS()
 class GETTOJOB_API AGJBossGameState : public AGameState
