@@ -48,9 +48,10 @@ void UGJDebuffComponent::ApplyDebuff(const FDebuffEffect& Debuff)
     // 출혈 효과 (Bleed)는 지속적인 체력 감소 효과이므로 따로 처리
     if (Debuff.DebuffType == EDebuffType::Bleed)
     {
-        ApplyBleedEffect(5.0f, 1.0f, Debuff.Duration);
+        ApplyBleedEffect(Debuff.Intensity, 1.0f, Debuff.Duration); // Debuff.Intensity를 사용하여 트랩에서 설정한 값 적용
         return;
     }
+
 
     // 일반적인 디버프 타이머 설정
     FTimerDelegate TimerDelegate;
