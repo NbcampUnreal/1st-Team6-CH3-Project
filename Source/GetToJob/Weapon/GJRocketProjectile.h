@@ -58,14 +58,11 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")
 	USoundBase* FireSound;
 
-	bool bIsFrozen;
 
 	// 로켓 지속 타이머
 	FTimerHandle DestroyTimerHandle;
 	// 속성 지속 타이머
 	FTimerHandle EffectTimerHandle;
-	// 얼음 지속 타이머
-	FTimerHandle FreezeTimerHandle;
 
 	// 충돌 함수: 충돌 시 폭발
 	UFUNCTION()
@@ -87,6 +84,4 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-	
-
 };

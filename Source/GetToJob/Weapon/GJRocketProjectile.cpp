@@ -70,8 +70,6 @@ AGJRocketProjectile::AGJRocketProjectile()
 	ShockEffect = nullptr;
 	FreezeEffect = nullptr;
 	BurnEffect = nullptr;
-
-	bIsFrozen = false;
 }
 
 void AGJRocketProjectile::OnImpact(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
@@ -215,28 +213,18 @@ void AGJRocketProjectile::AutoExplode()
 
 						case EGJElementalType::Freeze:
 							
-							if (bIsFrozen)
-							{
-								UE_LOG(LogTemp, Warning, TEXT("Freeze Effect already applied to %s!"), *HitCharacter->GetName());
-								break;
-							}
-							bIsFrozen = true;
 							MovementComp->MaxWalkSpeed *= 0.5f;
-							
 							UE_LOG(LogTemp, Warning, TEXT("Freeze Effect Applied: %s speed reduced to %f"), *HitCharacter->GetName(), MovementComp->MaxWalkSpeed);
 
-							GetWorld()->GetTimerManager().ClearTimer(FreezeTimerHandle);
-
 							GetWorld()->GetTimerManager().SetTimer(
-								FreezeTimerHandle,
-								[MovementComp, OriginalSpeed, this]()
+								EffectTimerHandle,
+								[MovementComp, OriginalSpeed]()
 								{
 									if (MovementComp)
 									{
 										MovementComp->MaxWalkSpeed = OriginalSpeed;
 										UE_LOG(LogTemp, Warning, TEXT("Freeze Effect Ended: Speed restored to %f"), OriginalSpeed);
 									}
-									bIsFrozen = false;
 								},
 								FreezeDelay,
 								false
