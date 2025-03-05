@@ -155,6 +155,14 @@ void AGJBossGameState::SetBossDefeated()
 		UGJGameInstance* GameInstance = Cast<UGJGameInstance>(GetGameInstance());
 		if (!GameInstance) return;
 
+		AddScore(5000);
+
+		GameInstance->AddToScore(Score);
+		GameInstance->AddToEnemyKill(EnemyKillCount);
+
+		GameInstance->SaveBossScore(Score);
+
+
 		StopSound();
 
 		GetWorldTimerManager().ClearAllTimersForObject(this);
