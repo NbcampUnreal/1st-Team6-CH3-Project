@@ -51,6 +51,14 @@ void AGJBossGameState::StopSound()
 	}
 }
 
+void AGJBossGameState::ClearPlaySound()
+{
+	if (ClearBGM)
+	{
+		AudioComponent = UGameplayStatics::SpawnSound2D(this, ClearBGM);
+	}
+}
+
 void AGJBossGameState::BeginPlay()
 {
 	Super::BeginPlay();
@@ -172,6 +180,7 @@ void AGJBossGameState::SetBossDefeated()
 
 
 		StopSound();
+		ClearPlaySound();
 
 		//보스 HUD 지우기
 		if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
