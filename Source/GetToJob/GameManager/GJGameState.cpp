@@ -5,6 +5,8 @@
 #include "UI/GJHUD.h"
 #include "Character/GJPlayerController.h"
 #include <EnhancedInputSubsystems.h>
+#include "Components/AudioComponent.h"
+#include "Sound/SoundBase.h"
 
 AGJGameState::AGJGameState()
 {
@@ -41,6 +43,7 @@ void AGJGameState::BeginPlay()
 	Super::BeginPlay();
 
 	StartWave();
+	PlaySound();
 
 	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
 	{
@@ -196,6 +199,22 @@ void AGJGameState::LoadNextLevel()
 
 	// 새로운 레벨 열기
 	UGameplayStatics::OpenLevel(GetWorld(), LevelMapNames[CurrentWaveIndex]);
+}
+
+void AGJGameState::PlaySound()
+{
+	if (MainBGM)
+	{
+		AudioComponent = UGameplayStatics::SpawnSound2D(this, MainBGM);
+	}
+}
+
+void AGJGameState::StopSound()
+{
+	if (AudioComponent)
+	{
+		AudioComponent->Stop();
+	}
 }
 
 
