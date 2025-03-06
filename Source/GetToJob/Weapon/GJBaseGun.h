@@ -17,7 +17,8 @@ enum class EGunType : uint8
 	Revolver      UMETA(DisplayName = "Revolver"),
 	Rifle       UMETA(DisplayName = "Rifle"),
 	RocketLauncher     UMETA(DisplayName = "RocketLauncher"),
-	MiniGun      UMETA(DisplayName = "MiniGun")
+	MiniGun      UMETA(DisplayName = "MiniGun"),
+	ShotGun	     UMETA(DisplayName = "ShotGun")
 };
 
 
