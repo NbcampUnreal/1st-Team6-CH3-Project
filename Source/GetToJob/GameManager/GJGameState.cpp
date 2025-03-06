@@ -124,12 +124,12 @@ void AGJGameState::NextWave()
 							InputSubsystem->ClearAllMappings();
 						}
 					}
-
+					// 체력을 100으로 설정
+					Character->SetHealth(100.0f);
 					// 강제적으로 무기 발사 중지 (추가적인 안전 조치)
 					Character->StopFireWeapon();
-
+					// 캐릭터 상태 저장
 					GJGameInstance->SaveCharacterState(Character);
-
 					// 유예시간 동안 무적 설정
 					Character->bIsInvincible = true;
 					// 플레이어 입력 차단 (유예시간 동안 움직이지 못하게)
