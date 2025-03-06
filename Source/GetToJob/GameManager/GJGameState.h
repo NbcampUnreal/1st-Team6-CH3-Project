@@ -4,6 +4,9 @@
 #include "GameFramework/GameState.h"
 #include "GJGameState.generated.h"
 
+class USoundBase;
+class UAudioComponent;
+
 UCLASS()
 class GETTOJOB_API AGJGameState : public AGameState
 {
@@ -71,4 +74,12 @@ public:
 	void LoadNextLevel();
 
 	FTimerHandle WaveTransitionTimerHandle; // 유예시간 타이머 핸들 추가
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	USoundBase* MainBGM;
+
+	UAudioComponent* AudioComponent;
+
+	void PlaySound();
+	void StopSound();
 };

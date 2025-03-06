@@ -30,11 +30,15 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
 	USoundBase* BossBGM;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	USoundBase* ClearBGM;
 
 	UAudioComponent* AudioComponent;
 
 	void PlaySound();
 	void StopSound();
+
+	void ClearPlaySound();
 
 	FTimerHandle UIUpdateTimerHandle;
 
