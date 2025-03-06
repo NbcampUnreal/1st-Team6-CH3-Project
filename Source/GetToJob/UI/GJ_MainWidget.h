@@ -125,6 +125,7 @@ public:
 	UProgressBar* Ult;
 
 	float CurrentUltimateGauge;
+	float MaxUltimateGauge;
 
 
 	UFUNCTION()

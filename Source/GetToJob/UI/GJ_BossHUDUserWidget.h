@@ -20,6 +20,10 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	UProgressBar* HealthBar;
 
+	UPROPERTY(Transient, meta = (BindWidgetAnim))
+	UWidgetAnimation* AlramAnim;
+
 public:
 	void UpdateHealthBar(float CurrentHealth, float MaxHealth);
+	void AngryUI();
 };

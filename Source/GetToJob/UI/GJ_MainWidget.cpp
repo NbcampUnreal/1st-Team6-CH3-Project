@@ -3,6 +3,7 @@
 #include "GameManager/GJBossGameState.h"
 #include "Character/GJCharacter.h"
 #include "Weapon/GJBaseGun.h"
+#include "Weapon/GJMiniGun.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "GameFramework/WorldSettings.h"
@@ -193,6 +194,16 @@ void UGJ_MainWidget::UpdateHUD()
 		HealthBGBar->SetPercent(BGHpPercent);
 	}
 
+	AGJMiniGun* GJMinigun = GJCharacter->MiniGun;
+
+	MaxUltimateGauge = GJMinigun->GetMaxGauge();
+	CurrentUltimateGauge = GJMinigun->GetCurrentGauge();
+
+	if (Ult)
+	{
+		float GaugePercent = CurrentUltimateGauge / MaxUltimateGauge;
+		Ult->SetPercent(GaugePercent);
+	}
 }
 
 void UGJ_MainWidget::UpdateBossHUD()
@@ -336,6 +347,17 @@ void UGJ_MainWidget::UpdateBossHUD()
 	{
 		BGHpPercent = FMath::Lerp(BGHpPercent, NewHppercent, 0.2f);
 		HealthBGBar->SetPercent(BGHpPercent);
+	}
+
+	AGJMiniGun* GJMinigun = GJCharacter->MiniGun;
+
+	MaxUltimateGauge = GJMinigun->GetMaxGauge();
+	CurrentUltimateGauge = GJMinigun->GetCurrentGauge();
+
+	if (Ult)
+	{
+		float GaugePercent = CurrentUltimateGauge / MaxUltimateGauge;
+		Ult->SetPercent(GaugePercent);
 	}
 }
 
