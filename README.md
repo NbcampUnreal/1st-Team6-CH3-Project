@@ -4,13 +4,13 @@
 
 ## 목차
 
-[1. 프로젝트 개요](https://www.notion.so/1-1aeca671e93980bb8c23d30613ba71b8?pvs=21) 
+[1. 프로젝트 개요](#프로젝트-개요) 
 
-[2. 팀원 소개](https://www.notion.so/2-1aeca671e939803eb4bde9d8c9752736?pvs=21) 
+[2. 팀원 소개](#팀원-소개) 
 
-[3. 게임 소개](https://www.notion.so/3-1aeca671e93980adbab5d230dbdb509a?pvs=21) 
+[3. 게임 소개](#게임-소개) 
 
-[4. 게임의 진행 과정](https://www.notion.so/4-1aeca671e939802896a6df7d04ae43bf?pvs=21) 
+[4. 게임의 진행 과정](#게임의-진행-과정) 
 
 ---
 
