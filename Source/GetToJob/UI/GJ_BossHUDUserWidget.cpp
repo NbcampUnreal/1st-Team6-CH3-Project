@@ -19,3 +19,11 @@ void UGJ_BossHUDUserWidget::UpdateHealthBar(float CurrentHealth, float MaxHealth
 		HealthBar->SetPercent(HealthPercent);
 	}
 }
+
+void UGJ_BossHUDUserWidget::AngryUI()
+{
+	if (AlramAnim)
+	{
+		PlayAnimation(AlramAnim);
+	}
+}
