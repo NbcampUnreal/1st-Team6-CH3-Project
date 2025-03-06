@@ -60,11 +60,11 @@ AGJRocketProjectile::AGJRocketProjectile()
 	// 데미지 설정, 자동 폭발 설정
 	DamageRadius = 300.0f;
 	DamageAmount = 50.0f;
-	RocketLifetime = 3.0f;
+	RocketLifetime = 2.0f;
 
 	ShockDelay = 2.0f;
-	FreezeDelay = 4.0f;
-	BurnDelay = 5;
+	FreezeDelay = 2.0f;
+	BurnDelay = 3;
 	
 	ExplosionEffect = nullptr;
 	ShockEffect = nullptr;
@@ -241,7 +241,7 @@ void AGJRocketProjectile::AutoExplode()
 									{
 										if (HitCharacter)
 										{
-											HitCharacter->TakeDamage(50.0f, FDamageEvent(), nullptr, nullptr);
+											HitCharacter->TakeDamage(200.0f, FDamageEvent(), nullptr, nullptr);
 											UE_LOG(LogTemp, Warning, TEXT("Burn Damage Applied: %s took 50 damage"), *HitCharacter->GetName());
 										}
 									},
@@ -397,7 +397,7 @@ void AGJRocketProjectile::SpawnElementalParticle()
 							SpawnedEffect->DestroyComponent(); // 컴포넌트 삭제
 						}
 					},
-					4.0f,
+					2.0f,
 					false
 				);
 			}
@@ -421,7 +421,7 @@ void AGJRocketProjectile::SpawnElementalParticle()
 							SpawnedEffect->DestroyComponent(); // 컴포넌트 삭제
 						}
 					},
-					3.0f,
+					2.0f,
 					false
 				);
 			}
