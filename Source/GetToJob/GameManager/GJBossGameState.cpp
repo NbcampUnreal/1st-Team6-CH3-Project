@@ -155,7 +155,15 @@ void AGJBossGameState::SetBossDefeated()
 		UGJGameInstance* GameInstance = Cast<UGJGameInstance>(GetGameInstance());
 		if (!GameInstance) return;
 
-		AddScore(5000);
+		if (GetWorldTimerManager().IsTimerActive(LevelTimerHandle))
+		{
+			int32 RemainingTimeInt = FMath::RoundToInt(GetWorldTimerManager().GetTimerRemaining(LevelTimerHandle));
+			int32 FinalValue = 5000 - (RemainingTimeInt * 5);
+
+			GetWorldTimerManager().ClearAllTimersForObject(this);
+
+			AddScore(FinalValue);
+		}
 
 		GameInstance->AddToScore(Score);
 		GameInstance->AddToEnemyKill(EnemyKillCount);
@@ -165,7 +173,6 @@ void AGJBossGameState::SetBossDefeated()
 
 		StopSound();
 
-		GetWorldTimerManager().ClearAllTimersForObject(this);
 		//보스 HUD 지우기
 		if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
 		{
@@ -175,14 +182,7 @@ void AGJBossGameState::SetBossDefeated()
 				{
 					HUD->HideHUD(GJHUDState::BossHUD);
 				}
-			}
-		}
 
-
-		if (GameInstance)
-		{
-			if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
-			{
 				if (AGJCharacter* Character = Cast<AGJCharacter>(PlayerController->GetPawn()))
 				{
 					GameInstance->SaveCharacterState(Character);
