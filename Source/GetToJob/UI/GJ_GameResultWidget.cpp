@@ -75,22 +75,22 @@ void UGJ_GameResultWidget::WaveGameOver()
 
 	if (OneWaveScore)
 	{
-		OneWaveScore->SetText(FText::FromString(FString::Printf(TEXT("서류 면접 : %d"), GJGameInstance->GetOneWaveScore())));
+		OneWaveScore->SetText(FText::FromString(FString::Printf(TEXT("1차 서류 면접 : %d"), GJGameInstance->GetOneWaveScore())));
 	}
 
 	if (TwoWaveScore)
 	{
-		TwoWaveScore->SetText(FText::FromString(FString::Printf(TEXT("인성 면접 : %d"), GJGameInstance->GetTwoWaveScore())));
+		TwoWaveScore->SetText(FText::FromString(FString::Printf(TEXT("2차 인성 면접 : %d"), GJGameInstance->GetTwoWaveScore())));
 	}
 
 	if (ThreeWaveScore)
 	{
-		ThreeWaveScore->SetText(FText::FromString(FString::Printf(TEXT("직무 테스트 : %d"), GJGameInstance->GetThreeWaveScore())));
+		ThreeWaveScore->SetText(FText::FromString(FString::Printf(TEXT("3차 직무 테스트 : %d"), GJGameInstance->GetThreeWaveScore())));
 	}
 
 	if (BossScore)
 	{
-		BossScore->SetText(FText::FromString(FString::Printf(TEXT("임원 면접 : %d"), GJGameInstance->GetBossScore())));
+		BossScore->SetText(FText::FromString(FString::Printf(TEXT("4차 임원 면접 : %d"), GJGameInstance->GetBossScore())));
 	}
 
 	if (TotalScore)
@@ -122,22 +122,22 @@ void UGJ_GameResultWidget::ClearFailUI()
 
 	if (OneWaveScore)
 	{
-		OneWaveScore->SetText(FText::FromString(FString::Printf(TEXT("1차 면접 : %d"), GJGameInstance->GetOneWaveScore())));
+		OneWaveScore->SetText(FText::FromString(FString::Printf(TEXT("1차 서류 면접 : %d"), GJGameInstance->GetOneWaveScore())));
 	}
 
 	if (TwoWaveScore)
 	{
-		TwoWaveScore->SetText(FText::FromString(FString::Printf(TEXT("2차 면접 : %d"), GJGameInstance->GetTwoWaveScore())));
+		TwoWaveScore->SetText(FText::FromString(FString::Printf(TEXT("2차 인성 면접 : %d"), GJGameInstance->GetTwoWaveScore())));
 	}
 
 	if (ThreeWaveScore)
 	{
-		ThreeWaveScore->SetText(FText::FromString(FString::Printf(TEXT("3차 면접 : %d"), GJGameInstance->GetThreeWaveScore())));
+		ThreeWaveScore->SetText(FText::FromString(FString::Printf(TEXT("3차 직무 테스트 : %d"), GJGameInstance->GetThreeWaveScore())));
 	}
 
 	if (BossScore)
 	{
-		BossScore->SetText(FText::FromString(FString::Printf(TEXT("최종 면접 : %d"), GJGameInstance->GetBossScore())));
+		BossScore->SetText(FText::FromString(FString::Printf(TEXT("4차 임원 면접 : %d"), GJGameInstance->GetBossScore())));
 	}
 
 	if (TotalScore)
@@ -171,22 +171,22 @@ void UGJ_GameResultWidget::GameClearUI()
 
 	if (OneWaveScore)
 	{
-		OneWaveScore->SetText(FText::FromString(FString::Printf(TEXT("1차 면접 : %d"), GJGameInstance->GetOneWaveScore())));
+		OneWaveScore->SetText(FText::FromString(FString::Printf(TEXT("1차 서류 면접 : %d"), GJGameInstance->GetOneWaveScore())));
 	}
 
 	if (TwoWaveScore)
 	{
-		TwoWaveScore->SetText(FText::FromString(FString::Printf(TEXT("2차 면접 : %d"), GJGameInstance->GetTwoWaveScore())));
+		TwoWaveScore->SetText(FText::FromString(FString::Printf(TEXT("2차 인성 면접 : %d"), GJGameInstance->GetTwoWaveScore())));
 	}
 
 	if (ThreeWaveScore)
 	{
-		ThreeWaveScore->SetText(FText::FromString(FString::Printf(TEXT("3차 면접 : %d"), GJGameInstance->GetThreeWaveScore())));
+		ThreeWaveScore->SetText(FText::FromString(FString::Printf(TEXT("3차 직무 테스트 : %d"), GJGameInstance->GetThreeWaveScore())));
 	}
 
 	if (BossScore)
 	{
-		BossScore->SetText(FText::FromString(FString::Printf(TEXT("최종 면접 : %d"), GJGameInstance->GetBossScore())));
+		BossScore->SetText(FText::FromString(FString::Printf(TEXT("4차 임원 면접 : %d"), GJGameInstance->GetBossScore())));
 	}
 
 	if (TotalScore)
