@@ -14,7 +14,7 @@
 
 ---
 
-![image.png](image.png)
+![Image](https://github.com/user-attachments/assets/a4d5d4c7-2371-439b-9dbb-6d56a988ca17)
 
 ## 1. 프로젝트 개요
 
@@ -91,18 +91,18 @@
 
 - **Revolver**: 기본 무기, 캐릭터 스폰 위치에 존재. 총알 무한 개, Silencer 부착 가능
     
-    ![image-removebg-preview.png](image-removebg-preview.png)
+![Image](https://github.com/user-attachments/assets/4bc6ff3c-655a-4577-9665-54b878c9bc46)
     
     - **Silencer**: 발사음 감소, 데미지 증가
 - **Rifle**: 특수 무기, 캐릭터 스폰 위치 뒤 건물에서 획득 가능, Scope 부착 가능
     - **Scope:** 줌인 줌 아웃 가능
 
-![image-removebg-preview (1).png](image-removebg-preview_(1).png)
+![Image](https://github.com/user-attachments/assets/9ce46185-8330-4013-b2ac-703517372eb0)
 
 - **Scope:** 줌인 줌 아웃 가능
 - **RocketLauncher**: 특수 무기, 캐릭터 스폰 위치 뒤 건물에서 획득 가능, Elemental Magazine 장착 가능
     
-    ![image-removebg-preview (2).png](bd531792-e2ae-4c91-bc4c-85e487c0a497.png)
+![Image](https://github.com/user-attachments/assets/ddae6ff3-3679-4d94-b6df-6cf7d0b2897a)
     
     - **Elemental Magazine**: RocketLauncher에 부착 시 효과가 다른 속성탄 발사 가능
 
