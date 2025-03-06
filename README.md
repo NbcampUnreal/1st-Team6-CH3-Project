@@ -91,6 +91,7 @@
 
 - **Revolver**: 기본 무기, 캐릭터 스폰 위치에 존재. 총알 무한 개, Silencer 부착 가능
     - **Silencer**: 발사음 감소, 데미지 증가
+ 
 ![Image](https://github.com/user-attachments/assets/4bc6ff3c-655a-4577-9665-54b878c9bc46)
     
 - **Rifle**: 특수 무기, 캐릭터 스폰 위치 뒤 건물에서 획득 가능, Scope 부착 가능
@@ -100,6 +101,7 @@
 
 - **RocketLauncher**: 특수 무기, 캐릭터 스폰 위치 뒤 건물에서 획득 가능, Elemental Magazine 장착 가능
     - **Elemental Magazine**: RocketLauncher에 부착 시 효과가 다른 속성탄 발사 가능
+
 ![Image](https://github.com/user-attachments/assets/ddae6ff3-3679-4d94-b6df-6cf7d0b2897a)
     
 
