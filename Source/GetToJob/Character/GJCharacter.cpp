@@ -13,6 +13,7 @@
 #include "Weapon/GJRocketLauncher.h"
 #include "Weapon/GJMiniGun.h"
 #include "Weapon/GJScope.h"
+#include "Weapon/GJShotGun.h"
 #include "UI/GJHUD.h"
 #include "Components/CapsuleComponent.h"
 #include "Character/GJHealingItem.h"
@@ -449,6 +450,10 @@ void AGJCharacter::UpdateWeaponState(AGJBaseGun* NewWeapon)
     {
         CurrentWeaponType = EWeaponType::MiniGun;
     }
+    else if (Cast<AGJShotGun>(NewWeapon))
+    {
+        CurrentWeaponType = EWeaponType::ShotGun;
+    }
     else
     {
         CurrentWeaponType = EWeaponType::None;
@@ -685,6 +690,16 @@ void AGJCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
                     ETriggerEvent::Triggered,
                     this,
                     &AGJCharacter::EquipWeaponFromInventory, 2
+                );
+            }
+
+            if (PlayerController->WeaponSlot4Action)
+            {
+                EnhancedInput->BindAction(
+                    PlayerController->WeaponSlot4Action,
+                    ETriggerEvent::Triggered,
+                    this,
+                    &AGJCharacter::EquipWeaponFromInventory, 3
                 );
             }
 
