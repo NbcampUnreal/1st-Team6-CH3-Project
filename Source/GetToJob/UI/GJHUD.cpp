@@ -2,6 +2,7 @@
 #include "GameManager/GJGameState.h"
 #include "Blueprint/UserWidget.h"
 #include "UI/GJ_MainWidget.h"
+#include "UI/GJ_BossHUDUserWidget.h"
 #include "UI/GJ_GameResultWidget.h"
 #include "Blueprint/WidgetBlueprintGeneratedClass.h"
 
@@ -44,6 +45,13 @@ void AGJHUD::DisplayHUD(GJHUDState HUDType)
 			ResultHUDWidget->ClearFailUI();
 		}
 		break;
+	case GJHUDState::BossHUD:
+		BossHUDWidget = CreateWidget<UGJ_BossHUDUserWidget>(GetWorld(), BossHUDClass);
+		if (BossHUDWidget)
+		{
+			BossHUDWidget->AddToViewport();
+		}
+		break;
 	default:
 		break;
 	}
@@ -83,6 +91,13 @@ void AGJHUD::HideHUD(GJHUDState HUDType)
 			ResultHUDWidget = nullptr;
 		}
 		break;
+	case GJHUDState::BossHUD:
+		if (BossHUDWidget)
+		{
+			BossHUDWidget->RemoveFromParent();
+			BossHUDWidget = nullptr;
+		}
+		break;
 	default:
 		break;
 	}
@@ -93,6 +108,30 @@ void AGJHUD::UpdateMainHUD()
 	if (MainHUDWidget)
 	{
 		MainHUDWidget->UpdateHUD();;
+	}
+}
+
+void AGJHUD::UpdateMainBossHUD()
+{
+	if (MainHUDWidget)
+	{
+		MainHUDWidget->UpdateBossHUD();
+	}
+}
+
+void AGJHUD::UpdateBossHUD(float CurrentHp, float Maxhp)
+{
+	if (BossHUDWidget)
+	{
+		BossHUDWidget->UpdateHealthBar(CurrentHp, Maxhp);
+	}
+}
+
+void AGJHUD::AngryBossHUD()
+{
+	if (BossHUDWidget)
+	{
+		BossHUDWidget->AngryUI();
 	}
 }
 

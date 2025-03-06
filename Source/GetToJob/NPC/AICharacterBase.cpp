@@ -2,11 +2,14 @@
 #include "NPC/GJNPC.h"
 #include "NPC/GJBossNPC.h"
 #include "GameManager/GJGameState.h"
+#include "GameManager/GJBossGameState.h"
 #include "Components/BoxComponent.h"
+#include "Character/GJPlayerController.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/Actor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Character/GJCharacter.h"
+#include "UI/GJHUD.h"
 
 AAICharacterBase::AAICharacterBase():
 	Health{ 100.f },
@@ -38,10 +41,16 @@ float AAICharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 		Health = FMath::Clamp(Health - DamageAmount, 0.0f, MaxHealth);
 		if (Health <= 0)
 		{
-
-			AGJGameState* const GameState = Cast<AGJGameState>(UGameplayStatics::GetGameState(GetWorld()));
-			GameState->AddScore(100);
-			GameState->AddEnemyKillCount(1);
+			if(AGJGameState* const GameState = Cast<AGJGameState>(UGameplayStatics::GetGameState(GetWorld())))
+			{
+				GameState->AddScore(100);
+				GameState->AddEnemyKillCount(1);
+			}
+			if (AGJBossGameState* const GameState = Cast<AGJBossGameState>(UGameplayStatics::GetGameState(GetWorld())))
+			{
+				GameState->AddScore(100);
+				GameState->AddEnemyKillCount(1);
+			}
 			NPC->SpawnDropItem();
 			NPC->SetNPCDead(true);
 			NPC->GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
@@ -56,6 +65,15 @@ float AAICharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	{
 		Health = FMath::Clamp(Health - DamageAmount, 0.0f, MaxHealth);
 		Boss->PlayHurtSound();
+
+		if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+		{
+			if (AGJHUD* HUD = Cast<AGJHUD>(PlayerController->GetHUD()))
+			{
+				HUD->UpdateBossHUD(GetHealth(), GetMaxHealth());
+			}
+		}
+
 		if (Health <= 0)
 		{
 			Boss->SetIsBossDead(true);
@@ -70,6 +88,12 @@ float AAICharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 
 			FTimerHandle DestroyTimerHandle;
 			GetWorldTimerManager().SetTimer(DestroyTimerHandle, this, &AAICharacterBase::DestroyActor, 5.f, false);
+
+			AGJBossGameState* GameState = GetWorld()->GetGameState<AGJBossGameState>();
+			if (GameState)
+			{
+				GameState->SetBossDefeated();
+			}
 		}
 	}
 	return ActualDamage;

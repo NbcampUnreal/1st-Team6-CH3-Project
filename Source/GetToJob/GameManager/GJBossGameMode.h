@@ -21,4 +21,15 @@ private:
 	AGJHUD* HUD;
 
 
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ClearScore")
+	int32 ClearScoreCheck;
+
+	void OnBossDefeated();
+
+	void StartCinematic();
+
+	void OnCinematicFinished();
+
+	bool ResultCheck = false;
 };
