@@ -35,7 +35,7 @@ public:
 
     // 최대 슬롯 수 설정
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
-    int32 MaxWeaponSlots = 3;
+    int32 MaxWeaponSlots = 4;
 
     // 무기 추가
     UFUNCTION(BlueprintCallable, Category = "Inventory")

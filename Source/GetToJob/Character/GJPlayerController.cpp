@@ -18,6 +18,7 @@ AGJPlayerController::AGJPlayerController()
     WeaponSlot1Action(nullptr),
     WeaponSlot2Action(nullptr),
     WeaponSlot3Action(nullptr),
+    WeaponSlot4Action(nullptr),
     TestDeathAction(nullptr),
     UseHealingItemAction(nullptr),
     UltimateSkillAction(nullptr),
