@@ -12,7 +12,6 @@
 #include "UI/GJHUD.h"
 
 AAICharacterBase::AAICharacterBase():
-	Health{ 100.f },
 	RightFistCollisionBox{ CreateDefaultSubobject<UBoxComponent>(TEXT("RightFirstCollisionBox")) }
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -28,6 +27,7 @@ void AAICharacterBase::BeginPlay()
 	Super::BeginPlay();
 	RightFistCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &AAICharacterBase::OnAttackOverlapBegin);
 	RightFistCollisionBox->OnComponentEndOverlap.AddDynamic(this, &AAICharacterBase::OnAttackOverlapEnd);
+	Health = MaxHealth;
 }
 
 float AAICharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamgeCauser)
