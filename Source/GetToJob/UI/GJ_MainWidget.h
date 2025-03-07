@@ -81,6 +81,8 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Gun Images")
 	UTexture2D* RocketLauncherImage;
 
+	UPROPERTY(EditAnywhere, Category = "Gun Images")
+	UTexture2D* ShotGunImage;
 
 	UPROPERTY(Transient, meta = (BindWidgetAnim))
 	UWidgetAnimation* KillAnimation;
