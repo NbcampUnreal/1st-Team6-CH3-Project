@@ -27,6 +27,11 @@ AGJBaseGun::AGJBaseGun()
 	RootComponent = GunMesh;
 	CollisionComp->SetupAttachment(GunMesh); // 이거 RootComponent->GunMesh로 바꿈
 
+	TriggerComp = CreateDefaultSubobject<USphereComponent>(TEXT("TriggerComp"));
+	TriggerComp->InitSphereRadius(100.0f);
+	TriggerComp->SetupAttachment(CollisionComp);
+
+
 	//// 플레이어가 총을 들고 있지 않을 때만 충돌 비활성화
 	//GunMesh->SetSimulatePhysics(false);
 	//GunMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -37,7 +42,8 @@ AGJBaseGun::AGJBaseGun()
 	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AGJBaseGun::OnBeginOverlap);
 	// 충돌 종료 이벤트 바인딩 (무기 범위를 벗어나면 호출됨)
 	CollisionComp->OnComponentEndOverlap.AddDynamic(this, &AGJBaseGun::OnEndOverlap);
-
+	TriggerComp->OnComponentBeginOverlap.AddDynamic(this, &AGJBaseGun::OnTriggerOverlap);
+	TriggerComp->OnComponentEndOverlap.AddDynamic(this, &AGJBaseGun::OnTriggerEndOverlap);
 
 
 
@@ -59,6 +65,8 @@ AGJBaseGun::AGJBaseGun()
 	bPickupMiniGun = false;
 	MagazineCount = 100;
 	MuzzleSocketName = TEXT("Muzzle");
+
+	bPickSilencer = false;
 }
 
 void AGJBaseGun::OnBeginOverlap(
@@ -98,6 +106,30 @@ void AGJBaseGun::OnEndOverlap(UPrimitiveComponent* OverlappedComponent,
 			// 플레이어가 더 이상 이 무기와 상호작용할 수 없음
 			GJCharacter->InteractableWeapon = nullptr;
 			UE_LOG(LogTemp, Warning, TEXT("무기 상호작용 범위를 벗어남: %s"), *GetName());
+		}
+	}
+}
+
+void AGJBaseGun::OnTriggerOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor && OtherActor->ActorHasTag("Player") && !bPickupGun)
+	{
+		AGJCharacter* GJCharacter = Cast<AGJCharacter>(OtherActor);
+		if (GJCharacter)
+		{
+			GunMesh->SetRenderCustomDepth(true);
+		}
+	}
+}
+
+void AGJBaseGun::OnTriggerEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (OtherActor && OtherActor->ActorHasTag("Player"))
+	{
+		AGJCharacter* GJCharacter = Cast<AGJCharacter>(OtherActor);
+		if (GJCharacter)
+		{
+			GunMesh->SetRenderCustomDepth(false);
 		}
 	}
 }
@@ -178,6 +210,7 @@ bool AGJBaseGun::IsReloading()
 
 void AGJBaseGun::Pickup(ACharacter* PlayerCharacter)
 {
+	
 	if (!PlayerCharacter)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("No Player!!"));
@@ -202,9 +235,13 @@ void AGJBaseGun::Pickup(ACharacter* PlayerCharacter)
 
 		// 인벤토리에 무기 추가
 		GJCharacter->InventoryComponent->AddWeapon(this);
+		
 
 		// 이전 무기 상태 업데이트
 		GJCharacter->PreviousWeaponType = GJCharacter->CurrentWeaponType;
+
+		GunMesh->SetRenderCustomDepth(false);
+		bPickupGun = true;
 	}
 
 	// 자동 장착 로직
@@ -356,11 +393,12 @@ void AGJBaseGun::EquipAttachment(AGJBaseGunAttachment* Attachment)
 	// 특정 부착물이 특정 무기만 장착 가능하도록 제한 
 	if (AGJSilencer* GJSilencer = Cast<AGJSilencer>(Attachment))
 	{
-		if (GetGunType() != EGunType::Revolver) // Rifle이 아니면 장착 불가
+		if (GetGunType() != EGunType::Revolver || bPickSilencer) // Rifle이 아니면 장착 불가
 		{
 			UE_LOG(LogTemp, Warning, TEXT("EquipAttachment - Silencer can only be equipped on Revolver!"));
 			return;
 		}
+		bPickSilencer = true;
 	}
 	// 특정 부착물이 특정 무기만 장착 가능하도록 제한 
 	if (AGJElementalRocketMagazine* GJElementalRocketMagazine = Cast<AGJElementalRocketMagazine>(Attachment))

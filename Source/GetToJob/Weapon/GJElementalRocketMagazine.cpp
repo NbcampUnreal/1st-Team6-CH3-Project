@@ -8,6 +8,7 @@ AGJElementalRocketMagazine::AGJElementalRocketMagazine()
 	ElementalSequence = { EGJElementalType::Shock, EGJElementalType::Freeze, EGJElementalType::Burn };
 
 	ShotCount = 0;
+	AttachedLauncher = nullptr;
 }
 
 void AGJElementalRocketMagazine::AttachToGun(AGJBaseGun* Gun)
@@ -31,6 +32,7 @@ void AGJElementalRocketMagazine::AttachToGun(AGJBaseGun* Gun)
 	RocketLauncher->RaiseMagazineCapacity(ExtraAmmoCapacity);
 	RocketLauncher->SetCurrentAmmo(RocketLauncher->GetMagazineCapacity());
 	RocketLauncher->bHasMagazine = true;
+	SkeletalMeshComp->SetRenderCustomDepth(false);
 }
 
 void AGJElementalRocketMagazine::DetachFromGun()

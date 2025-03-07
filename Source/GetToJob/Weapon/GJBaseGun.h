@@ -42,6 +42,8 @@ public:
 	USphereComponent* CollisionComp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	USkeletalMeshComponent* GunMesh;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TriggerComp")
+	USphereComponent* TriggerComp;
 	UPROPERTY(EditDefaultsOnly, Category = "Socket | Gun")
 	FName GunSocketName = TEXT("AttachmentSocket");
 	UPROPERTY(EditDefaultsOnly, Category = "Socket | Gun")
@@ -105,6 +107,23 @@ public:
 		AActor* OtherActor,
 		UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex);
+
+	UFUNCTION()
+	void OnTriggerOverlap(
+		UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult
+	);
+	UFUNCTION()
+	void OnTriggerEndOverlap(
+		UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex
+	);
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon Combat")
 	virtual void Fire() override;
@@ -174,4 +193,5 @@ protected:
 
 private:
 	bool bCanPickup;
+	bool bPickSilencer;
 };
