@@ -115,6 +115,7 @@ void AGJScope::AttachToGun(AGJBaseGun* Gun)
 		{
 			DefaultFOV = PlayerController->PlayerCameraManager->GetFOVAngle();
 		}
+		SkeletalMeshComp->SetRenderCustomDepth(false);
 	}
 }
 

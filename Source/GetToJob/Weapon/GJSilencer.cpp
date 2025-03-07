@@ -29,6 +29,7 @@ void AGJSilencer::AttachToGun(AGJBaseGun* Gun)
 		float NewDamage = Gun->GetDamage();
 		NewDamage *= DamageMultiplier;
 		Gun->SetDamage(NewDamage);
+		SkeletalMeshComp->SetRenderCustomDepth(false);
 	}
 }
 

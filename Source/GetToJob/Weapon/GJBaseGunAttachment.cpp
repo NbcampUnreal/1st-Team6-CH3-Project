@@ -23,7 +23,16 @@ AGJBaseGunAttachment::AGJBaseGunAttachment()
 	SkeletalMeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("StaticMesh"));
 	SkeletalMeshComp->SetupAttachment(CollisionComp);
 
+	TriggerComp = CreateDefaultSubobject<USphereComponent>(TEXT("TriggerComp"));
+	TriggerComp->InitSphereRadius(100.0f);
+	TriggerComp->SetupAttachment(CollisionComp);
+
+
 	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AGJBaseGunAttachment::OnOverlapBegin);
+	TriggerComp->OnComponentBeginOverlap.AddDynamic(this, &AGJBaseGunAttachment::OnTriggerOverlap);
+	TriggerComp->OnComponentEndOverlap.AddDynamic(this, &AGJBaseGunAttachment::OnTriggerEndOverlap);
+
+	bPickupAttachment = false;
 }
 
 void AGJBaseGunAttachment::AttachToGun(AGJBaseGun* Gun)
@@ -38,6 +47,7 @@ void AGJBaseGunAttachment::AttachToGun(AGJBaseGun* Gun)
 	//	FAttachmentTransformRules::SnapToTargetNotIncludingScale,
 	//	TEXT("Scope") //TODO: 총에 Scope Socket 만들어줘야 함.
 	//);
+	
 }
 
 void AGJBaseGunAttachment::DetachFromGun()
@@ -60,10 +70,35 @@ void AGJBaseGunAttachment::OnOverlapBegin(UPrimitiveComponent* OverlapeedComp, A
 			AGJBaseGun* PlayerGun = GJPlayerCharacter->CurrentGun;
 			PlayerGun->EquipAttachment(this);
 			UE_LOG(LogTemp, Warning, TEXT("Attachment detected"));
+			bPickupAttachment = true;
 //			Destroy();
 		}
 
 		
+	}
+}
+
+void AGJBaseGunAttachment::OnTriggerOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor && OtherActor->ActorHasTag("Player") && !bPickupAttachment)
+	{
+		AGJCharacter* GJCharacter = Cast<AGJCharacter>(OtherActor);
+		if (GJCharacter)
+		{
+			SkeletalMeshComp->SetRenderCustomDepth(true);
+		}	
+	}
+}
+
+void AGJBaseGunAttachment::OnTriggerEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (OtherActor && OtherActor->ActorHasTag("Player"))
+	{
+		AGJCharacter* GJCharacter = Cast<AGJCharacter>(OtherActor);
+		if (GJCharacter)
+		{
+			SkeletalMeshComp->SetRenderCustomDepth(false);
+		}
 	}
 }
 
