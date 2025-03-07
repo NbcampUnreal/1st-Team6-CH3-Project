@@ -121,6 +121,8 @@ void UGJ_MainWidget::UpdateHUD()
 			case EGunType::RocketLauncher:
 				GunImage->SetBrushFromTexture(RocketLauncherImage);
 				break;
+			case EGunType::ShotGun:
+				GunImage->SetBrushFromTexture(ShotGunImage);
 			default:
 				break;
 			}
@@ -291,6 +293,8 @@ void UGJ_MainWidget::UpdateBossHUD()
 			case EGunType::RocketLauncher:
 				GunImage->SetBrushFromTexture(RocketLauncherImage);
 				break;
+			case EGunType::ShotGun:
+				GunImage->SetBrushFromTexture(ShotGunImage);
 			default:
 				break;
 			}
